@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>화면 디자인 v2 — 급여통장 변경 연쇄 영향</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --doc-bg:#22242A;--doc-panel:#2C2F36;--doc-ink:#E8E9EC;--doc-mute:#9BA1AC;--doc-rule:#3D414A;
+  --app-bg:#F4F5F7;--app-surface:#FFF;--app-ink:#16181D;--app-mute:#767C87;--app-rule:#E5E7EB;
+  --brand:#087A6C;--danger:#B3261E;--danger-bg:#FDF2F1;--warn:#B45309;--warn-bg:#FDF6EC;
+  --src-doc:#5B4BB8;--src-calc:#0F766E;--src-hold:#6B7280;--src-user:#B45309;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--doc-bg);color:var(--doc-ink);
+ font-family:Pretendard,-apple-system,sans-serif;font-size:15px;line-height:1.7;word-break:keep-all}
+.mono{font-family:"IBM Plex Mono",monospace;font-size:.85em}
+.doc{max-width:78rem;margin:0 auto;padding:2.5rem 1.25rem 6rem}
+h1{font-size:1.7rem;font-weight:700;letter-spacing:-.03em;margin:.4rem 0 .4rem}
+.sub{color:var(--doc-mute);margin:0;font-size:.95rem}
+h2{font-size:1.15rem;font-weight:600;margin:2.8rem 0 .3rem;letter-spacing:-.02em}
+h2+p{color:var(--doc-mute);margin:0 0 1.2rem;font-size:.92rem}
+.changed{background:#2A3A34;border:1px solid #3C5A50;border-radius:10px;padding:.9rem 1.1rem;margin-top:1.2rem}
+.changed b{color:#7FD6C2}
+.changed ul{margin:.5rem 0 0;padding-left:1.1rem;font-size:.9rem;color:var(--doc-mute)}
+.changed li{margin:.25rem 0}
+.tokens{display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));gap:.5rem;margin-top:1rem}
+.tok{background:var(--doc-panel);border:1px solid var(--doc-rule);border-radius:8px;padding:.6rem .75rem}
+.tok .sw{height:1.4rem;border-radius:4px;margin-bottom:.45rem}
+.tok b{display:block;font-size:.82rem}
+.tok span{font-size:.72rem;color:var(--doc-mute);font-family:"IBM Plex Mono",monospace}
+.screens{display:grid;grid-template-columns:repeat(auto-fit,minmax(19rem,1fr));gap:1.75rem;margin-top:1.4rem;align-items:start}
+.slot h3{font-size:1rem;font-weight:600;margin:0 0 .15rem}
+.slot .role{color:var(--doc-mute);font-size:.84rem;margin:0 0 .85rem;line-height:1.6}
+.notes{margin:.85rem 0 0;padding-left:1rem;color:var(--doc-mute);font-size:.82rem;line-height:1.6}
+.notes li{margin:.3rem 0}
+.notes b{color:var(--doc-ink);font-weight:600}
+
+.phone{background:var(--app-bg);border-radius:22px;overflow:hidden;border:1px solid #14161A;
+ box-shadow:0 12px 30px rgba(0,0,0,.35);color:var(--app-ink);font-size:14px;line-height:1.6}
+.status{display:flex;justify-content:space-between;padding:.5rem .95rem .2rem;font-size:.68rem;color:var(--app-mute)}
+.navbar{display:flex;align-items:center;gap:.45rem;padding:.45rem .95rem .65rem;font-weight:600;font-size:.95rem}
+.navbar .back{color:var(--app-mute);font-weight:400}
+.body{padding:0 .95rem 1.1rem}
+.tabbar{display:flex;border-top:1px solid var(--app-rule);background:var(--app-surface)}
+.tabbar div{flex:1;text-align:center;padding:.55rem 0;font-size:.66rem;color:var(--app-mute)}
+.tabbar div.on{color:var(--brand);font-weight:600}
+.box{background:var(--app-surface);border-radius:14px;border:1px solid var(--app-rule);padding:.75rem .9rem;margin-bottom:.65rem}
+.box.tight{padding:.15rem .9rem}
+.inst{font-size:.7rem;color:var(--app-mute)}
+.pname{font-weight:600;font-size:.9rem}
+.meta{font-size:.72rem;color:var(--app-mute)}
+.tag{display:inline-block;font-size:.6rem;padding:.05rem .3rem;border-radius:3px;font-weight:600}
+.t-doc{color:var(--src-doc);background:#EDE9FB}
+.t-calc{color:var(--src-calc);background:#DCF2EF}
+.t-hold{color:var(--src-hold);background:#EDEFF2}
+.t-user{color:var(--src-user);background:#FBEEDC}
+
+/* 1 관계도 */
+.graph{background:var(--app-surface);border-radius:14px;border:1px solid var(--app-rule);padding:.5rem;margin-bottom:.65rem}
+.graph svg{display:block;width:100%;height:auto}
+.legend{font-size:.7rem;color:var(--app-mute);padding:.1rem .3rem .4rem}
+.cta{display:block;text-align:center;border-radius:11px;padding:.7rem;font-weight:600;font-size:.86rem;background:var(--app-surface);border:1px solid var(--app-rule)}
+
+/* 2 영향 */
+.alert{background:var(--danger-bg);border:1px solid #F3D6D3;border-radius:14px;padding:.85rem;margin-bottom:.65rem}
+.alert .hd{color:var(--danger);font-weight:700;font-size:.85rem}
+.alert .big{font-size:1.65rem;font-weight:800;letter-spacing:-.03em;margin:.3rem 0 .05rem;color:var(--danger)}
+.alert .per{font-size:.7rem;color:var(--app-mute)}
+.imp{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;padding:.55rem 0;border-bottom:1px solid var(--app-rule)}
+.imp:last-child{border-bottom:0}
+.imp .l{min-width:0}
+.imp .l b{display:block;font-size:.82rem;font-weight:600}
+.imp .l span{font-size:.7rem;color:var(--app-mute)}
+.imp .r{text-align:right;flex:none;font-size:.82rem;font-weight:700;color:var(--danger);font-variant-numeric:tabular-nums}
+.verdict{border-radius:14px;padding:.8rem .9rem;margin-bottom:.65rem;background:var(--warn-bg);border:1px solid #F0DBBB}
+.verdict .hd{font-weight:700;font-size:.85rem;color:var(--warn)}
+.verdict p{margin:.3rem 0 0;font-size:.76rem;line-height:1.6;color:#5C4A2E}
+.btn{display:block;text-align:center;border-radius:11px;padding:.7rem;font-weight:600;font-size:.86rem;margin-bottom:.42rem}
+.btn.primary{background:var(--brand);color:#fff}
+.btn.ghost{background:var(--app-surface);border:1px solid var(--app-rule)}
+.btn.text{color:var(--app-mute);font-weight:400;font-size:.8rem}
+.foot{font-size:.66rem;color:var(--app-mute);line-height:1.5;margin:.4rem 0 .8rem}
+
+/* 3 시점 */
+.tl{position:relative;padding:.2rem 0 .1rem}
+.tlrow{display:flex;align-items:center;gap:.5rem;padding:.5rem 0;border-bottom:1px solid var(--app-rule)}
+.tlrow:last-child{border-bottom:0}
+.dot{width:.55rem;height:.55rem;border-radius:50%;flex:none}
+.tlrow .nm{flex:1;font-size:.8rem;font-weight:600}
+.tlrow .dt{font-size:.76rem;font-variant-numeric:tabular-nums;font-weight:600}
+.tlrow .st{font-size:.66rem;color:var(--app-mute)}
+.axis{margin:.7rem 0 .2rem;position:relative;height:2.6rem}
+.axis .ln{position:absolute;top:.5rem;left:0;right:0;height:2px;background:var(--app-rule)}
+.axis .safe{position:absolute;top:.35rem;left:6%;width:50%;height:.5rem;background:#DCF2EF;border-radius:2px}
+.axis .pt{position:absolute;top:.15rem;width:.55rem;height:.55rem;border-radius:50%;transform:translateX(-50%)}
+.axis .lb{position:absolute;top:1.05rem;font-size:.63rem;color:var(--app-mute);transform:translateX(-50%);white-space:nowrap}
+
+/* 4 근거 */
+.clause{background:var(--app-surface);border:1px solid var(--app-rule);border-radius:14px;padding:.75rem .9rem;margin-bottom:.65rem;font-size:.78rem;line-height:1.75;color:#3E434C}
+mark{background:#EDE9FB;color:#33257A;border-radius:2px;padding:0 .1rem}
+.f{display:flex;justify-content:space-between;align-items:center;gap:.5rem;padding:.5rem 0;border-bottom:1px solid var(--app-rule)}
+.f:last-child{border-bottom:0}
+.f .k{font-size:.75rem;color:var(--app-mute)}
+.f .r{text-align:right}
+.f .v{font-weight:600;font-size:.82rem;font-variant-numeric:tabular-nums}
+.f .edit{font-size:.7rem;color:var(--brand);margin-left:.35rem}
+.unsup{border:1px dashed #D9BFC0;border-radius:10px;padding:.55rem .7rem;font-size:.7rem;color:#8A5A5C;background:#FCF6F6}
+.unsup .tg{font-family:"IBM Plex Mono",monospace;font-size:.65rem;color:var(--danger)}
+table.spec{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:.8rem}
+table.spec th,table.spec td{border:1px solid var(--doc-rule);padding:.45rem .55rem;text-align:left;vertical-align:top}
+table.spec th{background:var(--doc-panel);font-weight:600;font-size:.78rem}
+table.spec td{color:var(--doc-mute)}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<p class="sub">화면 디자인 v2 · 2026-09-08</p>
+<h1>급여통장 변경 — 연쇄 영향 분석</h1>
+<p class="sub">시나리오를 카드 해지에서 급여통장 변경으로 교체. 1대1이던 연쇄가 1대4가 된다.</p>
+
+<div class="changed">
+  <b>v1에서 바뀐 것</b>
+  <ul>
+    <li>시나리오 교체 — 카드 해지(1건 영향) → 급여통장 변경(4건 영향)</li>
+    <li>화면 1을 상품 목록에서 <b>관계도</b>로 교체. 연결이 보여야 연쇄가 성립한다</li>
+    <li>결론을 "미루세요" 하나에서 <b>회복 가능 / 회복 불가</b> 둘로 분리</li>
+    <li>손익 기간을 연 단위로 통일 (상품마다 만기가 달라 총액 비교가 불가능)</li>
+  </ul>
+</div>
+
+<h2>출처 색 체계</h2>
+<p>v1과 동일. 화면의 모든 수치에 넷 중 하나가 붙는다.</p>
+<div class="tokens">
+  <div class="tok"><div class="sw" style="background:#EDE9FB;border:1px solid #D8CFF5"></div><b>약관에서 추출</b><span>#5B4BB8</span></div>
+  <div class="tok"><div class="sw" style="background:#DCF2EF;border:1px solid #B9E3DC"></div><b>계산 결과</b><span>#0F766E</span></div>
+  <div class="tok"><div class="sw" style="background:#EDEFF2;border:1px solid #DCE0E5"></div><b>보유 상품 정보</b><span>#6B7280</span></div>
+  <div class="tok"><div class="sw" style="background:#FBEEDC;border:1px solid #F0DBBB"></div><b>사용자 확인</b><span>#B45309</span></div>
+</div>
+
+<h2>화면</h2>
+<p>모바일 375px 기준. 네 화면이며 1 → 2 → 3 → 4 순으로 깊어진다.</p>
+
+<div class="screens">
+
+<!-- ─── 1 ─── -->
+<div class="slot">
+  <h3>1 · 내 금융 연결</h3>
+  <p class="role">상품 목록이 아니라 관계도. 연결이 보여야 다음 화면의 연쇄가 성립한다.</p>
+  <div class="phone">
+    <div class="status"><span>9:41</span><span>LTE</span></div>
+    <div class="navbar">내 금융 연결</div>
+    <div class="body">
+      <div class="graph">
+        <svg viewBox="0 0 320 260" xmlns="http://www.w3.org/2000/svg">
+          <g stroke="#C9CFD6" stroke-width="1.2">
+            <line x1="160" y1="130" x2="70" y2="56"/>
+            <line x1="160" y1="130" x2="250" y2="56"/>
+            <line x1="160" y1="130" x2="62" y2="205"/>
+            <line x1="160" y1="130" x2="258" y2="205"/>
+          </g>
+          <g font-family="Pretendard" font-size="8" fill="#8B929B">
+            <text x="104" y="88" text-anchor="middle">급여이체 조건</text>
+            <text x="216" y="88" text-anchor="middle">급여이체 조건</text>
+            <text x="100" y="176" text-anchor="middle">급여이체 조건</text>
+            <text x="220" y="176" text-anchor="middle">카드+급여 조건</text>
+          </g>
+          <circle cx="160" cy="130" r="34" fill="#087A6C"/>
+          <text x="160" y="126" text-anchor="middle" font-family="Pretendard" font-size="10" font-weight="700" fill="#fff">급여통장</text>
+          <text x="160" y="139" text-anchor="middle" font-family="Pretendard" font-size="8" fill="#BFE5DE">하나은행</text>
+          <g font-family="Pretendard">
+            <circle cx="70" cy="56" r="30" fill="#fff" stroke="#E5E7EB"/>
+            <text x="70" y="53" text-anchor="middle" font-size="9" font-weight="600" fill="#16181D">주담대</text>
+            <text x="70" y="65" text-anchor="middle" font-size="8" fill="#B3261E">-0.3%p</text>
+            <circle cx="250" cy="56" r="30" fill="#fff" stroke="#E5E7EB"/>
+            <text x="250" y="53" text-anchor="middle" font-size="9" font-weight="600" fill="#16181D">신용카드</text>
+            <text x="250" y="65" text-anchor="middle" font-size="8" fill="#B3261E">월 2만원</text>
+            <circle cx="62" cy="205" r="30" fill="#fff" stroke="#E5E7EB"/>
+            <text x="62" y="202" text-anchor="middle" font-size="9" font-weight="600" fill="#16181D">정기예금</text>
+            <text x="62" y="214" text-anchor="middle" font-size="8" fill="#B3261E">+0.25%p</text>
+            <circle cx="258" cy="205" r="30" fill="#fff" stroke="#E5E7EB"/>
+            <text x="258" y="202" text-anchor="middle" font-size="9" font-weight="600" fill="#16181D">자동이체</text>
+            <text x="258" y="214" text-anchor="middle" font-size="8" fill="#B3261E">월 5천원</text>
+          </g>
+        </svg>
+        <div class="legend">선 4개는 모두 약관 문장에서 추출한 조건입니다 <span class="tag t-doc">약관에서 추출</span></div>
+      </div>
+      <div class="box">
+        <div class="inst">이 통장이 유지하고 있는 혜택</div>
+        <div class="pname">연 800,000원 <span class="tag t-calc">계산 결과</span></div>
+        <div class="meta">조건 4건 · 원문 보기</div>
+      </div>
+      <div class="cta">급여통장 변경하기</div>
+    </div>
+    <div class="tabbar"><div>자산</div><div class="on">연결</div><div>지출</div><div>내정보</div></div>
+  </div>
+  <ul class="notes">
+    <li>선을 누르면 해당 약관 원문이 뜬다. <b>이게 삽화가 아니라 데이터라는 증거다.</b> 정적 그림이면 "저건 그린 거죠"로 끝난다.</li>
+    <li>중앙 노드는 사용자가 아니라 <b>급여통장</b>. 무엇을 건드리면 무엇이 흔들리는지가 주어다.</li>
+    <li>변경 진입점은 화면 안에 두되 강조하지 않는다. 무심코 누르는 상황이어야 가로채기가 성립한다.</li>
+  </ul>
+</div>
+
+<!-- ─── 2 ─── -->
+<div class="slot">
+  <h3>2 · 변경 영향</h3>
+  <p class="role">가로채기. 하나를 건드리면 넷이 흔들린다는 것이 숫자로 보인다.</p>
+  <div class="phone">
+    <div class="status"><span>9:41</span><span>LTE</span></div>
+    <div class="navbar"><span class="back">〈</span> 급여통장 변경</div>
+    <div class="body">
+      <div class="alert">
+        <div class="hd">4개 상품의 혜택이 함께 사라집니다</div>
+        <div class="big">연 800,000원</div>
+        <div class="per">변경 시 예상 손실 <span class="tag t-calc">계산 결과</span></div>
+      </div>
+      <div class="box tight">
+        <div class="imp"><div class="l"><b>하나은행 주택담보대출</b><span>우대금리 0.3%p 소멸 · 잔액 1.5억</span></div><div class="r">450,000원</div></div>
+        <div class="imp"><div class="l"><b>하나원큐 신용카드</b><span>급여이체 연계 할인 중단</span></div><div class="r">240,000원</div></div>
+        <div class="imp"><div class="l"><b>생활요금 자동이체</b><span>할인 혜택 중단</span></div><div class="r">60,000원</div></div>
+        <div class="imp"><div class="l"><b>하나 정기예금</b><span>우대금리 0.25%p 소멸 · 2,000만원</span></div><div class="r">50,000원</div></div>
+      </div>
+      <div class="verdict">
+        <div class="hd">3건은 시점을 맞추면 지킬 수 있습니다</div>
+        <p>9월 30일 이후에 옮기면 이번 달 판정은 이미 끝나 주담대·카드·자동이체 혜택이 유지됩니다. 다만 <b>정기예금 우대는 만기(2027년 3월 20일)까지 회복되지 않습니다.</b></p>
+      </div>
+      <p class="foot">연간 기준 금액입니다. 주택담보대출은 첫해 기준이며 잔액이 줄면 차액도 줄어듭니다.</p>
+      <div class="btn primary">9월 30일 이후로 미루기</div>
+      <div class="btn ghost">그래도 변경하기</div>
+      <div class="btn text">언제 무엇이 깨지나요</div>
+    </div>
+  </div>
+  <ul class="notes">
+    <li>큰 숫자는 <b>합계 하나만</b>. 네 줄은 그 아래 내역으로 둔다.</li>
+    <li>내역을 금액 큰 순으로 정렬한다. 1.5억 × 0.3% = 45만원이라 <b>무대에서 암산 검증</b>이 된다.</li>
+    <li>결론을 회복 가능 3건과 회복 불가 1건으로 <b>쪼갠다.</b> "미루세요" 하나면 알림이고, 쪼개면 판단이다.</li>
+    <li>기간을 연 단위로 통일했다. 대출·예금·카드의 만기가 제각각이라 총액으로는 더할 수 없다.</li>
+  </ul>
+</div>
+
+<!-- ─── 3 ─── -->
+<div class="slot">
+  <h3>3 · 언제 무엇이 깨지나</h3>
+  <p class="role">인터프리터가 한 일. 조건마다 판정 주기가 달라 안전한 날이 하나로 모인다.</p>
+  <div class="phone">
+    <div class="status"><span>9:41</span><span>LTE</span></div>
+    <div class="navbar"><span class="back">〈</span> 시점</div>
+    <div class="body">
+      <div class="box">
+        <div class="inst">오늘 9월 8일 기준</div>
+        <div class="axis">
+          <div class="ln"></div><div class="safe"></div>
+          <div class="pt" style="left:6%;background:#16181D"></div>
+          <div class="pt" style="left:32%;background:#B45309"></div>
+          <div class="pt" style="left:56%;background:#087A6C"></div>
+          <div class="lb" style="left:6%">오늘</div>
+          <div class="lb" style="left:32%">9/15</div>
+          <div class="lb" style="left:58%">9/30</div>
+        </div>
+        <div class="meta">9월 30일이 지나면 이번 달 판정이 모두 끝납니다 <span class="tag t-calc">계산 결과</span></div>
+      </div>
+      <div class="box tight">
+        <div class="tlrow"><span class="dot" style="background:#087A6C"></span><span class="nm">주택담보대출<br><span class="st">매월 15일 재산정</span></span><span class="dt">9/15</span></div>
+        <div class="tlrow"><span class="dot" style="background:#087A6C"></span><span class="nm">생활요금 자동이체<br><span class="st">매월 5일 판정</span></span><span class="dt">10/5</span></div>
+        <div class="tlrow"><span class="dot" style="background:#087A6C"></span><span class="nm">신용카드<br><span class="st">전월 실적, 매월 말일</span></span><span class="dt">9/30</span></div>
+        <div class="tlrow"><span class="dot" style="background:#B3261E"></span><span class="nm">정기예금<br><span class="st">가입 시 확정, 만기까지 고정</span></span><span class="dt" style="color:#B3261E">회복 불가</span></div>
+      </div>
+      <div class="box">
+        <div class="inst">정기예금</div>
+        <div class="meta" style="line-height:1.65">가입 시점에 우대가 확정되는 조건이라 판정일이 없습니다. 급여이체를 끊으면 만기 <b>2027-03-20</b>까지 되돌릴 수 없습니다. <span class="tag t-doc">약관에서 추출</span></div>
+      </div>
+      <div class="btn text">근거 원문 보기</div>
+    </div>
+  </div>
+  <ul class="notes">
+    <li>네 조건의 판정 주기가 <b>전부 다르다.</b> 이걸 한 화면에 모으는 게 인터프리터가 하는 일이고, 사람이 손으로 못 한다.</li>
+    <li>정기예금만 빨간 점이다. <b>PERMANENT 연산자가 화면에서 실제로 일을 하는 자리다.</b> 다른 셋과 성격이 달라 별도 박스로 뺐다.</li>
+    <li>안전 구간을 축 위에 색으로 칠한다. "언제까지"가 아니라 "언제부터"라는 걸 형태로 보여준다.</li>
+  </ul>
+</div>
+
+<!-- ─── 4 ─── -->
+<div class="slot">
+  <h3>4 · 근거</h3>
+  <p class="role">AI가 한 일. 값을 고치면 앞 화면 전부가 다시 계산된다.</p>
+  <div class="phone">
+    <div class="status"><span>9:41</span><span>LTE</span></div>
+    <div class="navbar"><span class="back">〈</span> 근거 · 주택담보대출</div>
+    <div class="body">
+      <div class="clause">
+        <div class="inst" style="margin-bottom:.35rem">하나은행 주택담보대출 상품설명서 · 우대금리</div>
+        <mark>급여이체 실적이 월 50만원 이상</mark>인 경우 <mark>0.3%p</mark>를 감면하며, 실적은 <mark>매월 15일</mark> 재산정한다.
+      </div>
+      <div class="box tight">
+        <div class="f"><span class="k">감면 폭</span><span class="r"><span class="v">−0.3%p</span><span class="edit">수정</span><br><span class="tag t-doc">약관에서 추출</span></span></div>
+        <div class="f"><span class="k">판정 주기</span><span class="r"><span class="v">매월 15일</span><span class="edit">수정</span><br><span class="tag t-doc">약관에서 추출</span></span></div>
+        <div class="f"><span class="k">실적 기준</span><span class="r"><span class="v">월 500,000원</span><span class="edit">수정</span><br><span class="tag t-user">사용자 확인</span></span></div>
+        <div class="f"><span class="k">걸린 상품</span><span class="r"><span class="v">급여통장</span><br><span class="tag t-doc">약관에서 추출</span></span></div>
+        <div class="f"><span class="k">대출 잔액</span><span class="r"><span class="v">150,000,000원</span><br><span class="tag t-hold">보유 상품 정보</span></span></div>
+        <div class="f"><span class="k">연간 손실</span><span class="r"><span class="v">450,000원</span><br><span class="tag t-calc">계산 결과</span></span></div>
+      </div>
+      <div class="unsup">이 약관에서 1건을 조건으로 옮기지 못했습니다<br><span class="tg">조건복합</span> · 원문 보기</div>
+      <div class="btn text" style="margin-top:.6rem">다른 상품의 근거 보기</div>
+    </div>
+  </div>
+  <ul class="notes">
+    <li>원문 하이라이트와 아래 값이 <b>같은 보라색</b>으로 묶인다. 색이 출처를 설명한다.</li>
+    <li>"걸린 상품" 줄이 <code class="mono">binds.target</code>이다. <b>연쇄가 어디서 나왔는지가 화면에 노출되는 유일한 자리다.</b></li>
+    <li>실적 기준만 앰버로 그렸다. 수정하면 태그가 바뀐다는 걸 정지 화면에서 보이기 위해서다.</li>
+    <li>값을 고치면 화면 2의 80만원과 화면 3의 9/30이 다시 계산된다. <b>"AI가 틀리면요"에 대한 답이 이 동작이다.</b></li>
+  </ul>
+</div>
+
+</div>
+
+<h2>시나리오 데이터</h2>
+<p>픽스처로 넣을 값. 조건 4건이 모두 급여통장을 가리킨다.</p>
+<table class="spec">
+  <tr><th>상품</th><th>조건 (약관 원문 요약)</th><th>연산자</th><th>판정</th><th>효과</th><th>연간</th></tr>
+  <tr><td>주택담보대출</td><td>급여이체 월 50만원 이상</td><td class="mono">RECUR</td><td>매월 15일</td><td>−0.3%p</td><td>450,000</td></tr>
+  <tr><td>하나원큐 신용카드</td><td>급여이체 + 카드 실적 월 30만원</td><td class="mono">ROLLING</td><td>전월 실적, 말일</td><td>월 2만원 할인</td><td>240,000</td></tr>
+  <tr><td>생활요금 자동이체</td><td>급여이체 + 자동이체 3건 이상</td><td class="mono">COUNT</td><td>매월 5일</td><td>월 5천원 할인</td><td>60,000</td></tr>
+  <tr><td>하나 정기예금</td><td>가입 시 급여이체 실적 보유</td><td class="mono">PERMANENT</td><td>없음 · 만기 고정</td><td>+0.25%p</td><td>50,000</td></tr>
+</table>
+<ul class="notes" style="font-size:.88rem">
+  <li>네 조건이 <b>연산자 네 종류를 각각 하나씩</b> 쓴다. 설계한 연산자 집합이 화면에서 전부 일한다는 걸 보여주는 배치다.</li>
+  <li><code class="mono">ROLLING</code>과 <code class="mono">COUNT</code>는 실적 데이터가 필요하다. 데모에서는 픽스처에 현재 실적을 넣어 채운다.</li>
+  <li>합계 800,000원. 주담대 450,000은 1.5억 × 0.3%로 검산된다.</li>
+</ul>
+
+<h2>구현 규칙</h2>
+<ul class="notes" style="font-size:.88rem">
+  <li>네 화면은 <b>같은 상태 객체</b>를 공유한다. 화면 4의 수정이 화면 2·3에 반영되어야 한다.</li>
+  <li>800,000이나 9/30을 <b>문자열로 박지 않는다.</b> 전부 함수 산출값이다.</li>
+  <li>출처 태그는 값과 같은 객체에 담는다. 화면에서 조건문으로 붙이지 않는다.</li>
+  <li>관계도의 선은 조건 배열을 순회해 그린다. SVG를 손으로 그려두면 조건이 늘 때 안 늘어난다.</li>
+  <li>오늘 날짜 <code class="mono">2026-09-08</code> 고정. 시스템 시각을 쓰면 발표 당일 타임라인이 깨진다.</li>
+  <li>데모 초기화 수단을 넣는다. 발표 중 두 번 시연할 수 있어야 한다.</li>
+</ul>
+
+</div>
+</body>
+</html>
