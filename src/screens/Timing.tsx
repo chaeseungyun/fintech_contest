@@ -13,6 +13,7 @@ const POINT_COLOR: Record<AxisPoint['kind'], string> = {
 
 function dotColor(item: ImpactItem): string {
   if (!item.judgment.active) return '#B8BEC7';
+  if (item.judgment.recoverable && !item.judgment.countsForSafeAfter) return '#B8BEC7';
   if (!item.judgment.recoverable) return 'var(--danger)';
   return 'var(--brand)';
 }
@@ -57,6 +58,14 @@ export function Timing() {
             </>
           )}{' '}
           <SourceTag source={timing.safeAfter.source} />
+          {d.deferredNextMonth.length > 0 && (
+            <div className="sub">
+              {d.deferredNextMonth
+                .map((i) => `${i.product.shortName ?? i.product.name} ${formatMD(i.judgment.nextJudgmentDate.value!)}`)
+                .join(', ')}
+              은 다음 달 판정이라 계산에서 뺐습니다. 옮긴 뒤 실적을 다시 채우면 유지됩니다.
+            </div>
+          )}
         </div>
       </div>
 
@@ -82,7 +91,11 @@ export function Timing() {
                 <span className="dt">
                   {formatMD(date)}
                   <div className="rt">
-                    <SourceTag source={j.nextJudgmentDate.source} />
+                    {j.recoverable && !j.countsForSafeAfter ? (
+                      <span className="muted">다음 달 · 계산 제외</span>
+                    ) : (
+                      <SourceTag source={j.nextJudgmentDate.source} />
+                    )}
                   </div>
                 </span>
               )}

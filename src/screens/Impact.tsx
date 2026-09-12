@@ -38,7 +38,7 @@ function Verdict({ d }: { d: Derived }) {
   return (
     <div className="verdict">
       <div className="hd">
-        {recoverable.length}건은 시점을 맞추면 지킬 수 있습니다
+        {recoverable.length}건은 시점을 맞추면 다음 판정일까지 유지됩니다
       </div>
       {timing.alreadySafe ? (
         <p>
@@ -58,7 +58,7 @@ function Verdict({ d }: { d: Derived }) {
 }
 
 export function Impact() {
-  const { derived: d, dispatch } = useStore();
+  const { state, derived: d, dispatch } = useStore();
   const hasLoan = d.items.some((i) => i.product.type === 'loan' && i.judgment.active);
 
   return (
@@ -102,21 +102,37 @@ export function Impact() {
         {hasLoan && ' 주택담보대출은 첫해 기준이며 잔액이 줄면 차액도 줄어듭니다.'}
       </p>
 
-      <button
-        type="button"
-        className="btn primary"
-        onClick={() => dispatch({ type: 'navigate', screen: 3 })}
-      >
-        {d.timing.alreadySafe
-          ? '지금 변경해도 됩니다 · 시점 보기'
-          : `${formatKoMD(d.timing.safeAfter.value)} 이후로 미루기`}
-      </button>
-      <button type="button" className="btn ghost" onClick={() => dispatch({ type: 'navigate', screen: 3 })}>
-        그래도 변경하기
-      </button>
-      <button type="button" className="btn text" onClick={() => dispatch({ type: 'navigate', screen: 3 })}>
-        언제 무엇이 깨지나요
-      </button>
+      {state.decidedNow ? (
+        <div className="verdict now">
+          <div className="hd">지금 변경 시 연 {formatWon(d.total.value)} 손실이 확정됩니다</div>
+          <p>
+            {d.recoverable.length > 0 &&
+              `${d.recoverable.map(shortName).join('·')} 혜택은 다음 판정일에 끊깁니다. `}
+            {d.unrecoverable.map(
+              (u) => `${u.product.name} 우대는 만기(${formatKoYMD(u.judgment.recoverAt!.value)})까지 회복되지 않습니다. `,
+            )}
+            <SourceTag source={d.total.source} />
+          </p>
+          <button type="button" className="btn text" onClick={() => dispatch({ type: 'decideNow', value: false })}>
+            취소하고 시점 다시 보기
+          </button>
+        </div>
+      ) : (
+        <>
+          <button
+            type="button"
+            className="btn primary"
+            onClick={() => dispatch({ type: 'navigate', screen: 3 })}
+          >
+            {d.timing.alreadySafe
+              ? '지금 변경해도 됩니다 · 시점 보기'
+              : `${formatKoMD(d.timing.safeAfter.value)} 이후로 미루기`}
+          </button>
+          <button type="button" className="btn ghost" onClick={() => dispatch({ type: 'decideNow', value: true })}>
+            그래도 변경하기
+          </button>
+        </>
+      )}
     </PhoneFrame>
   );
 }

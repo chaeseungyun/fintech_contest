@@ -150,11 +150,6 @@ button {
   margin-left: auto;
   font-size: 0.7rem;
 }
-@media (max-width: 480px) {
-  .stage {
-    padding: 1rem 0.75rem;
-  }
-}
 
 /* ── 폰 프레임 ── */
 /* 높이 고정. 내용이 넘치면 body 안에서 스크롤 — 화면마다 프레임 높이가 달라지지 않는다. */
@@ -281,6 +276,16 @@ button {
 .meta {
   font-size: 0.72rem;
   color: var(--app-mute);
+}
+.meta .sub {
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+  border-top: 1px dashed var(--app-rule);
+}
+.rt .muted {
+  font-size: 0.62rem;
+  color: var(--app-mute);
+  font-weight: 400;
 }
 button.link,
 .link {
@@ -513,6 +518,13 @@ button.link,
   margin-bottom: 0.65rem;
   background: var(--warn-bg);
   border: 1px solid #f0dbbb;
+}
+.verdict.now {
+  background: var(--danger-bg);
+  border-color: #f0c9c5;
+}
+.verdict.now .hd {
+  color: var(--danger);
 }
 .verdict .hd {
   font-weight: 700;
@@ -771,4 +783,49 @@ mark {
   color: #a08284;
   line-height: 1.5;
   margin-top: 0.1rem;
+}
+
+/* ── 모바일. 맨 끝에 둬서 위의 .phone 기본 규칙을 덮어쓴다 ── */
+@media (max-width: 480px) {
+  /* 실제 폰: 프레임 장식을 벗기고 화면을 꽉 채운다. 가짜 상태바·홈바는 숨긴다. */
+  .stage {
+    padding: 0;
+  }
+  .stage.single .slot {
+    max-width: none;
+  }
+  .topbar {
+    padding: 0.5rem 0.75rem;
+  }
+  .topbar .brand b {
+    font-size: 0.9rem;
+  }
+  .topbar .today,
+  .controls .tb:not(.danger) {
+    display: none;
+  }
+  .phone {
+    --phone-h: calc(100dvh - 5.6rem);
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .phone .status,
+  .phone .home {
+    display: none;
+  }
+  .dots {
+    position: sticky;
+    bottom: 0;
+    margin: 0;
+    padding: 0.5rem 0.75rem;
+    background: var(--doc-bg);
+    border-top: 1px solid var(--doc-rule);
+  }
+  .legend-bar {
+    padding-bottom: 1rem;
+  }
+  .legend-bar .note {
+    margin-left: 0;
+  }
 }

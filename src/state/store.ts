@@ -23,6 +23,8 @@ export interface AppState {
   selectedConditionId: string | null;
   /** 데스크톱: 네 화면 나란히 */
   showAll: boolean;
+  /** 화면 2에서 "그래도 변경하기"를 눌렀는가 */
+  decidedNow: boolean;
 }
 
 export type Action =
@@ -33,6 +35,7 @@ export type Action =
   | { type: 'edit'; conditionId: string; edit: ConditionEdit }
   | { type: 'removeCondition'; conditionId: string }
   | { type: 'toggleShowAll' }
+  | { type: 'decideNow'; value: boolean }
   | { type: 'reset' };
 
 export function initialState(): AppState {
@@ -44,6 +47,7 @@ export function initialState(): AppState {
     evidenceProductId: first ? first.product.id : BASE_SCENARIO.trigger.productId,
     selectedConditionId: null,
     showAll: false,
+    decidedNow: false,
   };
 }
 
@@ -69,6 +73,8 @@ export function reducer(state: AppState, action: Action): AppState {
       return state.removed.includes(action.conditionId)
         ? state
         : { ...state, removed: [...state.removed, action.conditionId] };
+    case 'decideNow':
+      return { ...state, decidedNow: action.value };
     case 'toggleShowAll':
       return { ...state, showAll: !state.showAll };
     case 'reset':

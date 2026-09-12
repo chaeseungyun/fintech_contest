@@ -47,6 +47,8 @@ export interface Derived {
   recoverable: ImpactItem[];
   unrecoverable: ImpactItem[];
   inactive: ImpactItem[];
+  /** 살아있고 회복 가능하지만 판정일이 다음 달이라 안전 시점 계산에서 빠진 것 */
+  deferredNextMonth: ImpactItem[];
   axis: Axis;
   unsupported: Condition[];
 }
@@ -78,6 +80,7 @@ export function derive(scenario: Scenario): Derived {
   const recoverable = active.filter((i) => i.judgment.recoverable);
   const unrecoverable = active.filter((i) => !i.judgment.recoverable);
   const inactive = items.filter((i) => !i.judgment.active);
+  const deferredNextMonth = recoverable.filter((i) => !i.judgment.countsForSafeAfter);
 
   return {
     today,
@@ -91,6 +94,7 @@ export function derive(scenario: Scenario): Derived {
     recoverable,
     unrecoverable,
     inactive,
+    deferredNextMonth,
     axis: buildAxis(today, items, timing),
     unsupported: unsupportedForDocs(
       scenario,
