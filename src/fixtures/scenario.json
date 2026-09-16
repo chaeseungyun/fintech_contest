@@ -14,7 +14,7 @@
   },
 
   "home": {
-    "userName": "최연수",
+    "userName": "디카프리오",
     "greeting": "좋은 하루 되세요.",
     "bannerTitle": "변경 전, 연결된 영향을 먼저 확인하세요",
     "bannerBody": "하나의 변경이 여러 금융상품에 어떤 영향을 주는지 분석해드립니다.",
@@ -51,7 +51,9 @@
       "icon": "card",
       "nodeLabel": "카드 해지/변경",
       "verb": "해지",
-      "savings": [{ "kind": "annual_fee", "label": "연회비", "note": "카드 해지 시" }]
+      "savings": [
+        { "kind": "annual_fee", "label": "연회비", "note": "카드 해지 시" }
+      ]
     },
     {
       "id": "loan_change",
@@ -86,7 +88,9 @@
       "nodeLabel": "보험 해지",
       "verb": "해지",
       "caveat": "해지로 사라지는 보장은 금액으로 계산하지 않았습니다.",
-      "savings": [{ "kind": "monthly_premium", "label": "보험료", "note": "보험 해지 시" }]
+      "savings": [
+        { "kind": "monthly_premium", "label": "보험료", "note": "보험 해지 시" }
+      ]
     },
     {
       "id": "salary_switch",
@@ -208,7 +212,10 @@
       "status": "MAPPED",
       "expr": {
         "op": "RECUR",
-        "params": { "every": "1M", "from": { "anchor": "judgment_day", "dayOfMonth": 15 } }
+        "params": {
+          "every": "1M",
+          "from": { "anchor": "judgment_day", "dayOfMonth": 15 }
+        }
       },
       "metric": {
         "kind": "card_spend",
@@ -237,7 +244,10 @@
       "status": "MAPPED",
       "expr": {
         "op": "PERMANENT",
-        "params": { "fixedAt": { "anchor": "account_open" }, "until": { "anchor": "maturity" } }
+        "params": {
+          "fixedAt": { "anchor": "account_open" },
+          "until": { "anchor": "maturity" }
+        }
       },
       "metric": { "kind": "card_holding", "threshold": null, "source": "doc" },
       "binds": {
@@ -260,7 +270,11 @@
       "status": "MAPPED",
       "expr": {
         "op": "ROLLING",
-        "params": { "window": "1M", "metric": "card_autopay", "settleOn": { "anchor": "month_end" } }
+        "params": {
+          "window": "1M",
+          "metric": "card_autopay",
+          "settleOn": { "anchor": "month_end" }
+        }
       },
       "metric": {
         "kind": "card_autopay",
@@ -290,7 +304,10 @@
       "status": "MAPPED",
       "expr": {
         "op": "RECUR",
-        "params": { "every": "1M", "from": { "anchor": "judgment_day", "dayOfMonth": 15 } }
+        "params": {
+          "every": "1M",
+          "from": { "anchor": "judgment_day", "dayOfMonth": 15 }
+        }
       },
       "metric": {
         "kind": "salary_transfer",
@@ -384,9 +401,16 @@
       "status": "MAPPED",
       "expr": {
         "op": "PERMANENT",
-        "params": { "fixedAt": { "anchor": "account_open" }, "until": { "anchor": "maturity" } }
+        "params": {
+          "fixedAt": { "anchor": "account_open" },
+          "until": { "anchor": "maturity" }
+        }
       },
-      "metric": { "kind": "salary_transfer", "threshold": null, "source": "doc" },
+      "metric": {
+        "kind": "salary_transfer",
+        "threshold": null,
+        "source": "doc"
+      },
       "binds": {
         "holder": "dep_nuri_term",
         "target": "acct_nuri_salary",
@@ -408,7 +432,11 @@
       "status": "MAPPED",
       "expr": {
         "op": "ROLLING",
-        "params": { "window": "1M", "metric": "loan_holding", "settleOn": { "anchor": "month_end" } }
+        "params": {
+          "window": "1M",
+          "metric": "loan_holding",
+          "settleOn": { "anchor": "month_end" }
+        }
       },
       "metric": {
         "kind": "loan_holding",
@@ -437,7 +465,10 @@
       "status": "MAPPED",
       "expr": {
         "op": "RECUR",
-        "params": { "every": "1M", "from": { "anchor": "judgment_day", "dayOfMonth": 20 } }
+        "params": {
+          "every": "1M",
+          "from": { "anchor": "judgment_day", "dayOfMonth": 20 }
+        }
       },
       "metric": {
         "kind": "loan_holding",
@@ -467,7 +498,10 @@
       "status": "MAPPED",
       "expr": {
         "op": "RECUR",
-        "params": { "every": "1M", "from": { "anchor": "judgment_day", "dayOfMonth": 15 } }
+        "params": {
+          "every": "1M",
+          "from": { "anchor": "judgment_day", "dayOfMonth": 15 }
+        }
       },
       "metric": {
         "kind": "deposit_balance",
@@ -497,7 +531,11 @@
       "status": "MAPPED",
       "expr": {
         "op": "ROLLING",
-        "params": { "window": "1M", "metric": "card_autopay", "settleOn": { "anchor": "month_end" } }
+        "params": {
+          "window": "1M",
+          "metric": "card_autopay",
+          "settleOn": { "anchor": "month_end" }
+        }
       },
       "metric": {
         "kind": "card_autopay",
@@ -551,7 +589,11 @@
         "annualLossTotal": 194000,
         "savingsTotal": 30000,
         "netAnnual": -164000,
-        "nextJudgmentDates": { "k1": "2026-09-15", "k2": null, "k3": "2026-09-30" },
+        "nextJudgmentDates": {
+          "k1": "2026-09-15",
+          "k2": null,
+          "k3": "2026-09-30"
+        },
         "safeAfter": "2026-09-30",
         "unrecoverable": [{ "conditionId": "k2", "until": "2027-03-20" }],
         "horizon": [-164000, 67000, 164000, 328000],
@@ -581,7 +623,10 @@
         "verdict": "keep"
       },
       "loan_change": {
-        "annualLossByProduct": { "card_nuri_tok": 30000, "dep_nuri_term": 20000 },
+        "annualLossByProduct": {
+          "card_nuri_tok": 30000,
+          "dep_nuri_term": 20000
+        },
         "annualLossTotal": 50000,
         "savingsTotal": 0,
         "netAnnual": -50000,
