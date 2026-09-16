@@ -36,11 +36,20 @@ export function productById(scenario: Scenario, id: string): Product {
   return p;
 }
 
+/** 선 위 라벨. metric.kind 하나로 정해진다 — 화면에서 조건문으로 고르지 않는다. */
+const EDGE_LABEL: Record<string, string> = {
+  salary_transfer: '급여이체 조건',
+  card_spend: '카드 실적 조건',
+  autopay_count: '자동이체 조건',
+  card_holding: '카드 보유 조건',
+  card_autopay: '카드 납부 조건',
+  loan_holding: '대출 보유 조건',
+  deposit_balance: '예적금 잔액 조건',
+};
+
 export function metricLabel(cond: MappedCondition): string {
   const kind = cond.metric.kind;
-  if (kind === 'salary_transfer') return '급여이체 조건';
-  const short: Record<string, string> = { card_spend: '카드', autopay_count: '자동이체' };
-  return `${short[kind] ?? metricNoun(kind)}+급여 조건`;
+  return EDGE_LABEL[kind] ?? `${metricNoun(kind)} 조건`;
 }
 
 export function toEdge(cond: MappedCondition): Edge {
@@ -68,4 +77,9 @@ export function unsupportedConditions(scenario: Scenario): Condition[] {
 export function unsupportedForDocs(scenario: Scenario, docs: string[]): Condition[] {
   const set = new Set(docs);
   return unsupportedConditions(scenario).filter((c) => set.has(c.sourceDoc));
+}
+
+/** 이 상품이 holder 로 걸려 있는 조건 — "이 상품이 받고 있는 혜택" */
+export function outgoingConditions(scenario: Scenario, holderId: string): MappedCondition[] {
+  return scenario.conditions.filter(isMapped).filter((c) => c.binds.holder === holderId);
 }

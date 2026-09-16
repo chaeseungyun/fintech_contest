@@ -1,4 +1,4 @@
-// 단일 상태 객체. 네 화면이 전부 여기서 읽는다.
+// 단일 상태 객체. 모든 화면이 여기서 읽는다.
 // 저장되는 것은 "기본 시나리오 + 사용자 수정 + 화면 위치" 뿐이고,
 // 금액·날짜는 매 렌더마다 lib/derive 로 다시 계산한다. localStorage 없음.
 
@@ -10,57 +10,87 @@ import type { Scenario } from '../lib/types';
 
 export const BASE_SCENARIO = fixture as unknown as Scenario;
 
-export type Screen = 1 | 2 | 3 | 4;
+/** 하단 탭바. 홈이 기본 */
+export type Tab = 'home' | 'assets' | 'products' | 'benefits' | 'more';
+
+export const TABS: { id: Tab; label: string; icon: string }[] = [
+  { id: 'home', label: '홈', icon: 'home' },
+  { id: 'assets', label: '자산', icon: 'invest' },
+  { id: 'products', label: '상품', icon: 'deposit' },
+  { id: 'benefits', label: '혜택', icon: 'benefit' },
+  { id: 'more', label: '전체', icon: 'grid' },
+];
+
+/** 탭 위에 쌓이는 화면. 뒤로가기는 이 스택을 하나씩 걷어낸다. */
+export type Route =
+  | { name: 'switchpoint' }
+  | { name: 'analyzing'; triggerId: string }
+  | { name: 'impact'; triggerId: string }
+  | { name: 'verdict'; triggerId: string }
+  | { name: 'timeline'; triggerId: string }
+  | { name: 'connections'; triggerId: string }
+  | { name: 'evidence'; triggerId: string; productId: string };
 
 export interface AppState {
   edits: Edits;
   /** 삭제된 조건 id (관계도 선이 줄어드는지 보는 용도) */
   removed: string[];
-  screen: Screen;
-  /** 화면 4에서 보고 있는 상품 */
-  evidenceProductId: string;
-  /** 화면 1에서 누른 선 */
+  tab: Tab;
+  stack: Route[];
+  /** 관계도에서 누른 선 */
   selectedConditionId: string | null;
-  /** 데스크톱: 네 화면 나란히 */
-  showAll: boolean;
-  /** 화면 2에서 "그래도 변경하기"를 눌렀는가 */
+  /** 화면 3에서 펼친 상세 항목 */
+  expandedConditionId: string | null;
+  /** 최종 판단 화면에서 "그래도 변경하기"를 눌렀는가 */
   decidedNow: boolean;
 }
 
 export type Action =
-  | { type: 'navigate'; screen: Screen }
+  | { type: 'selectTab'; tab: Tab }
+  | { type: 'push'; route: Route }
+  | { type: 'replace'; route: Route }
   | { type: 'back' }
+  | { type: 'popTo'; name: Route['name'] }
   | { type: 'selectCondition'; conditionId: string | null }
-  | { type: 'showEvidence'; productId: string }
+  | { type: 'toggleExpanded'; conditionId: string }
   | { type: 'edit'; conditionId: string; edit: ConditionEdit }
   | { type: 'removeCondition'; conditionId: string }
-  | { type: 'toggleShowAll' }
   | { type: 'decideNow'; value: boolean }
   | { type: 'reset' };
 
 export function initialState(): AppState {
-  const first = derive(applyEdits(BASE_SCENARIO, {})).graph.satellites[0];
   return {
     edits: {},
     removed: [],
-    screen: 1,
-    evidenceProductId: first ? first.product.id : BASE_SCENARIO.trigger.productId,
+    tab: 'home',
+    stack: [],
     selectedConditionId: null,
-    showAll: false,
+    expandedConditionId: null,
     decidedNow: false,
   };
 }
 
 export function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
-    case 'navigate':
-      return { ...state, screen: action.screen };
+    case 'selectTab':
+      return { ...state, tab: action.tab, stack: [], selectedConditionId: null };
+    case 'push':
+      return { ...state, stack: [...state.stack, action.route], decidedNow: false };
+    case 'replace':
+      return { ...state, stack: [...state.stack.slice(0, -1), action.route], decidedNow: false };
     case 'back':
-      return { ...state, screen: state.screen > 1 ? ((state.screen - 1) as Screen) : 1 };
+      return { ...state, stack: state.stack.slice(0, -1), selectedConditionId: null };
+    case 'popTo': {
+      const i = state.stack.findIndex((r) => r.name === action.name);
+      return i < 0 ? state : { ...state, stack: state.stack.slice(0, i + 1) };
+    }
     case 'selectCondition':
       return { ...state, selectedConditionId: action.conditionId };
-    case 'showEvidence':
-      return { ...state, evidenceProductId: action.productId, screen: 4 };
+    case 'toggleExpanded':
+      return {
+        ...state,
+        expandedConditionId: state.expandedConditionId === action.conditionId ? null : action.conditionId,
+      };
     case 'edit':
       return {
         ...state,
@@ -75,11 +105,21 @@ export function reducer(state: AppState, action: Action): AppState {
         : { ...state, removed: [...state.removed, action.conditionId] };
     case 'decideNow':
       return { ...state, decidedNow: action.value };
-    case 'toggleShowAll':
-      return { ...state, showAll: !state.showAll };
     case 'reset':
-      return { ...initialState(), showAll: state.showAll };
+      return initialState();
   }
+}
+
+export const currentRoute = (state: AppState): Route | null =>
+  state.stack.length > 0 ? state.stack[state.stack.length - 1] : null;
+
+/** 지금 화면이 다루고 있는 트리거. 스택이 비어 있으면 기본 트리거. */
+export function activeTriggerId(state: AppState, scenario: Scenario): string {
+  for (let i = state.stack.length - 1; i >= 0; i -= 1) {
+    const r = state.stack[i];
+    if ('triggerId' in r) return r.triggerId;
+  }
+  return scenario.defaultTriggerId;
 }
 
 export interface Store {
@@ -100,5 +140,5 @@ export function useStore(): Store {
 /** 상태 → 유효 시나리오 → 파생값. 화면 밖에서도(테스트) 쓸 수 있게 분리. */
 export function select(state: AppState): { scenario: Scenario; derived: Derived } {
   const scenario = applyEdits(BASE_SCENARIO, state.edits, state.removed);
-  return { scenario, derived: derive(scenario) };
+  return { scenario, derived: derive(scenario, activeTriggerId(state, scenario)) };
 }

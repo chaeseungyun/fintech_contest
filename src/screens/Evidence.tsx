@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { AppShell } from '../components/AppShell';
+import { Glyph } from '../components/Glyph';
 import { Highlight } from '../components/Highlight';
-import { PhoneFrame } from '../components/PhoneFrame';
 import { SourceTag } from '../components/SourceTag';
 import type { ImpactItem } from '../lib/derive';
 import { evidenceFields, toEditValue, type EditKind, type EvidenceField } from '../lib/evidence';
@@ -39,7 +40,7 @@ function FieldRow({
         {field.label}
         {field.note && <span className="note">{field.note}</span>}
       </span>
-      <span className="r">
+      <span className="v">
         {isEditing && field.edit ? (
           <span className="editbox">
             <input
@@ -65,7 +66,7 @@ function FieldRow({
           </span>
         ) : (
           <>
-            <span className="v">{field.display.value}</span>
+            <span className="val">{field.display.value}</span>
             {field.edit && (
               <button type="button" className="edit" onClick={() => onStart(field.edit!.kind, field.edit!.raw)}>
                 수정
@@ -73,19 +74,19 @@ function FieldRow({
             )}
           </>
         )}
-        <br />
         <SourceTag source={field.display.source} />
       </span>
     </div>
   );
 }
 
-export function Evidence() {
-  const { state, scenario, derived: d, dispatch } = useStore();
+export function Evidence({ productId }: { triggerId: string; productId: string }) {
+  const { scenario, derived: d, dispatch } = useStore();
   const [editing, setEditing] = useState<Editing | null>(null);
+  const [active, setActive] = useState(productId);
 
   const holders = d.graph.satellites.map((s) => s.product);
-  const product = holders.find((p) => p.id === state.evidenceProductId) ?? holders[0];
+  const product = holders.find((p) => p.id === active) ?? holders[0];
   const items = product ? d.items.filter((i) => i.product.id === product.id) : [];
   const unsupported = unsupportedForDocs(
     scenario,
@@ -110,14 +111,8 @@ export function Evidence() {
     setEditing(null);
   };
 
-  const idx = product ? holders.findIndex((p) => p.id === product.id) : -1;
-  const nextProduct = holders.length ? holders[(idx + 1) % holders.length] : null;
-
   return (
-    <PhoneFrame
-      title={`근거 · ${product?.name ?? ''}`}
-      onBack={() => dispatch({ type: 'navigate', screen: 3 })}
-    >
+    <AppShell title="약관 근거" onBack={() => dispatch({ type: 'back' })} hideTabBar>
       <div className="chips">
         {holders.map((p) => (
           <button
@@ -126,7 +121,7 @@ export function Evidence() {
             className={`chip${p.id === product?.id ? ' on' : ''}`}
             onClick={() => {
               setEditing(null);
-              dispatch({ type: 'showEvidence', productId: p.id });
+              setActive(p.id);
             }}
           >
             {p.shortName ?? p.name}
@@ -135,18 +130,16 @@ export function Evidence() {
       </div>
 
       {items.map((item) => (
-        <div key={item.condition.id}>
-          <div className="clause">
-            <div className="inst" style={{ marginBottom: '.35rem' }}>
-              {item.condition.sourceDoc}
-            </div>
+        <div key={item.condition.id} className="card">
+          <span className="src">{item.condition.sourceDoc}</span>
+          <p className="clause big">
             <Highlight text={item.condition.sourceText} spans={item.condition.spans} />
-            {item.condition.exclude && item.condition.exclude.length > 0 && (
-              <div className="excl">제외: {item.condition.exclude.join(', ')}</div>
-            )}
-          </div>
+          </p>
+          {item.condition.exclude && item.condition.exclude.length > 0 && (
+            <p className="excl">제외: {item.condition.exclude.join(', ')}</p>
+          )}
 
-          <div className="box tight">
+          <div className="fields">
             {evidenceFields(item, d.center).map((field) => (
               <FieldRow
                 key={field.key}
@@ -162,34 +155,37 @@ export function Evidence() {
               />
             ))}
           </div>
+
+          <button
+            type="button"
+            className="btn danger-text"
+            onClick={() => dispatch({ type: 'removeCondition', conditionId: item.condition.id })}
+          >
+            이 조건은 내 상품에 해당 없음
+          </button>
         </div>
       ))}
 
+      {items.length === 0 && <p className="empty">이 상품에 걸린 조건이 없습니다.</p>}
+
       {unsupported.length > 0 && (
-        <div className="unsup">
-          이 약관에서 {unsupported.length}건을 조건으로 옮기지 못했습니다
+        <div className="card unsup">
+          <h3 className="cardtitle">
+            <Glyph name="info" size={16} />이 약관에서 {unsupported.length}건을 조건으로 옮기지 못했습니다
+          </h3>
           {unsupported.map((u) => (
-            <div key={u.id} className="unsup-item">
-              <span className="tg">{u.unsupportedReason}</span> · 신뢰도 {Math.round(u.confidence * 100)}%
-              <div className="unsup-text">{u.sourceText}</div>
+            <div key={u.id} className="unsupitem">
+              <span className="tg">{u.unsupportedReason}</span>
+              <span className="conf">신뢰도 {Math.round(u.confidence * 100)}%</span>
+              <p>{u.sourceText}</p>
             </div>
           ))}
         </div>
       )}
 
-      {nextProduct && holders.length > 1 && (
-        <button
-          type="button"
-          className="btn text"
-          style={{ marginTop: '.6rem' }}
-          onClick={() => {
-            setEditing(null);
-            dispatch({ type: 'showEvidence', productId: nextProduct.id });
-          }}
-        >
-          다른 상품의 근거 보기 → {nextProduct.shortName ?? nextProduct.name}
-        </button>
-      )}
-    </PhoneFrame>
+      <p className="footnote">
+        값을 수정하면 화면 전체가 다시 계산됩니다. 수정한 값에는 &lsquo;사용자 확인&rsquo; 태그가 붙습니다.
+      </p>
+    </AppShell>
   );
 }

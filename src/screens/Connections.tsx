@@ -1,20 +1,21 @@
+import { AppShell } from '../components/AppShell';
+import { Amount } from '../components/Amount';
+import { Glyph, TYPE_ICON } from '../components/Glyph';
 import { Highlight } from '../components/Highlight';
-import { PhoneFrame, TabBar } from '../components/PhoneFrame';
 import { SourceTag } from '../components/SourceTag';
-import { formatWon } from '../lib/format';
 import { formatRateDelta } from '../lib/money';
 import type { Effect } from '../lib/types';
 import { useStore } from '../state/store';
 
 const W = 320;
-const H = 270;
+const H = 280;
 const CX = W / 2;
 const CY = H / 2;
-const RX = 114; // 위성 타원 반경
-const RY = 98;
-const R_CENTER = 34;
-const R_SAT = 28;
-const LABEL_T = 0.55; // 선 위 라벨 위치 (중앙 0 → 위성 1)
+const RX = 116;
+const RY = 100;
+const R_CENTER = 36;
+const R_SAT = 30;
+const LABEL_T = 0.64;
 
 function effectLabel(e: Effect): string {
   if (e.kind === 'rate_delta') return formatRateDelta(e.value);
@@ -27,22 +28,20 @@ function satellitePos(i: number, n: number) {
   return { x: CX + RX * Math.cos(angle), y: CY + RY * Math.sin(angle) };
 }
 
-export function Connections() {
+export function Connections({ triggerId }: { triggerId: string }) {
   const { state, derived: d, dispatch } = useStore();
   const { graph } = d;
   const selected = state.selectedConditionId;
   const selectedItem = d.items.find((i) => i.condition.id === selected) ?? null;
 
   return (
-    <PhoneFrame title="내 금융 연결" tabbar={<TabBar active="연결" />}>
-      <div className="graph">
+    <AppShell title="연결 관계도" onBack={() => dispatch({ type: 'back' })} hideTabBar>
+      <div className="card graphcard">
         <svg viewBox={`0 0 ${W} ${H}`} xmlns="http://www.w3.org/2000/svg" role="img" aria-label="금융 연결 관계도">
           {/* 선: 조건 배열을 순회해 그린다 */}
           {graph.satellites.map((s, i) => {
             const p = satellitePos(i, graph.satellites.length);
             const on = s.edge.conditionId === selected;
-            // 라벨은 중앙 원 밖, 위성 원 안쪽 — 선의 LABEL_T 지점에 둔다
-            const mid = { x: CX + (p.x - CX) * LABEL_T, y: CY + (p.y - CY) * LABEL_T };
             return (
               <g
                 key={s.edge.conditionId}
@@ -53,19 +52,16 @@ export function Connections() {
               >
                 <line x1={CX} y1={CY} x2={p.x} y2={p.y} className="hit" />
                 <line x1={CX} y1={CY} x2={p.x} y2={p.y} className="vis" />
-                <text x={mid.x} y={mid.y + 3} textAnchor="middle" className="elabel">
-                  {s.edge.metricLabel.value}
-                </text>
               </g>
             );
           })}
 
           {/* 중앙: 변경 대상 상품 */}
-          <circle cx={CX} cy={CY} r={R_CENTER} fill="var(--brand)" />
-          <text x={CX} y={CY - 4} textAnchor="middle" className="ctitle">
+          <circle cx={CX} cy={CY} r={R_CENTER} className="centernode" />
+          <text x={CX} y={CY - 3} textAnchor="middle" className="ctitle">
             {graph.center.shortName ?? graph.center.name}
           </text>
-          <text x={CX} y={CY + 9} textAnchor="middle" className="csub">
+          <text x={CX} y={CY + 11} textAnchor="middle" className="csub">
             {graph.center.institution}
           </text>
 
@@ -82,57 +78,77 @@ export function Connections() {
                 }
               >
                 <circle cx={p.x} cy={p.y} r={R_SAT} />
-                <text x={p.x} y={p.y - 3} textAnchor="middle" className="stitle">
+                <text x={p.x} y={p.y - 2} textAnchor="middle" className="stitle">
                   {s.product.shortName ?? s.product.name}
                 </text>
-                <text x={p.x} y={p.y + 9} textAnchor="middle" className="seffect">
+                <text x={p.x} y={p.y + 11} textAnchor="middle" className="seffect">
                   {effectLabel(s.edge.effect.value)}
                 </text>
               </g>
             );
           })}
+          {/* 라벨은 노드에 가리지 않도록 맨 마지막에 그린다 */}
+          {graph.satellites.map((s, i) => {
+            const p = satellitePos(i, graph.satellites.length);
+            const on = s.edge.conditionId === selected;
+            const mid = { x: CX + (p.x - CX) * LABEL_T, y: CY + (p.y - CY) * LABEL_T };
+            return (
+              <text
+                key={`l-${s.edge.conditionId}`}
+                x={mid.x}
+                y={mid.y + 3}
+                textAnchor="middle"
+                className={`elabel${on ? ' on' : ''}`}
+              >
+                {s.edge.metricLabel.value}
+              </text>
+            );
+          })}
         </svg>
-        <div className="legend">
+
+        <p className="legend">
           선 {graph.edges.length}개는 모두 약관 문장에서 추출한 조건입니다 <SourceTag source="doc" />
           {graph.edges.length > 0 && <span className="hint"> · 선을 누르면 원문이 보입니다</span>}
-        </div>
+        </p>
       </div>
 
       {selectedItem && (
-        <div className="sheet">
-          <div className="inst">{selectedItem.condition.sourceDoc}</div>
-          <div className="clause-inline">
+        <div className="card sheet">
+          <span className="src">{selectedItem.condition.sourceDoc}</span>
+          <p className="clause">
             <Highlight text={selectedItem.condition.sourceText} spans={selectedItem.condition.spans} />
-          </div>
-          <div className="sheet-row">
+          </p>
+          <div className="sheetrow">
             <span className="meta">
+              <Glyph name={TYPE_ICON[selectedItem.product.type] ?? 'deposit'} size={15} />
               {selectedItem.product.name} ← {graph.center.name} · 신뢰도{' '}
               {Math.round(selectedItem.condition.confidence * 100)}%
             </span>
             <button
               type="button"
               className="link"
-              onClick={() => dispatch({ type: 'showEvidence', productId: selectedItem.product.id })}
+              onClick={() =>
+                dispatch({
+                  type: 'push',
+                  route: { name: 'evidence', triggerId, productId: selectedItem.product.id },
+                })
+              }
             >
               근거 보기
+              <Glyph name="chevron" size={14} />
             </button>
           </div>
         </div>
       )}
 
-      <div className="box">
-        <div className="inst">이 통장이 유지하고 있는 혜택</div>
-        <div className="pname">
-          연 {formatWon(d.total.value)} <SourceTag source={d.total.source} />
-        </div>
-        <button type="button" className="meta link" onClick={() => dispatch({ type: 'navigate', screen: 4 })}>
-          조건 {graph.edges.length}건 · 원문 보기
-        </button>
+      <div className="card">
+        <h3 className="cardtitle">
+          이 상품이 유지하고 있는 혜택
+          <SourceTag source={d.total.source} />
+        </h3>
+        <Amount value={d.total} short size="lg" prefix="연" />
+        <p className="note">조건 {graph.edges.length}건 · 회복 불가 {d.unrecoverable.length}건</p>
       </div>
-
-      <button type="button" className="cta" onClick={() => dispatch({ type: 'navigate', screen: 2 })}>
-        {d.trigger.label}
-      </button>
-    </PhoneFrame>
+    </AppShell>
   );
 }

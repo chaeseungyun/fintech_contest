@@ -1,6 +1,7 @@
-// 이자·혜택 손실 계산. 전부 연 단위. 순수 함수.
+// 이자·혜택 손실과 변경으로 생기는 절감 계산. 전부 연 단위. 순수 함수.
 
-import type { Effect, MappedCondition, Product, Tagged } from './types';
+import { formatWonCompact } from './format';
+import type { Effect, MappedCondition, Product, Saving, Tagged } from './types';
 import { tag } from './types';
 
 export interface LossBreakdown {
@@ -52,14 +53,6 @@ export function formatRateDelta(value: number): string {
   return `${sign}${pct}%p`;
 }
 
-export function formatWonShort(n: number): string {
-  if (n >= 1e8) return `${trim(n / 1e8)}억`;
-  if (n >= 1e4) return `${trim(n / 1e4).toLocaleString('ko-KR')}만원`;
-  return `${n.toLocaleString('ko-KR')}원`;
-}
-
-const trim = (x: number) => Math.round(x * 100) / 100;
-
 export function basisLabel(cond: MappedCondition, holder: Product): string {
   const { effect } = cond.binds;
   if (effect.kind === 'rate_delta') {
@@ -68,9 +61,23 @@ export function basisLabel(cond: MappedCondition, holder: Product): string {
     const head = `우대금리 ${pct} 소멸`;
     if (!principal) return head;
     const noun = holder.type === 'loan' ? '잔액' : '원금';
-    return `${head} · ${noun} ${formatWonShort(principal.value)}`;
+    return `${head} · ${noun} ${formatWonCompact(principal.value)}`;
   }
   return `월 ${effect.value.toLocaleString('ko-KR')}원 할인 중단`;
+}
+
+/** 혜택 관점 문구. 같은 조건을 "지금 받고 있는 것"으로 읽을 때 쓴다. */
+export function benefitLabel(cond: MappedCondition, holder: Product): string {
+  const { effect } = cond.binds;
+  if (effect.kind === 'rate_delta') {
+    const principal = principalOf(holder);
+    const pct = formatRateDelta(effect.value).replace(/^[−+]/, '');
+    const head = `우대금리 ${pct} 적용 중`;
+    if (!principal) return head;
+    const noun = holder.type === 'loan' ? '잔액' : '원금';
+    return `${head} · ${noun} ${formatWonCompact(principal.value)}`;
+  }
+  return `월 ${effect.value.toLocaleString('ko-KR')}원 할인 중`;
 }
 
 export function lossBreakdown(cond: MappedCondition, holder: Product): LossBreakdown {
@@ -87,4 +94,53 @@ export function lossBreakdown(cond: MappedCondition, holder: Product): LossBreak
 
 export function sumAnnual(losses: number[]): Tagged<number> {
   return tag(losses.reduce((a, b) => a + b, 0), 'calc');
+}
+
+// ── 절감 ──────────────────────────────────────────────────────────────
+// 변경을 실행하면 안 내게 되는 비용. 금액은 대상 상품의 facts 에서 읽는다.
+
+export interface SavingItem {
+  kind: Saving['kind'];
+  label: string;
+  note: string;
+  /** 연 단위 절감액 (양수) */
+  annualAmount: Tagged<number>;
+  /** "연 1회 30,000원", "월 68,000원 × 12" */
+  basisLabel: string;
+}
+
+/** 절감 한 건의 연 단위 금액. facts 에 근거가 없으면 null. */
+export function savingAmountOf(saving: Saving, product: Product): number | null {
+  switch (saving.kind) {
+    case 'annual_fee':
+      return product.facts.annualFee ?? null;
+    case 'monthly_premium':
+      return product.facts.monthlyPremium === undefined ? null : product.facts.monthlyPremium * 12;
+  }
+}
+
+function savingBasis(saving: Saving, product: Product): string {
+  switch (saving.kind) {
+    case 'annual_fee':
+      return `연 1회 ${(product.facts.annualFee ?? 0).toLocaleString('ko-KR')}원`;
+    case 'monthly_premium':
+      return `월 ${(product.facts.monthlyPremium ?? 0).toLocaleString('ko-KR')}원 × 12개월`;
+  }
+}
+
+/** 트리거의 savings 목록 → 화면이 그대로 그리는 배열. 근거 없는 항목은 빠진다. */
+export function savingItems(savings: Saving[], product: Product): SavingItem[] {
+  const items: SavingItem[] = [];
+  for (const s of savings) {
+    const amount = savingAmountOf(s, product);
+    if (amount === null) continue;
+    items.push({
+      kind: s.kind,
+      label: s.label,
+      note: s.note,
+      annualAmount: tag(amount, 'calc'),
+      basisLabel: savingBasis(s, product),
+    });
+  }
+  return items;
 }

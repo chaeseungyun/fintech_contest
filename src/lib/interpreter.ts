@@ -3,7 +3,7 @@
 
 import { addOffset, compareISO, endOfMonth, maxISO, nextDayOfMonth, startOfNextMonth } from './dates';
 import type { ISODate, MappedCondition, Op, Product, Scenario, Tagged } from './types';
-import { isMapped, tag } from './types';
+import { defaultTrigger, isMapped, tag } from './types';
 
 export interface Judgment {
   conditionId: string;
@@ -101,16 +101,27 @@ const METRIC_NOUN: Record<string, string> = {
   salary_transfer: '급여이체',
   card_spend: '카드 이용금액',
   autopay_count: '자동이체 건수',
+  card_holding: '제휴카드 보유',
+  card_autopay: '카드 자동납부',
+  loan_holding: '대출 보유',
+  deposit_balance: '예적금 평균잔액',
 };
 
 export function metricNoun(kind: string): string {
   return METRIC_NOUN[kind] ?? kind;
 }
 
+/** 건수로 세는 실적인가. 아니면 원 단위 금액이다. */
+const COUNT_METRICS = new Set(['autopay_count', 'card_holding', 'card_autopay', 'loan_holding']);
+
+export function metricUnit(kind: string): string {
+  return COUNT_METRICS.has(kind) ? '건' : '원';
+}
+
 function inactiveReason(cond: MappedCondition): string | null {
   if (isMetricMet(cond)) return null;
   const { threshold, currentValue, kind } = cond.metric;
-  const unit = kind === 'autopay_count' ? '건' : '원';
+  const unit = metricUnit(kind);
   return `현재 ${metricNoun(kind)} ${fmt(currentValue!)}${unit} < 기준 ${fmt(threshold!)}${unit} · 이미 미적용`;
 }
 
@@ -152,12 +163,21 @@ export function evaluateCondition(
   };
 }
 
-export function evaluateAll(scenario: Scenario): Judgment[] {
+/** targetId 를 가리키는 MAPPED 조건 전부를 평가한다. 생략하면 기본 트리거의 대상 상품. */
+export function evaluateAll(scenario: Scenario, targetId?: string): Judgment[] {
   const today = scenario.meta.today;
+  const target = targetId ?? defaultTrigger(scenario).productId;
   return scenario.conditions
     .filter(isMapped)
-    .filter((c) => c.binds.target === scenario.trigger.productId)
+    .filter((c) => c.binds.target === target)
     .map((c) => evaluateCondition(c, today, scenario.products));
+}
+
+/** 회복 불가 조건들의 회복 시점 중 가장 늦은 날. 없으면 null */
+export function latestRecoverAt(judgments: Judgment[]): ISODate | null {
+  return maxISO(
+    judgments.filter((j) => !j.recoverable && j.recoverAt).map((j) => (j.recoverAt as Tagged<ISODate>).value),
+  );
 }
 
 /**

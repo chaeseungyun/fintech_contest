@@ -1,81 +1,286 @@
 {
   "meta": {
-    "scenarioId": "salary-account-switch",
+    "scenarioId": "switchpoint-demo",
     "today": "2026-09-08",
     "timezone": "Asia/Seoul",
-    "note": "약관 원문은 시연용 재구성. 실제 상품설명서 문구 확인 후 교체할 것."
+    "note": "약관 원문은 시연용 재구성. 금융사·상품명은 가상 브랜드다. 실제 상품설명서 문구 확인 후 교체할 것."
   },
 
-  "trigger": {
-    "productId": "acct_hana_salary",
-    "action": "change_bank",
-    "label": "급여통장을 다른 은행으로 변경"
+  "brand": {
+    "group": "누리금융그룹",
+    "short": "누리",
+    "service": "SwitchPoint AI",
+    "serviceTagline": "하나만 바꿔도 내 금융은 어떻게 달라질까요?"
   },
+
+  "home": {
+    "userName": "최연수",
+    "greeting": "좋은 하루 되세요.",
+    "bannerTitle": "변경 전, 연결된 영향을 먼저 확인하세요",
+    "bannerBody": "하나의 변경이 여러 금융상품에 어떤 영향을 주는지 분석해드립니다.",
+    "spend": [
+      { "month": "3월", "amount": 620000 },
+      { "month": "4월", "amount": 700000 },
+      { "month": "5월", "amount": 780000 },
+      { "month": "6월", "amount": 900000 },
+      { "month": "7월", "amount": 1050000 },
+      { "month": "8월", "amount": 1410000 },
+      { "month": "9월", "amount": 1240000 }
+    ],
+    "quickMenu": [
+      { "key": "account", "label": "계좌", "tab": "assets" },
+      { "key": "card", "label": "카드", "tab": "assets" },
+      { "key": "loan", "label": "대출", "tab": "assets" },
+      { "key": "invest", "label": "투자", "tab": "assets" },
+      { "key": "insurance", "label": "보험", "tab": "assets" },
+      { "key": "benefit", "label": "혜택", "tab": "benefits" },
+      { "key": "ai", "label": "SwitchPoint AI" },
+      { "key": "grid", "label": "전체메뉴", "tab": "more" }
+    ]
+  },
+
+  "defaultTriggerId": "card_cancel",
+
+  "triggers": [
+    {
+      "id": "card_cancel",
+      "productId": "card_nuri_tok",
+      "action": "cancel_card",
+      "label": "카드 해지/변경",
+      "sublabel": "연회비, 혜택, 연결된 우대조건",
+      "icon": "card",
+      "nodeLabel": "카드 해지/변경",
+      "verb": "해지",
+      "savings": [{ "kind": "annual_fee", "label": "연회비", "note": "카드 해지 시" }]
+    },
+    {
+      "id": "loan_change",
+      "productId": "loan_nuri_mortgage",
+      "action": "refinance_loan",
+      "label": "대출 변경",
+      "sublabel": "금리, 한도, 우대금리 영향",
+      "icon": "loan",
+      "nodeLabel": "대출 변경",
+      "verb": "변경",
+      "savings": []
+    },
+    {
+      "id": "deposit_cancel",
+      "productId": "dep_nuri_term",
+      "action": "cancel_deposit",
+      "label": "예·적금 해지/변경",
+      "sublabel": "금리, 우대조건, 자동이체 영향",
+      "icon": "deposit",
+      "nodeLabel": "예·적금 해지",
+      "verb": "해지",
+      "caveat": "중도해지에 따른 약정이자 감소는 이 계산에 넣지 않았습니다.",
+      "savings": []
+    },
+    {
+      "id": "insurance_cancel",
+      "productId": "ins_nuri_care",
+      "action": "cancel_insurance",
+      "label": "보험 해지/변경",
+      "sublabel": "보장, 보험료, 제휴 혜택 영향",
+      "icon": "insurance",
+      "nodeLabel": "보험 해지",
+      "verb": "해지",
+      "caveat": "해지로 사라지는 보장은 금액으로 계산하지 않았습니다.",
+      "savings": [{ "kind": "monthly_premium", "label": "보험료", "note": "보험 해지 시" }]
+    },
+    {
+      "id": "salary_switch",
+      "productId": "acct_nuri_salary",
+      "action": "change_bank",
+      "label": "급여통장 변경",
+      "sublabel": "우대금리, 수수료, 연결된 실적 조건",
+      "icon": "account",
+      "nodeLabel": "급여통장 변경",
+      "verb": "변경",
+      "savings": []
+    }
+  ],
 
   "products": [
     {
-      "id": "acct_hana_salary",
-      "institution": "하나은행",
-      "name": "급여통장",
+      "id": "acct_nuri_salary",
+      "institution": "누리은행",
+      "name": "주거래 급여통장",
       "shortName": "급여통장",
       "type": "deposit_account",
-      "facts": {}
+      "facts": { "balance": 5400000 }
     },
     {
-      "id": "loan_hana_mortgage",
-      "institution": "하나은행",
-      "name": "주택담보대출",
-      "shortName": "주담대",
-      "type": "loan",
-      "facts": {
-        "balance": 150000000,
-        "remainingMonths": 96,
-        "repaymentType": "equal_payment",
-        "baseRate": 0.038,
-        "appliedRate": 0.035
-      }
+      "id": "acct_nuri_free",
+      "institution": "누리은행",
+      "name": "입출금 자유예금",
+      "shortName": "입출금",
+      "type": "deposit_account",
+      "facts": { "balance": 2000000 }
     },
     {
-      "id": "card_hana_1q",
-      "institution": "하나카드",
-      "name": "하나원큐 신용카드",
-      "shortName": "신용카드",
-      "type": "credit_card",
-      "facts": {
-        "monthlySpendCurrent": 420000,
-        "annualFee": 15000
-      }
+      "id": "sav_nuri_housing",
+      "institution": "누리은행",
+      "name": "주택청약 적금",
+      "shortName": "청약적금",
+      "type": "savings",
+      "facts": { "balance": 13000000 }
     },
     {
-      "id": "autopay_hana_utility",
-      "institution": "하나은행",
-      "name": "생활요금 자동이체",
-      "shortName": "자동이체",
-      "type": "autopay",
-      "facts": {
-        "activeCount": 4
-      }
-    },
-    {
-      "id": "dep_hana_term",
-      "institution": "하나은행",
-      "name": "하나 정기예금",
+      "id": "dep_nuri_term",
+      "institution": "누리은행",
+      "name": "누리 정기예금",
       "shortName": "정기예금",
       "type": "term_deposit",
       "facts": {
         "principal": 20000000,
         "openedAt": "2026-03-20",
         "maturity": "2027-03-20",
-        "baseRate": 0.0305,
-        "appliedRate": 0.033
+        "baseRate": 0.029,
+        "appliedRate": 0.034
       }
+    },
+    {
+      "id": "inv_nuri_fund",
+      "institution": "누리증권",
+      "name": "적립식 펀드",
+      "shortName": "펀드",
+      "type": "investment",
+      "facts": { "balance": 85000000 }
+    },
+    {
+      "id": "loan_nuri_mortgage",
+      "institution": "누리은행",
+      "name": "주택담보대출",
+      "shortName": "주담대",
+      "type": "loan",
+      "facts": {
+        "balance": 60000000,
+        "remainingMonths": 96,
+        "repaymentType": "equal_payment",
+        "baseRate": 0.042,
+        "appliedRate": 0.036
+      }
+    },
+    {
+      "id": "card_nuri_tok",
+      "institution": "누리카드",
+      "name": "톡톡카드",
+      "shortName": "톡톡카드",
+      "type": "credit_card",
+      "facts": {
+        "monthlySpendCurrent": 620000,
+        "annualFee": 30000,
+        "last4": "1234"
+      }
+    },
+    {
+      "id": "ins_nuri_care",
+      "institution": "누리생명",
+      "name": "건강보험",
+      "shortName": "건강보험",
+      "type": "insurance",
+      "facts": {
+        "monthlyPremium": 68000,
+        "coverage": "입원·수술 주계약 3,000만원"
+      }
+    },
+    {
+      "id": "autopay_nuri_utility",
+      "institution": "누리은행",
+      "name": "생활요금 자동이체",
+      "shortName": "자동이체",
+      "type": "autopay",
+      "facts": { "activeCount": 4 }
     }
   ],
 
   "conditions": [
     {
+      "id": "k1",
+      "sourceDoc": "누리은행 주택담보대출 상품설명서 · 우대금리",
+      "sourceText": "당행 신용카드 결제실적이 월 30만원 이상인 경우 0.2%p를 추가 감면하며, 실적은 매월 15일 재산정한다.",
+      "spans": [
+        { "field": "metric", "start": 0, "end": 23 },
+        { "field": "effect", "start": 28, "end": 33 },
+        { "field": "expr.from", "start": 48, "end": 54 }
+      ],
+      "status": "MAPPED",
+      "expr": {
+        "op": "RECUR",
+        "params": { "every": "1M", "from": { "anchor": "judgment_day", "dayOfMonth": 15 } }
+      },
+      "metric": {
+        "kind": "card_spend",
+        "threshold": 300000,
+        "period": "1M",
+        "currentValue": 620000,
+        "source": "mydata_sample"
+      },
+      "binds": {
+        "holder": "loan_nuri_mortgage",
+        "target": "card_nuri_tok",
+        "effect": { "kind": "rate_delta", "value": -0.002 }
+      },
+      "exclude": ["상품권 구매", "제세공과금"],
+      "confidence": 0.88
+    },
+    {
+      "id": "k2",
+      "sourceDoc": "누리 정기예금 상품설명서 · 우대이율",
+      "sourceText": "가입 시점에 당행 제휴 신용카드를 보유한 고객에게 0.25%p를 우대하며, 우대이율은 가입일에 확정되어 만기까지 변경되지 않는다.",
+      "spans": [
+        { "field": "metric", "start": 0, "end": 22 },
+        { "field": "effect", "start": 28, "end": 34 },
+        { "field": "expr", "start": 48, "end": 62 }
+      ],
+      "status": "MAPPED",
+      "expr": {
+        "op": "PERMANENT",
+        "params": { "fixedAt": { "anchor": "account_open" }, "until": { "anchor": "maturity" } }
+      },
+      "metric": { "kind": "card_holding", "threshold": null, "source": "doc" },
+      "binds": {
+        "holder": "dep_nuri_term",
+        "target": "card_nuri_tok",
+        "effect": { "kind": "rate_delta", "value": 0.0025 }
+      },
+      "exclude": [],
+      "confidence": 0.91
+    },
+    {
+      "id": "k3",
+      "sourceDoc": "누리생명 건강보험 제휴 할인 안내",
+      "sourceText": "보험료를 당행 제휴 신용카드로 자동납부하는 경우 월 2천원을 할인하며, 할인 적용 여부는 매월 말일 확정한다.",
+      "spans": [
+        { "field": "metric", "start": 0, "end": 23 },
+        { "field": "effect", "start": 27, "end": 32 },
+        { "field": "expr.settleOn", "start": 50, "end": 55 }
+      ],
+      "status": "MAPPED",
+      "expr": {
+        "op": "ROLLING",
+        "params": { "window": "1M", "metric": "card_autopay", "settleOn": { "anchor": "month_end" } }
+      },
+      "metric": {
+        "kind": "card_autopay",
+        "threshold": 1,
+        "period": "1M",
+        "currentValue": 1,
+        "source": "mydata_sample"
+      },
+      "binds": {
+        "holder": "ins_nuri_care",
+        "target": "card_nuri_tok",
+        "effect": { "kind": "monthly_benefit", "value": 2000 }
+      },
+      "exclude": [],
+      "confidence": 0.84
+    },
+
+    {
       "id": "c1",
-      "sourceDoc": "하나은행 주택담보대출 상품설명서 · 우대금리",
+      "sourceDoc": "누리은행 주택담보대출 상품설명서 · 우대금리",
       "sourceText": "급여이체 실적이 월 50만원 이상인 경우 0.3%p를 감면하며, 실적은 매월 15일 재산정한다.",
       "spans": [
         { "field": "metric", "start": 0, "end": 18 },
@@ -85,10 +290,7 @@
       "status": "MAPPED",
       "expr": {
         "op": "RECUR",
-        "params": {
-          "every": "1M",
-          "from": { "anchor": "judgment_day", "dayOfMonth": 15 }
-        }
+        "params": { "every": "1M", "from": { "anchor": "judgment_day", "dayOfMonth": 15 } }
       },
       "metric": {
         "kind": "salary_transfer",
@@ -97,8 +299,8 @@
         "source": "user_confirmed"
       },
       "binds": {
-        "holder": "loan_hana_mortgage",
-        "target": "acct_hana_salary",
+        "holder": "loan_nuri_mortgage",
+        "target": "acct_nuri_salary",
         "effect": { "kind": "rate_delta", "value": -0.003 }
       },
       "exclude": [],
@@ -106,7 +308,7 @@
     },
     {
       "id": "c2",
-      "sourceDoc": "하나원큐 신용카드 상품안내 · 급여이체 우대",
+      "sourceDoc": "누리카드 톡톡카드 상품안내 · 급여이체 우대",
       "sourceText": "당행 급여이체 실적 보유 고객이 직전 1개월 카드 이용금액 30만원 이상인 경우 월 최대 2만원을 할인하며, 실적은 전월 기준으로 매월 말일 확정한다.",
       "spans": [
         { "field": "metric", "start": 18, "end": 40 },
@@ -127,12 +329,12 @@
         "kind": "card_spend",
         "threshold": 300000,
         "period": "1M",
-        "currentValue": 420000,
+        "currentValue": 620000,
         "source": "mydata_sample"
       },
       "binds": {
-        "holder": "card_hana_1q",
-        "target": "acct_hana_salary",
+        "holder": "card_nuri_tok",
+        "target": "acct_nuri_salary",
         "effect": { "kind": "monthly_benefit", "value": 20000 }
       },
       "exclude": ["상품권 구매", "제세공과금"],
@@ -140,7 +342,7 @@
     },
     {
       "id": "c3",
-      "sourceDoc": "하나은행 생활요금 자동이체 우대 안내",
+      "sourceDoc": "누리은행 생활요금 자동이체 우대 안내",
       "sourceText": "급여이체 실적을 보유하고 생활요금 자동이체가 3건 이상 등록된 경우 월 5천원을 할인하며, 등록 건수는 매월 5일 확인한다.",
       "spans": [
         { "field": "metric", "start": 14, "end": 30 },
@@ -163,8 +365,8 @@
         "source": "mydata_sample"
       },
       "binds": {
-        "holder": "autopay_hana_utility",
-        "target": "acct_hana_salary",
+        "holder": "autopay_nuri_utility",
+        "target": "acct_nuri_salary",
         "effect": { "kind": "monthly_benefit", "value": 5000 }
       },
       "exclude": [],
@@ -172,64 +374,248 @@
     },
     {
       "id": "c4",
-      "sourceDoc": "하나 정기예금 상품설명서 · 우대이율",
-      "sourceText": "가입 시점에 당행 급여이체 실적을 보유한 고객에게 0.25%p를 우대하며, 우대이율은 가입일에 확정되어 만기까지 변경되지 않는다.",
+      "sourceDoc": "누리 정기예금 상품설명서 · 우대이율",
+      "sourceText": "가입 시점에 당행 급여이체 실적을 보유한 고객에게 0.15%p를 우대하며, 우대이율은 가입일에 확정되어 만기까지 변경되지 않는다.",
       "spans": [
-        { "field": "metric", "start": 0, "end": 21 },
+        { "field": "metric", "start": 0, "end": 22 },
         { "field": "effect", "start": 28, "end": 34 },
-        { "field": "expr", "start": 48, "end": 71 }
+        { "field": "expr", "start": 48, "end": 62 }
       ],
       "status": "MAPPED",
       "expr": {
         "op": "PERMANENT",
-        "params": {
-          "fixedAt": { "anchor": "account_open" },
-          "until": { "anchor": "maturity" }
-        }
+        "params": { "fixedAt": { "anchor": "account_open" }, "until": { "anchor": "maturity" } }
       },
-      "metric": {
-        "kind": "salary_transfer",
-        "threshold": null,
-        "source": "doc"
-      },
+      "metric": { "kind": "salary_transfer", "threshold": null, "source": "doc" },
       "binds": {
-        "holder": "dep_hana_term",
-        "target": "acct_hana_salary",
-        "effect": { "kind": "rate_delta", "value": 0.0025 }
+        "holder": "dep_nuri_term",
+        "target": "acct_nuri_salary",
+        "effect": { "kind": "rate_delta", "value": 0.0015 }
       },
       "exclude": [],
-      "confidence": 0.91
+      "confidence": 0.9
+    },
+
+    {
+      "id": "l1",
+      "sourceDoc": "누리카드 톡톡카드 상품안내 · 연회비 면제",
+      "sourceText": "당행 주택담보대출을 보유한 고객은 연회비를 면제하며, 보유 여부는 매월 말일 확인한다.",
+      "spans": [
+        { "field": "metric", "start": 0, "end": 18 },
+        { "field": "effect", "start": 19, "end": 26 },
+        { "field": "expr.settleOn", "start": 37, "end": 42 }
+      ],
+      "status": "MAPPED",
+      "expr": {
+        "op": "ROLLING",
+        "params": { "window": "1M", "metric": "loan_holding", "settleOn": { "anchor": "month_end" } }
+      },
+      "metric": {
+        "kind": "loan_holding",
+        "threshold": 1,
+        "period": "1M",
+        "currentValue": 1,
+        "source": "mydata_sample"
+      },
+      "binds": {
+        "holder": "card_nuri_tok",
+        "target": "loan_nuri_mortgage",
+        "effect": { "kind": "monthly_benefit", "value": 2500 }
+      },
+      "exclude": [],
+      "confidence": 0.86
     },
     {
-      "id": "c5",
-      "sourceDoc": "하나은행 주택담보대출 상품설명서 · 우대금리",
+      "id": "l2",
+      "sourceDoc": "누리 정기예금 상품설명서 · 우대이율",
+      "sourceText": "당행 여신 거래실적을 보유한 고객에게 0.1%p를 우대하며, 실적은 매월 20일 재산정한다.",
+      "spans": [
+        { "field": "metric", "start": 0, "end": 20 },
+        { "field": "effect", "start": 21, "end": 26 },
+        { "field": "expr.from", "start": 38, "end": 44 }
+      ],
+      "status": "MAPPED",
+      "expr": {
+        "op": "RECUR",
+        "params": { "every": "1M", "from": { "anchor": "judgment_day", "dayOfMonth": 20 } }
+      },
+      "metric": {
+        "kind": "loan_holding",
+        "threshold": 1,
+        "period": "1M",
+        "currentValue": 1,
+        "source": "mydata_sample"
+      },
+      "binds": {
+        "holder": "dep_nuri_term",
+        "target": "loan_nuri_mortgage",
+        "effect": { "kind": "rate_delta", "value": 0.001 }
+      },
+      "exclude": [],
+      "confidence": 0.82
+    },
+
+    {
+      "id": "p1",
+      "sourceDoc": "누리은행 주택담보대출 상품설명서 · 우대금리",
+      "sourceText": "당행 예적금 평균잔액이 1천만원 이상인 경우 0.1%p를 추가 감면하며, 실적은 매월 15일 재산정한다.",
+      "spans": [
+        { "field": "metric", "start": 0, "end": 20 },
+        { "field": "effect", "start": 25, "end": 30 },
+        { "field": "expr.from", "start": 45, "end": 51 }
+      ],
+      "status": "MAPPED",
+      "expr": {
+        "op": "RECUR",
+        "params": { "every": "1M", "from": { "anchor": "judgment_day", "dayOfMonth": 15 } }
+      },
+      "metric": {
+        "kind": "deposit_balance",
+        "threshold": 10000000,
+        "period": "1M",
+        "currentValue": 20000000,
+        "source": "mydata_sample"
+      },
+      "binds": {
+        "holder": "loan_nuri_mortgage",
+        "target": "dep_nuri_term",
+        "effect": { "kind": "rate_delta", "value": -0.001 }
+      },
+      "exclude": [],
+      "confidence": 0.85
+    },
+
+    {
+      "id": "n1",
+      "sourceDoc": "누리카드 톡톡카드 상품안내 · 보험료 자동납부 할인",
+      "sourceText": "당사 카드로 보험료를 자동납부하는 경우 월 3천원을 청구할인하며, 실적은 전월 기준으로 매월 말일 확정한다.",
+      "spans": [
+        { "field": "metric", "start": 0, "end": 21 },
+        { "field": "effect", "start": 22, "end": 28 },
+        { "field": "expr.settleOn", "start": 49, "end": 54 }
+      ],
+      "status": "MAPPED",
+      "expr": {
+        "op": "ROLLING",
+        "params": { "window": "1M", "metric": "card_autopay", "settleOn": { "anchor": "month_end" } }
+      },
+      "metric": {
+        "kind": "card_autopay",
+        "threshold": 1,
+        "period": "1M",
+        "currentValue": 1,
+        "source": "mydata_sample"
+      },
+      "binds": {
+        "holder": "card_nuri_tok",
+        "target": "ins_nuri_care",
+        "effect": { "kind": "monthly_benefit", "value": 3000 }
+      },
+      "exclude": [],
+      "confidence": 0.8
+    },
+
+    {
+      "id": "u1",
+      "sourceDoc": "누리은행 주택담보대출 상품설명서 · 우대금리",
       "sourceText": "다만 신규 고객 또는 재약정 고객의 경우 최초 3개월간은 별도 기준을 적용할 수 있으며, 관련 세부사항은 영업점에 문의하시기 바랍니다.",
       "status": "UNSUPPORTED",
       "unsupportedReason": "조건복합",
       "expr": null,
       "binds": null,
       "confidence": 0.31
+    },
+    {
+      "id": "u2",
+      "sourceDoc": "누리카드 톡톡카드 상품안내 · 급여이체 우대",
+      "sourceText": "할인 한도는 통합 월 한도 내에서 적용되며, 카드사 정책에 따라 사전 고지 후 변경될 수 있습니다.",
+      "status": "UNSUPPORTED",
+      "unsupportedReason": "한도중첩",
+      "expr": null,
+      "binds": null,
+      "confidence": 0.27
     }
   ],
 
   "expected": {
     "note": "코드가 계산해야 할 값. 하드코딩 금지 — 검증용 기대치로만 사용한다.",
-    "annualLossByProduct": {
-      "loan_hana_mortgage": 450000,
-      "card_hana_1q": 240000,
-      "autopay_hana_utility": 60000,
-      "dep_hana_term": 50000
-    },
-    "annualLossTotal": 800000,
-    "nextJudgmentDates": {
-      "c1": "2026-09-15",
-      "c2": "2026-09-30",
-      "c3": "2026-10-05",
-      "c4": null
-    },
-    "safeAfter": "2026-09-30",
-    "unrecoverable": [
-      { "conditionId": "c4", "until": "2027-03-20" }
-    ]
+    "totalAssets": 125400000,
+    "horizonMonths": [0, 6, 12, 24],
+    "triggers": {
+      "card_cancel": {
+        "annualLossByProduct": {
+          "loan_nuri_mortgage": 120000,
+          "dep_nuri_term": 50000,
+          "ins_nuri_care": 24000
+        },
+        "annualLossTotal": 194000,
+        "savingsTotal": 30000,
+        "netAnnual": -164000,
+        "nextJudgmentDates": { "k1": "2026-09-15", "k2": null, "k3": "2026-09-30" },
+        "safeAfter": "2026-09-30",
+        "unrecoverable": [{ "conditionId": "k2", "until": "2027-03-20" }],
+        "horizon": [-164000, 67000, 164000, 328000],
+        "recommendedMonths": 12,
+        "verdict": "keep"
+      },
+      "salary_switch": {
+        "annualLossByProduct": {
+          "loan_nuri_mortgage": 180000,
+          "card_nuri_tok": 240000,
+          "autopay_nuri_utility": 60000,
+          "dep_nuri_term": 30000
+        },
+        "annualLossTotal": 510000,
+        "savingsTotal": 0,
+        "netAnnual": -510000,
+        "nextJudgmentDates": {
+          "c1": "2026-09-15",
+          "c2": "2026-09-30",
+          "c3": "2026-10-05",
+          "c4": null
+        },
+        "safeAfter": "2026-09-30",
+        "unrecoverable": [{ "conditionId": "c4", "until": "2027-03-20" }],
+        "horizon": [-510000, 255000, 510000, 1020000],
+        "recommendedMonths": 12,
+        "verdict": "keep"
+      },
+      "loan_change": {
+        "annualLossByProduct": { "card_nuri_tok": 30000, "dep_nuri_term": 20000 },
+        "annualLossTotal": 50000,
+        "savingsTotal": 0,
+        "netAnnual": -50000,
+        "nextJudgmentDates": { "l1": "2026-09-30", "l2": "2026-09-20" },
+        "safeAfter": "2026-09-30",
+        "unrecoverable": [],
+        "horizon": [-50000, 25000, 50000, 100000],
+        "recommendedMonths": 6,
+        "verdict": "keep"
+      },
+      "deposit_cancel": {
+        "annualLossByProduct": { "loan_nuri_mortgage": 60000 },
+        "annualLossTotal": 60000,
+        "savingsTotal": 0,
+        "netAnnual": -60000,
+        "nextJudgmentDates": { "p1": "2026-09-15" },
+        "safeAfter": "2026-09-15",
+        "unrecoverable": [],
+        "horizon": [-60000, 30000, 60000, 120000],
+        "recommendedMonths": 6,
+        "verdict": "keep"
+      },
+      "insurance_cancel": {
+        "annualLossByProduct": { "card_nuri_tok": 36000 },
+        "annualLossTotal": 36000,
+        "savingsTotal": 816000,
+        "netAnnual": 780000,
+        "nextJudgmentDates": { "n1": "2026-09-30" },
+        "safeAfter": "2026-09-30",
+        "unrecoverable": [],
+        "horizon": [780000, -798000, -780000, -1560000],
+        "recommendedMonths": 0,
+        "verdict": "switch"
+      }
+    }
   }
 }
