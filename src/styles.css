@@ -36,6 +36,34 @@
   --r-lg: 18px;
   --r-xl: 24px;
   --pad: 16px;
+
+  /* 폰 프레임 배율. 데스크톱에서만 1 이 아니다.
+     길이가 전부 같은 비율로 커지므로 줄바꿈이 바뀌지 않는다 — 가시성은 여기서 먼저 얻는다. */
+  --ui-scale: 1;
+
+  /* 글자 크기. 화면은 리터럴 px 를 쓰지 않는다.
+     본문 계단(2xs~lg)은 1px 간격. 제목·금액은 시안 비율이라 그대로 둔다. */
+  --fs-2xs: 11px;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-base: 14px;
+  --fs-md: 15px;
+  --fs-lg: 16px;
+  --fs-xl: 17px;
+  --fs-2xl: 19px;
+  --fs-3xl: 21px;
+  --fs-4xl: 22px;
+  --fs-5xl: 23px;
+  --fs-6xl: 27px;
+
+  /* SVG 안의 글자. viewBox 좌표에 묶여 있어 계단에서 제외한다 —
+     키우면 원·프레임 밖으로 나간다. 대신 --ui-scale 이 같은 비율로 키워 준다. */
+  --fs-svg-2xs: 8.5px;
+  --fs-svg-xs: 9px;
+  --fs-svg-sm: 9.5px;
+  --fs-svg-md: 10px;
+  --fs-svg-lg: 11px;
+  --fs-svg-xl: 12px;
 }
 
 * {
@@ -55,7 +83,7 @@ body {
   color: var(--ink);
   font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo',
     'Noto Sans KR', sans-serif;
-  font-size: 15px;
+  font-size: var(--fs-lg);
   line-height: 1.6;
   word-break: keep-all;
   -webkit-font-smoothing: antialiased;
@@ -106,13 +134,22 @@ ol {
   position: relative;
 }
 
+/* 데스크톱에서는 폰 양옆이 그냥 빈 여백이다. 그 여백을 배율로 바꿔 쓴다.
+   zoom 은 글자·여백·아이콘·SVG 를 같은 비율로 키우므로 줄바꿈이 바뀌지 않는다.
+   크기는 vh 가 아니라 백분율로 잡는다 — 백분율은 배율에 맞춰 알아서 환산되지만
+   vh 는 브라우저마다 다르게 풀려서 폰이 창보다 길어진다.
+   zoom 을 모르는 브라우저에서는 --ui-scale 이 무시되고 원래 400×860 으로 돌아간다. */
 @media (min-width: 520px) and (min-height: 640px) {
+  :root {
+    --ui-scale: 1.2;
+  }
   .stage {
     padding: 24px;
   }
   .phone {
+    zoom: var(--ui-scale);
     max-width: 400px;
-    height: min(860px, calc(100dvh - 48px));
+    max-height: 860px;
     border-radius: 40px;
     box-shadow: 0 30px 70px rgba(16, 24, 40, 0.28), 0 0 0 9px #11151f, 0 0 0 11px #2b3242;
   }
@@ -132,7 +169,7 @@ ol {
   justify-content: space-between;
   align-items: center;
   padding: 10px var(--pad) 2px;
-  font-size: 13px;
+  font-size: var(--fs-base);
   font-weight: 700;
   color: var(--ink);
   flex: none;
@@ -171,7 +208,7 @@ ol {
   flex: none;
 }
 .navbar h1 {
-  font-size: 17px;
+  font-size: var(--fs-xl);
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
@@ -206,7 +243,7 @@ ol {
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  font-size: 21px;
+  font-size: var(--fs-3xl);
   font-weight: 800;
   letter-spacing: -0.4px;
   color: var(--brand);
@@ -261,7 +298,7 @@ ol {
   gap: 2px;
   padding: 4px 0;
   color: var(--mute);
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 600;
 }
 .tabbar button.on {
@@ -303,7 +340,7 @@ ol {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 14.5px;
+  font-size: var(--fs-md);
   color: var(--ink);
 }
 .cardtitle .amt,
@@ -315,7 +352,7 @@ ol {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 15px;
+  font-size: var(--fs-lg);
   margin-top: 4px;
 }
 .iconbtn {
@@ -324,21 +361,21 @@ ol {
 }
 
 .lbl {
-  font-size: 13px;
+  font-size: var(--fs-base);
   color: var(--ink-2);
   display: inline-flex;
   align-items: center;
   gap: 4px;
 }
 .sub {
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   color: var(--mute);
   display: inline-flex;
   align-items: center;
   gap: 5px;
 }
 .note {
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   line-height: 1.6;
   color: var(--ink-2);
 }
@@ -346,13 +383,13 @@ ol {
   color: var(--warn);
 }
 .footnote {
-  font-size: 12px;
+  font-size: var(--fs-sm);
   line-height: 1.65;
   color: var(--mute);
   padding: 2px 2px 4px;
 }
 .tabintro {
-  font-size: 13.5px;
+  font-size: var(--fs-base);
   color: var(--ink-2);
   padding: 2px 2px 0;
 }
@@ -360,13 +397,13 @@ ol {
   padding: 26px 10px;
   text-align: center;
   color: var(--mute);
-  font-size: 13.5px;
+  font-size: var(--fs-base);
   background: var(--surface);
   border-radius: var(--r-lg);
 }
 
 .src {
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   color: var(--mute);
 }
 
@@ -398,6 +435,7 @@ ol {
   display: inline-flex;
   align-items: baseline;
   gap: 4px;
+  white-space: nowrap;
   font-variant-numeric: tabular-nums;
   font-weight: 700;
   color: var(--ink);
@@ -408,10 +446,10 @@ ol {
   font-weight: 600;
   color: var(--ink-2);
 }
-.amt.s-sm { font-size: 13px; }
-.amt.s-md { font-size: 15px; }
-.amt.s-lg { font-size: 22px; letter-spacing: -0.4px; }
-.amt.s-xl { font-size: 27px; letter-spacing: -0.8px; }
+.amt.s-sm { font-size: var(--fs-base); }
+.amt.s-md { font-size: var(--fs-lg); }
+.amt.s-lg { font-size: var(--fs-4xl); letter-spacing: -0.4px; }
+.amt.s-xl { font-size: var(--fs-6xl); letter-spacing: -0.8px; }
 .amt.up .num { color: var(--up); }
 .amt.down .num { color: var(--down); }
 .amt.flat .num { color: var(--mute); }
@@ -425,7 +463,7 @@ ol {
   width: 100%;
   min-height: 52px;
   border-radius: var(--r-md);
-  font-size: 15.5px;
+  font-size: var(--fs-lg);
   font-weight: 700;
 }
 .btn.primary {
@@ -440,12 +478,12 @@ ol {
 .btn.text {
   min-height: 44px;
   color: var(--brand);
-  font-size: 14px;
+  font-size: var(--fs-md);
 }
 .btn.danger-text {
   min-height: 40px;
   color: var(--danger);
-  font-size: 13px;
+  font-size: var(--fs-base);
   font-weight: 600;
 }
 
@@ -454,7 +492,7 @@ ol {
   align-items: center;
   gap: 2px;
   color: var(--brand);
-  font-size: 13px;
+  font-size: var(--fs-base);
   font-weight: 600;
 }
 
@@ -463,7 +501,7 @@ ol {
   display: inline-block;
   padding: 1px 7px;
   border-radius: 999px;
-  font-size: 10.5px;
+  font-size: var(--fs-2xs);
   font-weight: 700;
   line-height: 1.6;
   white-space: nowrap;
@@ -477,7 +515,7 @@ ol {
 /* ── 홈 ──────────────────────────────────────────────────── */
 
 .greeting {
-  font-size: 22px;
+  font-size: var(--fs-4xl);
   line-height: 1.38;
   letter-spacing: -0.5px;
   padding: 4px 2px 2px;
@@ -526,7 +564,7 @@ ol {
   font-weight: 700;
 }
 .qlabel {
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   color: var(--ink-2);
   text-align: center;
   line-height: 1.35;
@@ -548,11 +586,11 @@ ol {
   flex: 1;
 }
 .aibanner b {
-  font-size: 15.5px;
+  font-size: var(--fs-lg);
   color: var(--brand-ink);
 }
 .aibanner span {
-  font-size: 12.8px;
+  font-size: var(--fs-sm);
   line-height: 1.5;
   color: var(--ink-2);
 }
@@ -575,7 +613,7 @@ ol {
   gap: 12px;
 }
 .delta {
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
   font-weight: 600;
   color: var(--mute);
 }
@@ -601,13 +639,13 @@ ol {
 /* ── SwitchPoint 허브 ─────────────────────────────────────── */
 
 .hero {
-  font-size: 23px;
+  font-size: var(--fs-5xl);
   line-height: 1.38;
   letter-spacing: -0.6px;
   padding: 2px 2px 0;
 }
 .herosub {
-  font-size: 13.5px;
+  font-size: var(--fs-base);
   line-height: 1.6;
   color: var(--ink-2);
   padding: 0 2px;
@@ -644,7 +682,7 @@ ol {
   text-align: center;
 }
 .mg-centerbody b {
-  font-size: 12px;
+  font-size: var(--fs-svg-xl);
   color: var(--ink);
   line-height: 1.3;
   padding: 0 6px;
@@ -662,7 +700,7 @@ ol {
   color: var(--brand);
 }
 .mg-label {
-  font-size: 11px;
+  font-size: var(--fs-svg-lg);
   font-weight: 600;
   fill: var(--ink-2);
 }
@@ -692,10 +730,10 @@ ol {
   min-width: 0;
 }
 .triggerrow .body b {
-  font-size: 14.5px;
+  font-size: var(--fs-md);
 }
 .triggerrow .body span {
-  font-size: 12.2px;
+  font-size: var(--fs-sm);
   color: var(--mute);
 }
 .triggerrow .tail {
@@ -706,7 +744,7 @@ ol {
   flex: none;
 }
 .linkcount {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   color: var(--brand);
   background: var(--brand-soft);
@@ -726,12 +764,12 @@ ol {
   padding: 18px 4px 0;
 }
 .analyzing h2 {
-  font-size: 19px;
+  font-size: var(--fs-2xl);
   line-height: 1.45;
   letter-spacing: -0.4px;
 }
 .analyzing .target {
-  font-size: 13px;
+  font-size: var(--fs-base);
   color: var(--ink-2);
 }
 
@@ -841,14 +879,14 @@ ol {
   gap: 2px;
 }
 .steps b {
-  font-size: 13.8px;
+  font-size: var(--fs-base);
   font-weight: 600;
 }
 .steps li.wait b {
   color: var(--mute);
 }
 .steps .detail {
-  font-size: 12px;
+  font-size: var(--fs-sm);
   color: var(--src-calc);
   background: var(--src-calc-bg);
   border-radius: 6px;
@@ -870,10 +908,10 @@ ol {
   min-width: 0;
 }
 .targetcard .body b {
-  font-size: 14.5px;
+  font-size: var(--fs-md);
 }
 .targetcard .body span {
-  font-size: 12.2px;
+  font-size: var(--fs-sm);
   color: var(--mute);
 }
 .targetcard .tail {
@@ -884,7 +922,7 @@ ol {
 }
 .targetcard .tail em {
   font-style: normal;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   color: var(--mute);
 }
 
@@ -914,14 +952,15 @@ ol {
   min-width: 0;
 }
 .irow .head .body b {
-  font-size: 14.2px;
+  font-size: var(--fs-md);
 }
 .irow .head .body span {
-  font-size: 11.8px;
+  font-size: var(--fs-xs);
   line-height: 1.45;
   color: var(--mute);
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  /* 글자가 커져도 내용이 잘려 사라지지 않도록 한 줄 여유를 둔다 */
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -960,7 +999,7 @@ ol {
 }
 
 .clause {
-  font-size: 12.8px;
+  font-size: var(--fs-sm);
   line-height: 1.75;
   color: var(--ink-2);
   background: #fff;
@@ -969,7 +1008,7 @@ ol {
   padding: 10px 12px;
 }
 .clause.big {
-  font-size: 13.6px;
+  font-size: var(--fs-base);
 }
 .clause mark {
   background: var(--src-doc-bg);
@@ -979,7 +1018,7 @@ ol {
   font-weight: 600;
 }
 .excl {
-  font-size: 12px;
+  font-size: var(--fs-sm);
   color: var(--warn);
 }
 
@@ -997,11 +1036,11 @@ ol {
   border-color: #d3e0ff;
 }
 .totalcard .lbl {
-  font-size: 13px;
+  font-size: var(--fs-base);
   font-weight: 600;
 }
 .totalcard .basis {
-  font-size: 12px;
+  font-size: var(--fs-sm);
   color: var(--ink-2);
   display: inline-flex;
   align-items: center;
@@ -1035,7 +1074,7 @@ ol {
   margin-bottom: 2px;
 }
 .verdictcard h2 {
-  font-size: 21px;
+  font-size: var(--fs-3xl);
   line-height: 1.42;
   letter-spacing: -0.5px;
 }
@@ -1044,7 +1083,7 @@ ol {
   color: var(--brand);
 }
 .verdictcard p {
-  font-size: 13px;
+  font-size: var(--fs-base);
   line-height: 1.65;
   color: var(--ink-2);
 }
@@ -1057,7 +1096,7 @@ ol {
 }
 
 .chartnote {
-  font-size: 12.3px;
+  font-size: var(--fs-sm);
   color: var(--ink-2);
   line-height: 1.6;
 }
@@ -1114,7 +1153,8 @@ ol {
   left: -6px;
   right: -6px;
   text-align: center;
-  font-size: 11.5px;
+  white-space: nowrap;
+  font-size: var(--fs-xs);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--ink-2);
@@ -1130,7 +1170,7 @@ ol {
   color: var(--brand);
 }
 .hchart .badge {
-  font-size: 10px;
+  font-size: var(--fs-2xs);
   font-weight: 700;
   color: #fff;
   background: var(--brand);
@@ -1146,7 +1186,7 @@ ol {
 }
 .hchart .xaxis span {
   text-align: center;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   color: var(--mute);
 }
 .hchart .xaxis span.on {
@@ -1177,7 +1217,7 @@ ol {
   color: var(--brand);
 }
 .checklist .tx {
-  font-size: 13px;
+  font-size: var(--fs-base);
   line-height: 1.6;
   color: var(--ink-2);
 }
@@ -1196,10 +1236,10 @@ ol {
   border-color: #c8e8df;
 }
 .decided b {
-  font-size: 14.5px;
+  font-size: var(--fs-md);
 }
 .decided p {
-  font-size: 12.8px;
+  font-size: var(--fs-sm);
   line-height: 1.65;
   color: var(--ink-2);
 }
@@ -1244,13 +1284,14 @@ ol {
   position: absolute;
   top: 34px;
   transform: translateX(-50%);
-  font-size: 11px;
+  /* 절대 배치라 커지면 이웃 라벨과 겹친다 — 계단에서 빼고 --ui-scale 에만 맡긴다 */
+  font-size: var(--fs-2xs);
   color: var(--ink-2);
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
 .axisnote {
-  font-size: 13px;
+  font-size: var(--fs-base);
   line-height: 1.6;
   color: var(--ink-2);
 }
@@ -1289,10 +1330,10 @@ ol {
   min-width: 0;
 }
 .trow .body b {
-  font-size: 14px;
+  font-size: var(--fs-md);
 }
 .trow .body > span {
-  font-size: 11.8px;
+  font-size: var(--fs-xs);
   color: var(--mute);
   display: inline-flex;
   align-items: center;
@@ -1308,17 +1349,17 @@ ol {
 }
 .trow .tail em {
   font-style: normal;
-  font-size: 14px;
+  font-size: var(--fs-md);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 .trow .tail .muted {
-  font-size: 10.5px;
+  font-size: var(--fs-2xs);
   color: var(--mute);
 }
 .trow .tail .danger {
   color: var(--danger);
-  font-size: 13px;
+  font-size: var(--fs-base);
 }
 
 .warncard {
@@ -1327,7 +1368,7 @@ ol {
 .warncard .cardtitle { color: var(--danger); }
 .warncard p,
 .offcard p {
-  font-size: 12.8px;
+  font-size: var(--fs-sm);
   line-height: 1.7;
   color: var(--ink-2);
 }
@@ -1343,7 +1384,7 @@ ol {
   display: block;
 }
 .graphcard .legend {
-  font-size: 12px;
+  font-size: var(--fs-sm);
   color: var(--ink-2);
   display: flex;
   align-items: center;
@@ -1369,7 +1410,7 @@ ol {
   stroke-width: 2.2;
 }
 .elabel {
-  font-size: 9.5px;
+  font-size: var(--fs-svg-sm);
   fill: var(--mute);
   pointer-events: none;
   stroke: #fff;
@@ -1384,12 +1425,12 @@ ol {
   fill: var(--brand);
 }
 .ctitle {
-  font-size: 11px;
+  font-size: var(--fs-svg-lg);
   font-weight: 700;
   fill: #fff;
 }
 .csub {
-  font-size: 8.5px;
+  font-size: var(--fs-svg-2xs);
   fill: rgba(255, 255, 255, 0.8);
 }
 .sat circle {
@@ -1403,13 +1444,13 @@ ol {
   stroke-width: 2;
 }
 .stitle {
-  font-size: 10px;
+  font-size: var(--fs-svg-md);
   font-weight: 700;
   fill: var(--ink);
   pointer-events: none;
 }
 .seffect {
-  font-size: 9px;
+  font-size: var(--fs-svg-xs);
   fill: var(--mute);
   pointer-events: none;
 }
@@ -1424,7 +1465,7 @@ ol {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   color: var(--mute);
 }
 
@@ -1442,7 +1483,7 @@ ol {
   flex: none;
   padding: 7px 13px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: var(--fs-base);
   font-weight: 600;
   background: var(--surface);
   color: var(--ink-2);
@@ -1471,12 +1512,12 @@ ol {
   display: flex;
   flex-direction: column;
   gap: 1px;
-  font-size: 12.8px;
+  font-size: var(--fs-sm);
   color: var(--ink-2);
   flex: none;
 }
 .f .k .note {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: var(--mute);
 }
 .f .v {
@@ -1485,12 +1526,12 @@ ol {
   justify-content: flex-end;
   gap: 6px;
   flex-wrap: wrap;
-  font-size: 13.2px;
+  font-size: var(--fs-base);
   text-align: right;
 }
 .f .val { font-weight: 600; }
 .f .edit {
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   color: var(--brand);
   background: var(--brand-soft);
@@ -1503,18 +1544,18 @@ ol {
   gap: 4px;
 }
 .editbox input {
-  width: 92px;
+  width: 104px;
   padding: 5px 8px;
   border: 1.5px solid var(--brand);
   border-radius: 8px;
   font: inherit;
-  font-size: 13px;
+  font-size: var(--fs-base);
   text-align: right;
 }
-.editbox .unit { font-size: 12px; color: var(--ink-2); }
+.editbox .unit { font-size: var(--fs-sm); color: var(--ink-2); }
 .editbox .ok,
 .editbox .cancel {
-  font-size: 11.5px;
+  font-size: var(--fs-xs);
   font-weight: 700;
   padding: 3px 7px;
   border-radius: 6px;
@@ -1526,7 +1567,7 @@ ol {
   border: 1px dashed #d8cdf3;
   background: #faf8ff;
 }
-.unsup .cardtitle { color: var(--src-doc); font-size: 13.2px; }
+.unsup .cardtitle { color: var(--src-doc); font-size: var(--fs-base); }
 .unsupitem {
   display: flex;
   flex-wrap: wrap;
@@ -1536,17 +1577,17 @@ ol {
   border-top: 1px solid #eee7fb;
 }
 .unsupitem .tg {
-  font-size: 10.5px;
+  font-size: var(--fs-2xs);
   font-weight: 700;
   color: var(--src-doc);
   background: var(--src-doc-bg);
   border-radius: 999px;
   padding: 1px 7px;
 }
-.unsupitem .conf { font-size: 11px; color: var(--mute); }
+.unsupitem .conf { font-size: var(--fs-xs); color: var(--mute); }
 .unsupitem p {
   width: 100%;
-  font-size: 12.3px;
+  font-size: var(--fs-sm);
   line-height: 1.65;
   color: var(--ink-2);
 }
@@ -1575,15 +1616,15 @@ ol {
   flex: 1;
   min-width: 0;
 }
-.prow .body b { font-size: 14px; }
+.prow .body b { font-size: var(--fs-md); }
 .prow .body > span {
-  font-size: 11.8px;
+  font-size: var(--fs-xs);
   color: var(--mute);
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .prow .body .dep {
-  font-size: 11px;
+  font-size: var(--fs-xs);
   color: var(--brand);
   font-weight: 600;
 }
@@ -1635,10 +1676,10 @@ ol {
   min-width: 0;
 }
 .crow .head .body b {
-  font-size: 14px;
+  font-size: var(--fs-md);
 }
 .crow .head .body span {
-  font-size: 11.6px;
+  font-size: var(--fs-xs);
   line-height: 1.45;
   color: var(--mute);
 }
@@ -1650,7 +1691,7 @@ ol {
   color: var(--mute);
 }
 .crow .pick {
-  font-size: 10.5px;
+  font-size: var(--fs-2xs);
   font-weight: 700;
   font-style: normal;
   color: #fff;
@@ -1678,7 +1719,7 @@ ol {
 .crow .detail .muted {
   font-style: normal;
   color: var(--mute);
-  font-size: 12.5px;
+  font-size: var(--fs-sm);
 }
 .crow .detail .clause {
   margin-top: 4px;
