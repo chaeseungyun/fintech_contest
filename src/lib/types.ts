@@ -180,6 +180,55 @@ export interface Trigger {
   savings: Saving[];
 }
 
+/**
+ * 갈아탈 후보 상품. 파이프라인(약관 추출)이 채우는 형태를 그대로 둔다 — 화면은 이 구조만 읽는다.
+ * 보유 상품이 아니므로 facts 의 출처는 'holding' 이 아니라 'doc'(상품설명서) 이다.
+ */
+export interface Candidate {
+  id: string;
+  /** 어느 트리거의 대안인가 */
+  forTriggers: string[];
+  institution: string;
+  name: string;
+  shortName?: string;
+  type: ProductType;
+  /** 상품설명서에서 옮긴 사실. 연회비·보험료 등 비용은 트리거의 savings[].kind 로 읽는다 */
+  facts: ProductFacts;
+  sourceDoc: string;
+  /** 이 상품이 기존 조건의 target 역할을 대신할 수 있는가 */
+  satisfies: CandidateSatisfies;
+  /** 후보 자체의 혜택. 기존 effect 형태를 재사용한다 */
+  ownBenefits: OwnBenefit[];
+  eligibility?: Eligibility;
+}
+
+/**
+ * 후보가 유지시키는 실적 종류(metric.kind). "당행 신용카드" 같은 범위 문장을 파이프라인이
+ * 해석해 넣는다. 못 옮기면 UNSUPPORTED — 계산은 아무것도 유지되지 않는다고 보수적으로 본다.
+ */
+export interface CandidateSatisfies {
+  status: 'MAPPED' | 'UNSUPPORTED';
+  kinds: string[];
+  sourceText: string;
+  unsupportedReason?: string;
+  confidence: number;
+}
+
+export interface OwnBenefit {
+  label: string;
+  effect: Effect;
+  sourceText: string;
+  confidence: number;
+}
+
+/** 가입 자격. met 이 false 면 추천하지 않는다. UNSUPPORTED 면 "확인 필요"로 표시만 한다 */
+export interface Eligibility {
+  status: 'MAPPED' | 'UNSUPPORTED';
+  sourceText: string;
+  met?: boolean;
+  unsupportedReason?: string;
+}
+
 export interface HomeSpendPoint {
   month: string;
   amount: number;
@@ -210,6 +259,8 @@ export interface Scenario {
   defaultTriggerId: string;
   products: Product[];
   conditions: Condition[];
+  /** 갈아탈 후보. 없으면 추천 카드가 뜨지 않는다 */
+  candidates?: Candidate[];
   /** 테스트 검증용. 화면에서 읽지 않는다. */
   expected?: unknown;
 }
@@ -222,4 +273,9 @@ export function triggerById(scenario: Scenario, id: string): Trigger {
 
 export function defaultTrigger(scenario: Scenario): Trigger {
   return triggerById(scenario, scenario.defaultTriggerId);
+}
+
+/** 이 트리거의 대안으로 등록된 후보 상품. 등록 순서를 유지한다 — 정렬은 recommend 가 한다. */
+export function candidatesFor(scenario: Scenario, triggerId: string): Candidate[] {
+  return (scenario.candidates ?? []).filter((c) => c.forTriggers.includes(triggerId));
 }

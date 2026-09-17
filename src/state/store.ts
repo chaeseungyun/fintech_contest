@@ -41,6 +41,8 @@ export interface AppState {
   selectedConditionId: string | null;
   /** 화면 3에서 펼친 상세 항목 */
   expandedConditionId: string | null;
+  /** 최종 판단 화면의 갈아타기 후보 중 펼친 것 */
+  expandedCandidateId: string | null;
   /** 최종 판단 화면에서 "그래도 변경하기"를 눌렀는가 */
   decidedNow: boolean;
 }
@@ -53,6 +55,7 @@ export type Action =
   | { type: 'popTo'; name: Route['name'] }
   | { type: 'selectCondition'; conditionId: string | null }
   | { type: 'toggleExpanded'; conditionId: string }
+  | { type: 'toggleCandidate'; candidateId: string }
   | { type: 'edit'; conditionId: string; edit: ConditionEdit }
   | { type: 'removeCondition'; conditionId: string }
   | { type: 'decideNow'; value: boolean }
@@ -66,6 +69,7 @@ export function initialState(): AppState {
     stack: [],
     selectedConditionId: null,
     expandedConditionId: null,
+    expandedCandidateId: null,
     decidedNow: false,
   };
 }
@@ -90,6 +94,11 @@ export function reducer(state: AppState, action: Action): AppState {
       return {
         ...state,
         expandedConditionId: state.expandedConditionId === action.conditionId ? null : action.conditionId,
+      };
+    case 'toggleCandidate':
+      return {
+        ...state,
+        expandedCandidateId: state.expandedCandidateId === action.candidateId ? null : action.candidateId,
       };
     case 'edit':
       return {

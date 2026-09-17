@@ -1,7 +1,7 @@
 // 이자·혜택 손실과 변경으로 생기는 절감 계산. 전부 연 단위. 순수 함수.
 
 import { formatWonCompact } from './format';
-import type { Effect, MappedCondition, Product, Saving, Tagged } from './types';
+import type { Effect, MappedCondition, Product, ProductFacts, Saving, Tagged } from './types';
 import { tag } from './types';
 
 export interface LossBreakdown {
@@ -109,8 +109,11 @@ export interface SavingItem {
   basisLabel: string;
 }
 
+/** facts 만 읽는다 — 보유 상품이든 갈아탈 후보든 같은 규칙으로 비용을 낸다 */
+type HasFacts = { facts: ProductFacts };
+
 /** 절감 한 건의 연 단위 금액. facts 에 근거가 없으면 null. */
-export function savingAmountOf(saving: Saving, product: Product): number | null {
+export function savingAmountOf(saving: Saving, product: HasFacts): number | null {
   switch (saving.kind) {
     case 'annual_fee':
       return product.facts.annualFee ?? null;
@@ -119,7 +122,7 @@ export function savingAmountOf(saving: Saving, product: Product): number | null 
   }
 }
 
-function savingBasis(saving: Saving, product: Product): string {
+function savingBasis(saving: Saving, product: HasFacts): string {
   switch (saving.kind) {
     case 'annual_fee':
       return `연 1회 ${(product.facts.annualFee ?? 0).toLocaleString('ko-KR')}원`;
@@ -129,7 +132,7 @@ function savingBasis(saving: Saving, product: Product): string {
 }
 
 /** 트리거의 savings 목록 → 화면이 그대로 그리는 배열. 근거 없는 항목은 빠진다. */
-export function savingItems(savings: Saving[], product: Product): SavingItem[] {
+export function savingItems(savings: Saving[], product: HasFacts): SavingItem[] {
   const items: SavingItem[] = [];
   for (const s of savings) {
     const amount = savingAmountOf(s, product);

@@ -16,6 +16,16 @@ export interface TriggerExpectation {
   horizon: number[];
   recommendedMonths: number;
   verdict: 'keep' | 'switch';
+  recommendation: RecommendationExpectation;
+}
+
+export interface RecommendationExpectation {
+  hurdle: number;
+  /** 갈아탄 뒤 순손익 큰 순 */
+  ranked: string[];
+  netAfter: Record<string, number>;
+  preserved: Record<string, string[]>;
+  best: string | null;
 }
 
 export interface Expectation {

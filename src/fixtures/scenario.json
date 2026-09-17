@@ -575,6 +575,90 @@
     }
   ],
 
+  "candidates": [
+    {
+      "id": "card_nuri_smart",
+      "forTriggers": ["card_cancel"],
+      "institution": "누리카드",
+      "name": "스마트카드",
+      "shortName": "스마트카드",
+      "type": "credit_card",
+      "facts": { "annualFee": 15000 },
+      "sourceDoc": "누리카드 스마트카드 상품안내",
+      "satisfies": {
+        "status": "MAPPED",
+        "kinds": ["card_holding", "card_spend", "card_autopay"],
+        "sourceText": "본 카드는 누리은행 제휴 신용카드로, 누리은행 및 계열사 상품의 신용카드 실적·보유·자동납부 우대 조건에서 당행 신용카드로 인정된다.",
+        "confidence": 0.86
+      },
+      "ownBenefits": [
+        {
+          "label": "생활요금 자동납부 할인",
+          "effect": { "kind": "monthly_benefit", "value": 5000 },
+          "sourceText": "통신·공과금을 본 카드로 자동납부하는 경우 월 5천원을 청구할인한다.",
+          "confidence": 0.84
+        }
+      ],
+      "eligibility": {
+        "status": "MAPPED",
+        "met": true,
+        "sourceText": "만 19세 이상 개인 고객이 신청할 수 있다."
+      }
+    },
+    {
+      "id": "card_hanbit_premium",
+      "forTriggers": ["card_cancel"],
+      "institution": "한빛카드",
+      "name": "프리미엄 포인트카드",
+      "shortName": "한빛 프리미엄",
+      "type": "credit_card",
+      "facts": { "annualFee": 0 },
+      "sourceDoc": "한빛카드 프리미엄 포인트카드 상품안내",
+      "satisfies": {
+        "status": "MAPPED",
+        "kinds": [],
+        "sourceText": "타 금융기관 상품의 우대 조건 인정 여부는 해당 기관의 약관에 따르며, 본 카드는 누리금융그룹 제휴 카드가 아니다.",
+        "confidence": 0.9
+      },
+      "ownBenefits": [
+        {
+          "label": "온라인쇼핑 포인트 적립",
+          "effect": { "kind": "monthly_benefit", "value": 10000 },
+          "sourceText": "온라인쇼핑 이용금액의 2%를 포인트로 적립하며, 월 최대 1만 포인트까지 적립한다.",
+          "confidence": 0.78
+        }
+      ],
+      "eligibility": {
+        "status": "UNSUPPORTED",
+        "unsupportedReason": "조건복합",
+        "sourceText": "신용평가 결과 및 당사 내부 기준에 따라 발급이 제한될 수 있다."
+      }
+    },
+    {
+      "id": "ins_nuri_lite",
+      "forTriggers": ["insurance_cancel"],
+      "institution": "누리생명",
+      "name": "실속건강보험",
+      "shortName": "실속건강보험",
+      "type": "insurance",
+      "facts": { "monthlyPremium": 42000, "coverage": "입원·수술 주계약 2,000만원" },
+      "sourceDoc": "누리생명 실속건강보험 상품설명서",
+      "satisfies": {
+        "status": "UNSUPPORTED",
+        "kinds": [],
+        "sourceText": "보험료 납입 방법은 계약 체결 시 별도로 정한다.",
+        "unsupportedReason": "범위불명",
+        "confidence": 0.4
+      },
+      "ownBenefits": [],
+      "eligibility": {
+        "status": "MAPPED",
+        "met": true,
+        "sourceText": "만 20세부터 60세까지 가입할 수 있다."
+      }
+    }
+  ],
+
   "expected": {
     "note": "코드가 계산해야 할 값. 하드코딩 금지 — 검증용 기대치로만 사용한다.",
     "totalAssets": 125400000,
@@ -598,7 +682,14 @@
         "unrecoverable": [{ "conditionId": "k2", "until": "2027-03-20" }],
         "horizon": [-164000, 67000, 164000, 328000],
         "recommendedMonths": 12,
-        "verdict": "keep"
+        "verdict": "keep",
+        "recommendation": {
+          "hurdle": 164000,
+          "ranked": ["card_nuri_smart", "card_hanbit_premium"],
+          "netAfter": { "card_nuri_smart": 25000, "card_hanbit_premium": -44000 },
+          "preserved": { "card_nuri_smart": ["k1", "k3"], "card_hanbit_premium": [] },
+          "best": "card_nuri_smart"
+        }
       },
       "salary_switch": {
         "annualLossByProduct": {
@@ -620,7 +711,8 @@
         "unrecoverable": [{ "conditionId": "c4", "until": "2027-03-20" }],
         "horizon": [-510000, 255000, 510000, 1020000],
         "recommendedMonths": 12,
-        "verdict": "keep"
+        "verdict": "keep",
+        "recommendation": { "hurdle": 510000, "ranked": [], "netAfter": {}, "preserved": {}, "best": null }
       },
       "loan_change": {
         "annualLossByProduct": {
@@ -635,7 +727,8 @@
         "unrecoverable": [],
         "horizon": [-50000, 25000, 50000, 100000],
         "recommendedMonths": 6,
-        "verdict": "keep"
+        "verdict": "keep",
+        "recommendation": { "hurdle": 50000, "ranked": [], "netAfter": {}, "preserved": {}, "best": null }
       },
       "deposit_cancel": {
         "annualLossByProduct": { "loan_nuri_mortgage": 60000 },
@@ -647,7 +740,8 @@
         "unrecoverable": [],
         "horizon": [-60000, 30000, 60000, 120000],
         "recommendedMonths": 6,
-        "verdict": "keep"
+        "verdict": "keep",
+        "recommendation": { "hurdle": 60000, "ranked": [], "netAfter": {}, "preserved": {}, "best": null }
       },
       "insurance_cancel": {
         "annualLossByProduct": { "card_nuri_tok": 36000 },
@@ -659,7 +753,14 @@
         "unrecoverable": [],
         "horizon": [780000, -798000, -780000, -1560000],
         "recommendedMonths": 0,
-        "verdict": "switch"
+        "verdict": "switch",
+        "recommendation": {
+          "hurdle": 0,
+          "ranked": ["ins_nuri_lite"],
+          "netAfter": { "ins_nuri_lite": 276000 },
+          "preserved": { "ins_nuri_lite": [] },
+          "best": "ins_nuri_lite"
+        }
       }
     }
   }

@@ -2,6 +2,7 @@ import { AppShell } from '../components/AppShell';
 import { Amount } from '../components/Amount';
 import { Glyph } from '../components/Glyph';
 import { HorizonChart } from '../components/HorizonChart';
+import { RecommendCard } from '../components/RecommendCard';
 import { SourceTag } from '../components/SourceTag';
 import { formatKoMD, formatMonths, withJosa } from '../lib/format';
 import { useStore } from '../state/store';
@@ -75,6 +76,8 @@ export function Verdict({ triggerId }: { triggerId: string }) {
             : `${formatMonths(d.horizon.recommended.months)} 유지하면 ${withJosa(name, '과/와')} 연결된 우대 조건이 한 바퀴를 돕니다.`}
         </p>
       </section>
+
+      <RecommendCard />
 
       <section className="card checklist">
         <h3 className="cardtitle">

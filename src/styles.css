@@ -1603,3 +1603,89 @@ ol {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ── 갈아타기 추천 ─────────────────────────────────────────── */
+
+.candlist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.crow {
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--surface);
+}
+.crow.rec {
+  border-color: #c9d7ff;
+}
+.crow .head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 12px 13px;
+}
+.crow .head .body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.crow .head .body b {
+  font-size: 14px;
+}
+.crow .head .body span {
+  font-size: 11.6px;
+  line-height: 1.45;
+  color: var(--mute);
+}
+.crow .head .tail {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+  color: var(--mute);
+}
+.crow .pick {
+  font-size: 10.5px;
+  font-weight: 700;
+  font-style: normal;
+  color: #fff;
+  background: var(--brand);
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+.crow .caret {
+  transition: transform 0.18s ease;
+}
+.crow.open .caret {
+  transform: rotate(180deg);
+}
+.crow .detail {
+  border-top: 1px solid var(--line);
+  padding: 3px 13px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  background: var(--surface-2);
+}
+.crow .detail .f {
+  padding: 8px 0;
+}
+.crow .detail .muted {
+  font-style: normal;
+  color: var(--mute);
+  font-size: 12.5px;
+}
+.crow .detail .clause {
+  margin-top: 4px;
+}
+.crow .detail .note.danger {
+  color: var(--danger);
+}
+.recommend.none .cardtitle {
+  color: var(--ink-2);
+}

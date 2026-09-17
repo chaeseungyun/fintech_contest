@@ -7,8 +7,9 @@ import { buildGraph, incomingConditions, productById, unsupportedForDocs, type G
 import { horizonProjection, type Horizon } from './horizon';
 import { computeSafeTiming, evaluateCondition, latestRecoverAt, type Judgment, type SafeTiming } from './interpreter';
 import { lossBreakdown, savingItems, sumAnnual, type LossBreakdown, type SavingItem } from './money';
+import { recommend, type Recommendation } from './recommend';
 import type { Condition, ISODate, MappedCondition, Product, Scenario, Source, Tagged, Trigger } from './types';
-import { defaultTrigger, tag, triggerById } from './types';
+import { candidatesFor, defaultTrigger, tag, triggerById } from './types';
 
 export interface ImpactItem {
   condition: MappedCondition;
@@ -74,6 +75,8 @@ export interface Derived {
   netAnnual: Tagged<number>;
   horizon: Horizon;
   verdict: Verdict;
+  /** 손실을 넘어서는 갈아타기 후보. 후보가 없으면 results 가 빈 배열 */
+  recommendation: Recommendation;
   checklist: ChecklistItem[];
   steps: AnalysisStep[];
   timing: SafeTiming;
@@ -138,6 +141,14 @@ export function derive(scenario: Scenario, triggerId?: string): Derived {
 
   const verdict = buildVerdict({ trigger, center, items: active, horizon, savings });
 
+  const recommendation = recommend({
+    trigger,
+    center,
+    links: items,
+    netAnnual: horizon.netAnnual.value,
+    candidates: candidatesFor(scenario, trigger.id),
+  });
+
   return {
     today,
     trigger,
@@ -151,6 +162,7 @@ export function derive(scenario: Scenario, triggerId?: string): Derived {
     netAnnual: horizon.netAnnual,
     horizon,
     verdict,
+    recommendation,
     checklist: buildChecklist({
       trigger,
       center,
@@ -161,6 +173,7 @@ export function derive(scenario: Scenario, triggerId?: string): Derived {
       horizon,
       timing,
       unrecoverable,
+      recommendation,
     }),
     steps: buildSteps({ conditions, unsupported, items, total, savingsTotal }),
     timing,
@@ -234,8 +247,10 @@ function buildChecklist(ctx: {
   horizon: Horizon;
   timing: SafeTiming;
   unrecoverable: ImpactItem[];
+  recommendation: Recommendation;
 }): ChecklistItem[] {
-  const { trigger, center, items, total, savings, savingsTotal, horizon, timing, unrecoverable } = ctx;
+  const { trigger, center, items, total, savings, savingsTotal, horizon, timing, unrecoverable, recommendation } =
+    ctx;
   const name = shortName(center);
   const list: ChecklistItem[] = [];
 
@@ -287,6 +302,18 @@ function buildChecklist(ctx: {
       key: 'safe',
       text: `이번 달 판정은 ${formatKoMD(timing.safeAfter.value)}에 끝납니다. 그 이후에 실행하면 이번 달 혜택은 지킵니다.`,
       source: timing.safeAfter.source,
+    });
+  }
+
+  // 연결을 살리는 갈아타기는 순서가 핵심이다 — 새 상품을 먼저 만들고, 판정이 끝난 뒤 옮긴다
+  const best = recommendation.best;
+  if (best && best.preserved.length > 0) {
+    const newName = best.candidate.shortName ?? best.candidate.name;
+    const when = timing.alreadySafe ? '' : ` ${formatKoMD(timing.safeAfter.value)} 이후에`;
+    list.push({
+      key: 'switch-order',
+      text: `${withJosa(newName, '을/를')} 먼저 만든 뒤${when} ${withJosa(name, '을/를')} ${trigger.verb}하면 연결 ${best.preserved.length}건이 유지됩니다.`,
+      source: best.netAfter.source,
     });
   }
 
