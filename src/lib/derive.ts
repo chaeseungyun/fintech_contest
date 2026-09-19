@@ -1,12 +1,29 @@
 // 화면들이 공유하는 파생 값. 시나리오 하나 + 트리거 하나에서 전부 계산한다.
 // 화면은 이 결과만 읽는다. 값을 복사해 갖지 않는다.
 
+import { buildActionPlan, type ActionPlan, type PlanLink } from './actionplan';
+import { addonProposals, type AddonProposal } from './addon';
 import { addOffset, daysBetween, maxISO } from './dates';
 import { formatKoMD, formatKoYMD, formatMonths, formatWonShort, withJosa } from './format';
 import { buildGraph, incomingConditions, productById, unsupportedForDocs, type Graph } from './graph';
 import { horizonProjection, type Horizon } from './horizon';
-import { computeSafeTiming, evaluateCondition, latestRecoverAt, type Judgment, type SafeTiming } from './interpreter';
-import { lossBreakdown, savingItems, sumAnnual, type LossBreakdown, type SavingItem } from './money';
+import {
+  computeSafeTiming,
+  evaluateCondition,
+  latestRecoverAt,
+  requirementLabel,
+  type Judgment,
+  type SafeTiming,
+} from './interpreter';
+import {
+  earlyTermination,
+  lossBreakdown,
+  savingItems,
+  sumAnnual,
+  type EarlyTermination,
+  type LossBreakdown,
+  type SavingItem,
+} from './money';
 import { recommend, type Recommendation } from './recommend';
 import type { Condition, ISODate, MappedCondition, Product, Scenario, Source, Tagged, Trigger } from './types';
 import { candidatesFor, defaultTrigger, tag, triggerById } from './types';
@@ -77,6 +94,12 @@ export interface Derived {
   verdict: Verdict;
   /** 손실을 넘어서는 갈아타기 후보. 후보가 없으면 results 가 빈 배열 */
   recommendation: Recommendation;
+  /** 보유 상품을 그대로 두고 더하면 이득인 후보. 변경 대상과 같은 종류는 뺀다 */
+  addons: AddonProposal;
+  /** 판단 이후 실제로 밟을 순서. 계산을 새로 하지 않고 위 값들을 엮는다 */
+  actionPlan: ActionPlan;
+  /** 변경 대상이 정기예금일 때의 일회성 중도해지 이자 손실. 연 단위 합계에 더하지 않는다 */
+  earlyTermination: EarlyTermination | null;
   checklist: ChecklistItem[];
   steps: AnalysisStep[];
   timing: SafeTiming;
@@ -149,6 +172,22 @@ export function derive(scenario: Scenario, triggerId?: string): Derived {
     candidates: candidatesFor(scenario, trigger.id),
   });
 
+  const addons = addonProposals(scenario, { excludeType: center.type });
+  const early = earlyTermination(center, today);
+
+  const actionPlan = buildActionPlan({
+    kind: verdict.kind,
+    today,
+    trigger,
+    center,
+    timing,
+    horizon,
+    links: active.map(toPlanLink),
+    best: recommendation.best,
+    unrecoverable: unrecoverable.map(toPlanLink),
+    earlyTermination: early,
+  });
+
   return {
     today,
     trigger,
@@ -163,6 +202,9 @@ export function derive(scenario: Scenario, triggerId?: string): Derived {
     horizon,
     verdict,
     recommendation,
+    addons,
+    actionPlan,
+    earlyTermination: early,
     checklist: buildChecklist({
       trigger,
       center,
@@ -174,6 +216,7 @@ export function derive(scenario: Scenario, triggerId?: string): Derived {
       timing,
       unrecoverable,
       recommendation,
+      earlyTermination: early,
     }),
     steps: buildSteps({ conditions, unsupported, items, total, savingsTotal }),
     timing,
@@ -188,6 +231,17 @@ export function derive(scenario: Scenario, triggerId?: string): Derived {
 }
 
 const shortName = (p: Product) => p.shortName ?? p.name;
+
+/** ImpactItem → 실행 안내가 읽는 한 줄. actionplan 이 derive 를 import 하지 않게 여기서 만든다. */
+function toPlanLink(item: ImpactItem): PlanLink {
+  return {
+    productName: shortName(item.product),
+    requirement: requirementLabel(item.condition),
+    cycleLabel: item.judgment.cycleLabel.value,
+    recoverable: item.judgment.recoverable,
+    recoverAt: item.judgment.recoverAt?.value ?? null,
+  };
+}
 
 function productNames(items: ImpactItem[]): string {
   const seen: string[] = [];
@@ -248,9 +302,21 @@ function buildChecklist(ctx: {
   timing: SafeTiming;
   unrecoverable: ImpactItem[];
   recommendation: Recommendation;
+  earlyTermination: EarlyTermination | null;
 }): ChecklistItem[] {
-  const { trigger, center, items, total, savings, savingsTotal, horizon, timing, unrecoverable, recommendation } =
-    ctx;
+  const {
+    trigger,
+    center,
+    items,
+    total,
+    savings,
+    savingsTotal,
+    horizon,
+    timing,
+    unrecoverable,
+    recommendation,
+    earlyTermination: early,
+  } = ctx;
   const name = shortName(center);
   const list: ChecklistItem[] = [];
 
@@ -314,6 +380,16 @@ function buildChecklist(ctx: {
       key: 'switch-order',
       text: `${withJosa(newName, '을/를')} 먼저 만든 뒤${when} ${withJosa(name, '을/를')} ${trigger.verb}하면 연결 ${best.preserved.length}건이 유지됩니다.`,
       source: best.netAfter.source,
+    });
+  }
+
+  if (early) {
+    list.push({
+      key: 'early-termination',
+      text: `중도해지하면 약정이자 ${formatWonShort(early.fullInterest.value)} 대신 ${formatWonShort(
+        early.earlyInterest.value,
+      )}만 받아 ${formatWonShort(early.loss.value)}을 덜 받습니다. 한 번 확정되는 금액이라 위 연 단위 손익과 따로 봅니다.`,
+      source: early.loss.source,
     });
   }
 

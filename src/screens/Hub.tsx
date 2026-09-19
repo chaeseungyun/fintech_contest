@@ -1,12 +1,16 @@
 import { AppShell } from '../components/AppShell';
 import { Glyph } from '../components/Glyph';
 import { MiniGraph } from '../components/MiniGraph';
+import { SourceTag } from '../components/SourceTag';
 import { derive } from '../lib/derive';
+import { formatKoMD } from '../lib/format';
+import { watchSummary } from '../lib/watch';
 import { useStore } from '../state/store';
 
-/** SwitchPoint AI 허브. 분석 진입점(트리거)을 고르는 화면. */
-export function Switchpoint() {
+/** 상시 분석 허브. 분석 진입점(트리거)을 고르는 화면. */
+export function Hub() {
   const { scenario, derived: d, dispatch } = useStore();
+  const watch = watchSummary(scenario);
 
   return (
     <AppShell
@@ -19,15 +23,39 @@ export function Switchpoint() {
       }
     >
       <h2 className="hero">
-        변경 전,
-        <br />
-        연결된 영향을 먼저 확인하세요.
+        {scenario.home.bannerTitle.split('\n').map((line, i) => (
+          <span key={line}>
+            {i > 0 && <br />}
+            {line}
+          </span>
+        ))}
       </h2>
       <p className="herosub">{scenario.home.bannerBody}</p>
 
+      <div className="flowbar">
+        {['상시 분석', '손익 판정', '최종 판단', '실행 안내'].map((s, i) => (
+          <span key={s} className={i === 0 ? 'on' : undefined}>
+            {s}
+          </span>
+        ))}
+      </div>
+
       <MiniGraph graph={d.graph} nodeLabel={d.trigger.nodeLabel} />
 
-      <h3 className="sectiontitle">분석할 항목을 선택하세요.</h3>
+      <div className="monitorbar">
+        <span className="ico" aria-hidden="true">
+          <Glyph name="clock" size={18} />
+        </span>
+        <span className="tx">
+          상품 {watch.productCount}개 · 우대 조건 {watch.linkCount}건을 보고 있습니다.
+          {watch.nextDate
+            ? ` 다음 판정일은 ${formatKoMD(watch.nextDate)}입니다.`
+            : ' 이번 달 판정은 모두 끝났습니다.'}
+        </span>
+        <SourceTag source="calc" />
+      </div>
+
+      <h3 className="sectiontitle">유지·변경 손익을 따져볼 항목</h3>
 
       <div className="triggerlist">
         {scenario.triggers.map((t) => {

@@ -190,6 +190,27 @@ export function Impact({ triggerId }: { triggerId: string }) {
         </span>
       </div>
 
+      {d.earlyTermination && (
+        <div className="onetime">
+          <span className="lbl">
+            중도해지 이자 손실 <em>일회성</em>
+          </span>
+          <Amount
+            value={tag(-d.earlyTermination.loss.value, d.earlyTermination.loss.source)}
+            signed
+            short
+            size="lg"
+          />
+          <span className="basis">
+            {d.earlyTermination.basisLabel} <SourceTag source={d.earlyTermination.loss.source} />
+          </span>
+          <p className="note">
+            해지할 때 한 번 확정되는 금액이라 위 연 단위 합계에 더하지 않았습니다. 상품마다 만기가
+            달라 같은 축에 올릴 수 없습니다.
+          </p>
+        </div>
+      )}
+
       <button
         type="button"
         className="btn ghost"

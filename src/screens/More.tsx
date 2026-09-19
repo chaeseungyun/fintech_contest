@@ -6,7 +6,8 @@ import { useStore, type Tab } from '../state/store';
 
 const SOURCES: Source[] = ['doc', 'calc', 'holding', 'user'];
 
-const MENU: { key: string; label: string; tab?: Tab }[] = [
+/** 'ai' 는 서비스명이 들어갈 자리다 — 이름은 scenario.brand 에서 읽는다. 여기에 적지 않는다. */
+const MENU: { key: string; label?: string; tab?: Tab }[] = [
   { key: 'account', label: '계좌 조회', tab: 'assets' },
   { key: 'card', label: '카드', tab: 'assets' },
   { key: 'loan', label: '대출', tab: 'assets' },
@@ -15,7 +16,7 @@ const MENU: { key: string; label: string; tab?: Tab }[] = [
   { key: 'insurance', label: '보험', tab: 'assets' },
   { key: 'benefit', label: '혜택', tab: 'benefits' },
   { key: 'autopay', label: '자동이체', tab: 'assets' },
-  { key: 'ai', label: 'SwitchPoint AI' },
+  { key: 'ai' },
 ];
 
 export function More() {
@@ -33,13 +34,13 @@ export function More() {
             onClick={() =>
               m.tab
                 ? dispatch({ type: 'selectTab', tab: m.tab })
-                : dispatch({ type: 'push', route: { name: 'switchpoint' } })
+                : dispatch({ type: 'push', route: { name: 'hub' } })
             }
           >
             <span className="ico">
               <Glyph name={m.key as never} size={23} />
             </span>
-            <span className="qlabel">{m.label}</span>
+            <span className="qlabel">{m.label ?? scenario.brand.service}</span>
           </button>
         ))}
       </div>

@@ -12,7 +12,7 @@ const SX = 214;
 const SR = 24;
 
 /**
- * SwitchPoint AI 히어로의 연결 관계도.
+ * FinStay AI 히어로의 연결 관계도.
  * 선은 graph.satellites 배열을 순회해 그린다 — SVG 를 손으로 박아두지 않는다.
  */
 export function MiniGraph({ graph, nodeLabel }: { graph: Graph; nodeLabel: string }) {

@@ -1,4 +1,4 @@
-/* SwitchPoint AI — 모바일 금융앱 UI.
+/* FinStay AI — 모바일 금융앱 UI.
    색·간격 토큰은 여기 한 군데서만 정한다. 화면은 클래스만 쓴다. */
 
 :root {
@@ -636,7 +636,7 @@ ol {
   background: var(--brand);
 }
 
-/* ── SwitchPoint 허브 ─────────────────────────────────────── */
+/* ── 상시 분석 허브 ───────────────────────────────────────── */
 
 .hero {
   font-size: var(--fs-5xl);
@@ -1728,5 +1728,391 @@ ol {
   color: var(--danger);
 }
 .recommend.none .cardtitle {
+  color: var(--ink-2);
+}
+
+/* ── 상시 분석 표시 ───────────────────────────────────────── */
+
+.aibanner .live {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 3px;
+  font-size: var(--fs-xs);
+  font-style: normal;
+  font-weight: 600;
+  color: var(--brand-ink);
+}
+.aibanner .live .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--save);
+  flex: none;
+  animation: pulse 2.2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+
+.watchcard .watchlist {
+  display: flex;
+  flex-direction: column;
+}
+.wrow {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+.wrow:last-child { border-bottom: 0; }
+.wrow .d {
+  flex: none;
+  min-width: 42px;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--brand);
+}
+.wrow .body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+.wrow .body b { font-size: var(--fs-base); }
+.wrow .body span {
+  font-size: var(--fs-xs);
+  color: var(--mute);
+}
+.wrow .tail {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: none;
+  color: var(--mute);
+}
+.wrow:disabled { cursor: default; }
+
+.monitorbar {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: var(--brand-soft);
+  border: 1px solid #d7e2ff;
+}
+.monitorbar.clear {
+  background: #e6f5f0;
+  border-color: #c8e8df;
+}
+.monitorbar .ico {
+  width: auto;
+  height: auto;
+  background: none;
+  border-radius: 0;
+  color: var(--brand-ink);
+  flex: none;
+  margin-top: 1px;
+}
+.monitorbar.clear .ico { color: var(--save); }
+.monitorbar .tx {
+  flex: 1;
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+.flowbar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  padding: 2px 2px 0;
+}
+.flowbar span {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--mute);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px 9px;
+}
+.flowbar span.on {
+  color: #fff;
+  background: var(--brand-deep);
+  border-color: var(--brand-deep);
+}
+.flowbar span + span::before {
+  content: '';
+}
+
+.prow.off .body b,
+.prow.off .tail .amt {
+  color: var(--mute);
+}
+.prow .tail {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+.prow .tail .due {
+  font-style: normal;
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  color: var(--mute);
+}
+.prow .tail .due.soon {
+  color: var(--brand);
+}
+
+/* ── 중도해지 이자 (일회성) ───────────────────────────────── */
+
+.onetime {
+  border-radius: var(--r-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  background: var(--warn-bg);
+  border: 1px solid #f0dfc2;
+}
+.onetime .lbl {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-base);
+  font-weight: 600;
+}
+.onetime .lbl em {
+  font-style: normal;
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  color: var(--warn);
+  background: var(--src-user-bg);
+  border-radius: 999px;
+  padding: 1px 7px;
+}
+.onetime .basis {
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.onetime .note {
+  margin-top: 4px;
+}
+
+.earlycard .cardtitle .amt {
+  color: var(--warn);
+}
+
+/* ── 연계 가입 제안 ───────────────────────────────────────── */
+
+.recommend.addon .cardtitle .addmark {
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+}
+
+/* ── 실행 안내 ────────────────────────────────────────────── */
+
+.planhead {
+  border-radius: var(--r-lg);
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--brand-soft);
+  border: 1px solid #d5e0ff;
+}
+.planhead.switch {
+  background: #e6f5f0;
+  border-color: #c8e8df;
+}
+.planhead .mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: #fff;
+}
+.planhead.switch .mark { background: var(--save); }
+.planhead h2 {
+  font-size: var(--fs-3xl);
+  letter-spacing: -0.4px;
+}
+.planhead p {
+  font-size: var(--fs-base);
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+
+.planlist {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.pstep {
+  display: flex;
+  gap: 11px;
+  background: var(--surface);
+  border-radius: var(--r-md);
+  padding: 14px;
+}
+.pstep .no {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--brand-deep);
+  color: #fff;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.pstep .body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+  min-width: 0;
+}
+.pstep .body > b {
+  font-size: var(--fs-md);
+  line-height: 1.45;
+}
+.pstep .when {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--brand);
+  background: var(--brand-soft);
+  border-radius: 999px;
+  padding: 2px 9px 2px 7px;
+}
+.pstep .detail {
+  font-size: var(--fs-sm);
+  line-height: 1.65;
+  color: var(--ink-2);
+}
+.pstep .bullets {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 2px;
+}
+.pstep .bullets li {
+  position: relative;
+  padding-left: 12px;
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+.pstep .bullets li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 9px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--mute);
+}
+
+.contactbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  align-self: flex-start;
+  margin-top: 3px;
+  padding: 6px 11px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink-2);
+}
+.contactbtn .caret {
+  transition: transform 0.18s ease;
+}
+.pstep.open .contactbtn .caret {
+  transform: rotate(180deg);
+}
+.pstep .contact {
+  margin-top: 4px;
+  padding: 4px 12px 10px;
+  border-radius: var(--r-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+}
+.pstep .contact .f .v {
+  text-align: right;
+  font-size: var(--fs-sm);
+}
+.pstep .contact .muted {
+  font-style: normal;
+  color: var(--mute);
+}
+.pstep .contact .ask {
+  padding-top: 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pstep .contact .ask b {
+  font-size: var(--fs-sm);
+  color: var(--warn);
+}
+.pstep .contact .ask li {
+  position: relative;
+  padding-left: 12px;
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+.pstep .contact .ask li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 9px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--warn);
+}
+
+.nextup {
+  border-radius: var(--r-lg);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: var(--surface-2);
+  border: 1px dashed var(--line);
+}
+.nextup b { font-size: var(--fs-md); }
+.nextup p {
+  font-size: var(--fs-sm);
+  line-height: 1.65;
   color: var(--ink-2);
 }

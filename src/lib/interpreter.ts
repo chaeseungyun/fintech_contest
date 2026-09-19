@@ -118,6 +118,13 @@ export function metricUnit(kind: string): string {
   return COUNT_METRICS.has(kind) ? '건' : '원';
 }
 
+/** 이 조건을 살려 두려면 지켜야 하는 것. "카드 이용금액 300,000원 이상" */
+export function requirementLabel(cond: MappedCondition): string {
+  const { kind, threshold } = cond.metric;
+  if (threshold === null) return `${metricNoun(kind)} 유지`;
+  return `${metricNoun(kind)} ${fmt(threshold)}${metricUnit(kind)} 이상`;
+}
+
 function inactiveReason(cond: MappedCondition): string | null {
   if (isMetricMet(cond)) return null;
   const { threshold, currentValue, kind } = cond.metric;

@@ -2,16 +2,19 @@ import { AppShell } from '../components/AppShell';
 import { Amount } from '../components/Amount';
 import { Glyph } from '../components/Glyph';
 import { derive } from '../lib/derive';
+import { watchSummary } from '../lib/watch';
 import { useStore } from '../state/store';
 
 /** 상품 탭. 변경을 검토할 수 있는 상품(=트리거)을 모아 보여준다. */
 export function Products() {
   const { scenario, dispatch } = useStore();
+  const watch = watchSummary(scenario);
 
   return (
     <AppShell title="상품">
       <p className="tabintro">
-        변경을 검토 중인 상품을 고르면 {scenario.brand.service}가 연결된 영향을 먼저 계산합니다.
+        {scenario.brand.service}가 보유 상품 {watch.productCount}개를 상시 분석하고 있습니다. 항목을
+        고르면 유지·변경 손익을 바로 계산합니다.
       </p>
 
       <div className="triggerlist">

@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { derive } from './derive';
 import { applyEdits } from './edits';
-import { BASE, CARD, EXPECTED, SALARY, TRIGGER_IDS } from './fixture.test-helpers';
+import { BASE, CARD, DEPOSIT, EXPECTED, SALARY, TRIGGER_IDS } from './fixture.test-helpers';
 import { formatWonCompact, formatWonShort } from './format';
-import { annualLossOf, formatRateDelta, lossBreakdown, savingAmountOf } from './money';
+import { annualLossOf, earlyTermination, formatRateDelta, interestFor, lossBreakdown, savingAmountOf } from './money';
 import { totalAssets } from './portfolio';
 import type { MappedCondition } from './types';
 
@@ -144,5 +144,60 @@ describe('포맷', () => {
     expect(formatWonShort(194_000)).toBe('19.4만원');
     expect(formatWonShort(-164_000)).toBe('−16.4만원');
     expect(formatWonShort(0)).toBe('0원');
+  });
+});
+
+describe('중도해지 이자 — expected.earlyTermination 재현', () => {
+  const e = EXPECTED.earlyTermination.dep_nuri_term;
+  const term = product('dep_nuri_term');
+  const et = earlyTermination(term, scenario.meta.today)!;
+
+  it(`예치 ${e.elapsedDays}일 / 약정 ${e.fullDays}일`, () => {
+    expect(et).not.toBeNull();
+    expect(et.fullDays).toBe(e.fullDays);
+    expect(et.elapsedDays).toBe(e.elapsedDays);
+  });
+
+  it(`약정이자 ${e.fullInterest.toLocaleString()} · 중도해지이자 ${e.earlyInterest.toLocaleString()} · 손실 ${e.loss.toLocaleString()}`, () => {
+    expect(et.fullInterest.value).toBe(e.fullInterest);
+    expect(et.earlyInterest.value).toBe(e.earlyInterest);
+    expect(et.loss.value).toBe(e.loss);
+    expect(et.loss.value).toBe(et.fullInterest.value - et.earlyInterest.value);
+  });
+
+  it('원금·이율은 보유 상품 정보, 이자와 손실은 계산 결과로 태그된다', () => {
+    expect(et.principal.source).toBe('holding');
+    expect(et.appliedRate.source).toBe('holding');
+    expect(et.earlyRate.source).toBe('holding');
+    expect(et.fullInterest.source).toBe('calc');
+    expect(et.loss.source).toBe('calc');
+  });
+
+  it('일할 단리 — 원금 × 이율 × 일수 / 365', () => {
+    expect(interestFor(20_000_000, 0.034, 365)).toBe(680_000);
+    expect(interestFor(20_000_000, 0.008, 172)).toBe(Math.round((20_000_000 * 0.008 * 172) / 365));
+  });
+
+  it('연 단위 합계에는 더하지 않는다 — 따로 들고 다닌다', () => {
+    const d = derive(scenario, DEPOSIT);
+    expect(d.earlyTermination!.loss.value).toBe(e.loss);
+    expect(d.total.value).toBe(EXPECTED.triggers[DEPOSIT].annualLossTotal);
+    expect(d.netAnnual.value).toBe(EXPECTED.triggers[DEPOSIT].netAnnual);
+  });
+
+  it('정기예금이 아니거나 근거가 없으면 null', () => {
+    expect(earlyTermination(product('card_nuri_tok'), scenario.meta.today)).toBeNull();
+    expect(earlyTermination(product('acct_nuri_salary'), scenario.meta.today)).toBeNull();
+    const noRate = { ...term, facts: { ...term.facts, earlyTerminationRate: undefined } };
+    expect(earlyTermination(noRate, scenario.meta.today)).toBeNull();
+  });
+
+  it('만기 당일부터는 중도해지가 아니다', () => {
+    expect(earlyTermination(term, '2027-03-20')).toBeNull();
+    expect(earlyTermination(term, '2027-03-19')).not.toBeNull();
+  });
+
+  it('카드 해지 시나리오에는 중도해지 손실이 없다', () => {
+    expect(derive(scenario, CARD).earlyTermination).toBeNull();
   });
 });

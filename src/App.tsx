@@ -1,4 +1,5 @@
 import { useMemo, useReducer } from 'react';
+import { ActionPlan } from './screens/ActionPlan';
 import { Analyzing } from './screens/Analyzing';
 import { Assets } from './screens/Assets';
 import { Benefits } from './screens/Benefits';
@@ -8,7 +9,7 @@ import { Home } from './screens/Home';
 import { Impact } from './screens/Impact';
 import { More } from './screens/More';
 import { Products } from './screens/Products';
-import { Switchpoint } from './screens/Switchpoint';
+import { Hub } from './screens/Hub';
 import { Timeline } from './screens/Timeline';
 import { Verdict } from './screens/Verdict';
 import {
@@ -32,14 +33,16 @@ const TAB_SCREEN: Record<Tab, () => JSX.Element> = {
 
 function renderRoute(route: Route): JSX.Element {
   switch (route.name) {
-    case 'switchpoint':
-      return <Switchpoint />;
+    case 'hub':
+      return <Hub />;
     case 'analyzing':
       return <Analyzing triggerId={route.triggerId} />;
     case 'impact':
       return <Impact triggerId={route.triggerId} />;
     case 'verdict':
       return <Verdict triggerId={route.triggerId} />;
+    case 'actionplan':
+      return <ActionPlan triggerId={route.triggerId} />;
     case 'timeline':
       return <Timeline />;
     case 'connections':

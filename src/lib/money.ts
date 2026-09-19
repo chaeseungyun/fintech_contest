@@ -1,7 +1,8 @@
 // 이자·혜택 손실과 변경으로 생기는 절감 계산. 전부 연 단위. 순수 함수.
 
-import { formatWonCompact } from './format';
-import type { Effect, MappedCondition, Product, ProductFacts, Saving, Tagged } from './types';
+import { compareISO, daysBetween } from './dates';
+import { formatRate, formatWonCompact } from './format';
+import type { Effect, ISODate, MappedCondition, Product, ProductFacts, Saving, Tagged } from './types';
 import { tag } from './types';
 
 export interface LossBreakdown {
@@ -146,4 +147,74 @@ export function savingItems(savings: Saving[], product: HasFacts): SavingItem[] 
     });
   }
   return items;
+}
+
+// ── 중도해지 이자 ──────────────────────────────────────────────────────
+// 정기예금을 만기 전에 깨면 약정이율 대신 중도해지이율이 예치기간에 적용된다.
+// 이건 해지 시점에 한 번 확정되는 금액이라 연 단위 합계(netAnnual)에 더하지 않는다 —
+// 상품마다 만기가 달라 더할 수 없다는 규칙이 여기에도 그대로 걸린다. 화면이 따로 그린다.
+
+export interface EarlyTermination {
+  productId: string;
+  principal: Tagged<number>;
+  appliedRate: Tagged<number>;
+  earlyRate: Tagged<number>;
+  /** 가입일 → 만기 (일) */
+  fullDays: number;
+  /** 가입일 → 오늘 (일) */
+  elapsedDays: number;
+  /** 만기까지 두면 받는 약정이자 */
+  fullInterest: Tagged<number>;
+  /** 오늘 깨면 받는 이자 */
+  earlyInterest: Tagged<number>;
+  /** 일회성 손실 = 약정이자 − 중도해지이자 */
+  loss: Tagged<number>;
+  /** "약정 3.4% → 중도해지 0.8% · 172일 예치 / 365일" */
+  basisLabel: string;
+}
+
+const DAYS_IN_YEAR = 365;
+
+/** 일할 단리. 만기이자·중도해지이자를 같은 식으로 낸다. */
+export function interestFor(principal: number, rate: number, days: number): number {
+  return Math.round((principal * rate * days) / DAYS_IN_YEAR);
+}
+
+/**
+ * 오늘 중도해지할 때의 이자 손실. 근거가 하나라도 없으면 null —
+ * 값을 지어내지 않는다. 만기가 지났으면 중도해지가 아니므로 null.
+ */
+export function earlyTermination(product: Product, today: ISODate): EarlyTermination | null {
+  const f = product.facts;
+  if (product.type !== 'term_deposit') return null;
+  if (
+    f.principal === undefined ||
+    f.openedAt === undefined ||
+    f.maturity === undefined ||
+    f.appliedRate === undefined ||
+    f.earlyTerminationRate === undefined
+  ) {
+    return null;
+  }
+  if (compareISO(today, f.maturity) >= 0) return null;
+
+  const fullDays = daysBetween(f.openedAt, f.maturity);
+  const elapsedDays = Math.max(0, daysBetween(f.openedAt, today));
+  const fullInterest = interestFor(f.principal, f.appliedRate, fullDays);
+  const earlyInterest = interestFor(f.principal, f.earlyTerminationRate, elapsedDays);
+
+  return {
+    productId: product.id,
+    principal: tag(f.principal, 'holding'),
+    appliedRate: tag(f.appliedRate, 'holding'),
+    earlyRate: tag(f.earlyTerminationRate, 'holding'),
+    fullDays,
+    elapsedDays,
+    fullInterest: tag(fullInterest, 'calc'),
+    earlyInterest: tag(earlyInterest, 'calc'),
+    loss: tag(fullInterest - earlyInterest, 'calc'),
+    basisLabel: `약정 ${formatRate(f.appliedRate)} → 중도해지 ${formatRate(
+      f.earlyTerminationRate,
+    )} · ${elapsedDays}일 예치 / ${fullDays}일`,
+  };
 }

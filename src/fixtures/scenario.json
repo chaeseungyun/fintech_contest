@@ -1,6 +1,6 @@
 {
   "meta": {
-    "scenarioId": "switchpoint-demo",
+    "scenarioId": "finstay-demo",
     "today": "2026-09-08",
     "timezone": "Asia/Seoul",
     "note": "약관 원문은 시연용 재구성. 금융사·상품명은 가상 브랜드다. 실제 상품설명서 문구 확인 후 교체할 것."
@@ -9,15 +9,15 @@
   "brand": {
     "group": "누리금융그룹",
     "short": "FinStay AI",
-    "service": "SwitchPoint AI",
-    "serviceTagline": "하나만 바꿔도 내 금융은 어떻게 달라질까요?"
+    "service": "FinStay AI",
+    "serviceTagline": "유지·변경·추가 가입까지 함께 판단합니다"
   },
 
   "home": {
     "userName": "최연수",
     "greeting": "좋은 하루 되세요.",
-    "bannerTitle": "변경 전, 연결된 영향을 먼저 확인하세요",
-    "bannerBody": "하나의 변경이 여러 금융상품에 어떤 영향을 주는지 분석해드립니다.",
+    "bannerTitle": "보유 금융상품을\n상시 분석하고 있습니다.",
+    "bannerBody": "유지·변경·추가 가입의 손익을 연결 관계까지 계산해 비교합니다.",
     "spend": [
       { "month": "3월", "amount": 620000 },
       { "month": "4월", "amount": 700000 },
@@ -34,7 +34,7 @@
       { "key": "invest", "label": "투자", "tab": "assets" },
       { "key": "insurance", "label": "보험", "tab": "assets" },
       { "key": "benefit", "label": "혜택", "tab": "benefits" },
-      { "key": "ai", "label": "SwitchPoint AI" },
+      { "key": "ai", "label": "FinStay AI" },
       { "key": "grid", "label": "전체메뉴", "tab": "more" }
     ]
   },
@@ -75,7 +75,7 @@
       "icon": "deposit",
       "nodeLabel": "예·적금 해지",
       "verb": "해지",
-      "caveat": "중도해지에 따른 약정이자 감소는 이 계산에 넣지 않았습니다.",
+      "caveat": "중도해지 이자 손실은 해지 시 한 번 확정되는 금액이라 연 단위 합계와 따로 표시합니다.",
       "savings": []
     },
     {
@@ -112,7 +112,13 @@
       "name": "주거래 급여통장",
       "shortName": "급여통장",
       "type": "deposit_account",
-      "facts": { "balance": 5400000 }
+      "facts": { "balance": 5400000 },
+      "contact": {
+        "dept": "누리은행 수신업무 담당",
+        "channels": ["누리은행 앱 > 전체메뉴 > 계좌 > 급여이체 계좌 변경", "영업점 창구 (신분증 지참)"],
+        "hours": "평일 09:00–16:00 · 앱은 24시간",
+        "ask": ["급여이체 실적을 언제 기준으로 인정하는지", "이번 달 실적이 이미 확정되었는지"]
+      }
     },
     {
       "id": "acct_nuri_free",
@@ -141,7 +147,14 @@
         "openedAt": "2026-03-20",
         "maturity": "2027-03-20",
         "baseRate": 0.029,
-        "appliedRate": 0.034
+        "appliedRate": 0.034,
+        "earlyTerminationRate": 0.008
+      },
+      "contact": {
+        "dept": "누리은행 수신업무 담당",
+        "channels": ["누리은행 앱 > 예적금 > 중도해지", "영업점 창구"],
+        "hours": "평일 09:00–16:00",
+        "ask": ["중도해지이율이 실제로 몇 %인지", "가입 시 확정된 우대이율을 되살릴 방법이 있는지"]
       }
     },
     {
@@ -164,6 +177,12 @@
         "repaymentType": "equal_payment",
         "baseRate": 0.042,
         "appliedRate": 0.036
+      },
+      "contact": {
+        "dept": "누리은행 여신관리부 주택담보대출 담당",
+        "channels": ["영업점 여신 창구 (사전 예약 권장)", "누리은행 앱 > 대출 > 금리 확인"],
+        "hours": "평일 09:00–16:00",
+        "ask": ["우대금리 재산정일이 매월 며칠인지", "중도상환수수료가 남아 있는지"]
       }
     },
     {
@@ -176,6 +195,12 @@
         "monthlySpendCurrent": 620000,
         "annualFee": 30000,
         "last4": "1234"
+      },
+      "contact": {
+        "dept": "누리카드 고객센터 해지·변경 담당",
+        "channels": ["누리카드 앱 > 내 카드 > 해지 신청", "고객센터 상담원 연결"],
+        "hours": "평일 09:00–18:00",
+        "ask": ["해지 시 잔여 포인트가 소멸되는지", "등록된 자동납부가 함께 해지되는지"]
       }
     },
     {
@@ -187,6 +212,12 @@
       "facts": {
         "monthlyPremium": 68000,
         "coverage": "입원·수술 주계약 3,000만원"
+      },
+      "contact": {
+        "dept": "누리생명 계약관리팀",
+        "channels": ["누리생명 앱 > 보험계약 > 해지 신청", "고객센터 상담원 연결 (본인 확인 필요)"],
+        "hours": "평일 09:00–17:00",
+        "ask": ["해지환급금이 얼마인지", "같은 보장으로 재가입할 때 면책기간이 다시 시작되는지"]
       }
     },
     {
@@ -578,6 +609,7 @@
   "candidates": [
     {
       "id": "card_nuri_smart",
+      "mode": "replace",
       "forTriggers": ["card_cancel"],
       "institution": "누리카드",
       "name": "스마트카드",
@@ -603,10 +635,17 @@
         "status": "MAPPED",
         "met": true,
         "sourceText": "만 19세 이상 개인 고객이 신청할 수 있다."
+      },
+      "contact": {
+        "dept": "누리카드 신규발급 담당",
+        "channels": ["누리카드 앱 > 카드 신청", "누리은행 영업점 창구"],
+        "hours": "평일 09:00–18:00 · 앱은 24시간",
+        "ask": ["발급 후 실적이 언제부터 인정되는지", "기존 카드의 자동납부를 옮기는 절차"]
       }
     },
     {
       "id": "card_hanbit_premium",
+      "mode": "replace",
       "forTriggers": ["card_cancel"],
       "institution": "한빛카드",
       "name": "프리미엄 포인트카드",
@@ -632,10 +671,17 @@
         "status": "UNSUPPORTED",
         "unsupportedReason": "조건복합",
         "sourceText": "신용평가 결과 및 당사 내부 기준에 따라 발급이 제한될 수 있다."
+      },
+      "contact": {
+        "dept": "한빛카드 신규발급 담당",
+        "channels": ["한빛카드 홈페이지 > 카드 신청"],
+        "hours": "평일 09:00–18:00",
+        "ask": ["누리은행 우대조건에서 인정되는지 서면으로 확인", "발급 거절 시 재신청 가능 시점"]
       }
     },
     {
       "id": "ins_nuri_lite",
+      "mode": "replace",
       "forTriggers": ["insurance_cancel"],
       "institution": "누리생명",
       "name": "실속건강보험",
@@ -655,6 +701,96 @@
         "status": "MAPPED",
         "met": true,
         "sourceText": "만 20세부터 60세까지 가입할 수 있다."
+      },
+      "contact": {
+        "dept": "누리생명 신계약팀",
+        "channels": ["누리생명 앱 > 보험 가입", "설계사 상담 예약"],
+        "hours": "평일 09:00–17:00",
+        "ask": ["보험료를 카드 자동납부로 걸 수 있는지", "면책기간이 언제까지인지"]
+      }
+    },
+    {
+      "id": "card_nuri_life",
+      "mode": "add",
+      "forTriggers": [],
+      "institution": "누리카드",
+      "name": "라이프카드",
+      "shortName": "라이프카드",
+      "type": "credit_card",
+      "facts": { "annualFee": 12000 },
+      "sourceDoc": "누리카드 라이프카드 상품안내",
+      "satisfies": {
+        "status": "MAPPED",
+        "kinds": ["card_holding", "card_spend", "card_autopay"],
+        "sourceText": "본 카드는 누리은행 제휴 신용카드로, 누리금융그룹 상품의 신용카드 실적·보유·자동납부 우대 조건에서 당행 신용카드로 인정된다.",
+        "confidence": 0.85
+      },
+      "ownBenefits": [
+        {
+          "label": "생활요금 자동납부 할인",
+          "effect": { "kind": "monthly_benefit", "value": 5000 },
+          "sourceText": "전기·가스·수도 요금을 본 카드로 자동납부하는 경우 월 5천원을 청구할인한다.",
+          "confidence": 0.83
+        },
+        {
+          "label": "통신요금 할인",
+          "effect": { "kind": "monthly_benefit", "value": 3000 },
+          "sourceText": "이동통신 요금을 본 카드로 결제하는 경우 월 3천원을 청구할인한다.",
+          "confidence": 0.81
+        }
+      ],
+      "eligibility": {
+        "status": "MAPPED",
+        "met": true,
+        "sourceText": "만 19세 이상 개인 고객이 신청할 수 있다."
+      },
+      "contact": {
+        "dept": "누리카드 신규발급 담당",
+        "channels": ["누리카드 앱 > 카드 신청", "누리은행 영업점 창구"],
+        "hours": "평일 09:00–18:00 · 앱은 24시간",
+        "ask": ["자동납부 등록이 실적으로 인정되는 시점", "기존 카드와 할인 한도가 겹치는지"]
+      }
+    },
+    {
+      "id": "acct_nuri_plus",
+      "mode": "add",
+      "forTriggers": [],
+      "institution": "누리은행",
+      "name": "주거래플러스 통장",
+      "shortName": "플러스통장",
+      "type": "deposit_account",
+      "facts": {},
+      "sourceDoc": "누리은행 주거래플러스 통장 상품설명서",
+      "satisfies": {
+        "status": "MAPPED",
+        "kinds": ["salary_transfer", "autopay_count"],
+        "sourceText": "본 통장의 급여이체 및 자동이체 실적은 당행 주거래 실적에 합산되어 인정된다.",
+        "confidence": 0.82
+      },
+      "ownBenefits": [
+        {
+          "label": "타행 이체수수료 면제",
+          "effect": { "kind": "monthly_benefit", "value": 2000 },
+          "sourceText": "타행 이체수수료를 월 10회까지 면제한다.",
+          "confidence": 0.86
+        },
+        {
+          "label": "자동이체 우대",
+          "effect": { "kind": "monthly_benefit", "value": 1000 },
+          "sourceText": "생활요금 자동이체를 2건 이상 등록한 경우 월 1천원을 우대한다.",
+          "confidence": 0.79
+        }
+      ],
+      "eligibility": {
+        "status": "MAPPED",
+        "met": true,
+        "sourceText": "개인 고객이 1인 1계좌 개설할 수 있다."
+      },
+      "contact": {
+        "dept": "누리은행 수신업무 담당",
+        "channels": ["누리은행 앱 > 계좌 개설", "영업점 창구 (신분증 지참)"],
+        "hours": "평일 09:00–16:00 · 앱은 24시간",
+        "ask": ["기존 급여통장 실적과 합산되는지", "1인 1계좌 제한에 걸리는지"]
       }
     }
   ],
@@ -663,6 +799,27 @@
     "note": "코드가 계산해야 할 값. 하드코딩 금지 — 검증용 기대치로만 사용한다.",
     "totalAssets": 125400000,
     "horizonMonths": [0, 6, 12, 24],
+    "earlyTermination": {
+      "dep_nuri_term": {
+        "fullDays": 365,
+        "elapsedDays": 172,
+        "fullInterest": 680000,
+        "earlyInterest": 75397,
+        "loss": 604603
+      }
+    },
+    "addons": {
+      "ranked": ["card_nuri_life", "acct_nuri_plus"],
+      "netGain": { "card_nuri_life": 84000, "acct_nuri_plus": 36000 },
+      "unlocked": { "card_nuri_life": [], "acct_nuri_plus": [] },
+      "byTrigger": {
+        "card_cancel": ["acct_nuri_plus"],
+        "loan_change": ["card_nuri_life", "acct_nuri_plus"],
+        "deposit_cancel": ["card_nuri_life", "acct_nuri_plus"],
+        "insurance_cancel": ["card_nuri_life", "acct_nuri_plus"],
+        "salary_switch": ["card_nuri_life"]
+      }
+    },
     "triggers": {
       "card_cancel": {
         "annualLossByProduct": {

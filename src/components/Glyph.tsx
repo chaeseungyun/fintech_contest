@@ -130,6 +130,23 @@ const PATHS: Record<string, JSX.Element> = {
       <path d="m13 6.5 5.5 5.5L13 17.5" />
     </>
   ),
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.5V12l3 1.8" />
+    </>
+  ),
+  phone: (
+    <>
+      <path d="M7.5 3.8h3l1.3 3.4-2 1.4a11 11 0 0 0 5.6 5.6l1.4-2 3.4 1.3v3a2 2 0 0 1-2.2 2C11.4 18 6 12.6 5.5 6a2 2 0 0 1 2-2.2Z" />
+    </>
+  ),
+  plus: (
+    <>
+      <path d="M12 5.5v13" />
+      <path d="M5.5 12h13" />
+    </>
+  ),
   save: (
     <>
       <path d="M12 4.5v11" />

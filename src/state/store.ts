@@ -23,10 +23,11 @@ export const TABS: { id: Tab; label: string; icon: string }[] = [
 
 /** 탭 위에 쌓이는 화면. 뒤로가기는 이 스택을 하나씩 걷어낸다. */
 export type Route =
-  | { name: 'switchpoint' }
+  | { name: 'hub' }
   | { name: 'analyzing'; triggerId: string }
   | { name: 'impact'; triggerId: string }
   | { name: 'verdict'; triggerId: string }
+  | { name: 'actionplan'; triggerId: string }
   | { name: 'timeline'; triggerId: string }
   | { name: 'connections'; triggerId: string }
   | { name: 'evidence'; triggerId: string; productId: string };
@@ -43,8 +44,8 @@ export interface AppState {
   expandedConditionId: string | null;
   /** 최종 판단 화면의 갈아타기 후보 중 펼친 것 */
   expandedCandidateId: string | null;
-  /** 최종 판단 화면에서 "그래도 변경하기"를 눌렀는가 */
-  decidedNow: boolean;
+  /** 실행 안내에서 펼친 창구 정보 */
+  expandedStepKey: string | null;
 }
 
 export type Action =
@@ -58,7 +59,7 @@ export type Action =
   | { type: 'toggleCandidate'; candidateId: string }
   | { type: 'edit'; conditionId: string; edit: ConditionEdit }
   | { type: 'removeCondition'; conditionId: string }
-  | { type: 'decideNow'; value: boolean }
+  | { type: 'toggleStep'; stepKey: string }
   | { type: 'reset' };
 
 export function initialState(): AppState {
@@ -70,7 +71,7 @@ export function initialState(): AppState {
     selectedConditionId: null,
     expandedConditionId: null,
     expandedCandidateId: null,
-    decidedNow: false,
+    expandedStepKey: null,
   };
 }
 
@@ -79,9 +80,9 @@ export function reducer(state: AppState, action: Action): AppState {
     case 'selectTab':
       return { ...state, tab: action.tab, stack: [], selectedConditionId: null };
     case 'push':
-      return { ...state, stack: [...state.stack, action.route], decidedNow: false };
+      return { ...state, stack: [...state.stack, action.route], expandedStepKey: null };
     case 'replace':
-      return { ...state, stack: [...state.stack.slice(0, -1), action.route], decidedNow: false };
+      return { ...state, stack: [...state.stack.slice(0, -1), action.route], expandedStepKey: null };
     case 'back':
       return { ...state, stack: state.stack.slice(0, -1), selectedConditionId: null };
     case 'popTo': {
@@ -112,8 +113,8 @@ export function reducer(state: AppState, action: Action): AppState {
       return state.removed.includes(action.conditionId)
         ? state
         : { ...state, removed: [...state.removed, action.conditionId] };
-    case 'decideNow':
-      return { ...state, decidedNow: action.value };
+    case 'toggleStep':
+      return { ...state, expandedStepKey: state.expandedStepKey === action.stepKey ? null : action.stepKey };
     case 'reset':
       return initialState();
   }
