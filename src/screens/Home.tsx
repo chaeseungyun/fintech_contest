@@ -2,9 +2,8 @@ import { AppShell } from '../components/AppShell';
 import { Amount } from '../components/Amount';
 import { Glyph } from '../components/Glyph';
 import { SourceTag } from '../components/SourceTag';
-import { SpendChart } from '../components/SpendChart';
-import { formatKoMD, formatMD, formatPercent } from '../lib/format';
-import { spendSummary, totalAssets } from '../lib/portfolio';
+import { formatKoMD, formatMD } from '../lib/format';
+import { totalAssets } from '../lib/portfolio';
 import { watchSummary } from '../lib/watch';
 import { useStore, type Tab } from '../state/store';
 
@@ -12,7 +11,6 @@ export function Home() {
   const { scenario, dispatch } = useStore();
   const { home, brand } = scenario;
   const assets = totalAssets(scenario);
-  const spend = spendSummary(scenario);
   const watch = watchSummary(scenario);
 
   const openAi = () => dispatch({ type: 'push', route: { name: 'hub' } });
@@ -21,17 +19,8 @@ export function Home() {
     <AppShell
       header={
         <div className="homehead">
-          <button type="button" className="logo">
-            {brand.short}
-            <Glyph name="chevron" size={16} />
-          </button>
+          <span className="logo">{brand.short}</span>
           <div className="homehead-actions">
-            <button type="button" aria-label="검색">
-              <Glyph name="search" size={22} />
-            </button>
-            <button type="button" aria-label="알림">
-              <Glyph name="bell" size={22} />
-            </button>
             <button type="button" aria-label="전체메뉴" onClick={() => dispatch({ type: 'selectTab', tab: 'more' })}>
               <Glyph name="menu" size={22} />
             </button>
@@ -132,20 +121,6 @@ export function Home() {
           <Glyph name="chevron" size={14} />
         </button>
       </section>
-
-      <div className="card spendcard">
-        <span className="lbl">이번 달 소비</span>
-        <div className="row">
-          <Amount value={spend.current} short size="lg" />
-          <SpendChart summary={spend} />
-        </div>
-        {spend.delta && (
-          <span className={`delta ${spend.delta.value < 0 ? 'down' : 'up'}`}>
-            전월 대비 {spend.delta.value < 0 ? '−' : '+'}
-            {formatPercent(spend.delta.value)}
-          </span>
-        )}
-      </div>
     </AppShell>
   );
 }

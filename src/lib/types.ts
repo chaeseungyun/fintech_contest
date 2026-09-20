@@ -185,11 +185,7 @@ export interface Trigger {
   action: string;
   /** 리스트 제목: "카드 해지/변경" */
   label: string;
-  /** 리스트 설명: "연회비, 혜택, 연결된 우대조건" */
-  sublabel: string;
   icon: IconKey;
-  /** 관계도 중앙 노드 문구: "카드 해지/변경" */
-  nodeLabel: string;
   /** 문장에 쓰는 동사: "해지", "변경" */
   verb: string;
   /** 변경 후에도 금액으로 계산하지 않는 것 (보장 상실 등) */
@@ -257,23 +253,15 @@ export interface Eligibility {
   unsupportedReason?: string;
 }
 
-export interface HomeSpendPoint {
-  month: string;
-  amount: number;
-}
-
 export interface HomeData {
   userName: string;
   greeting: string;
-  /** 최근 소비 추이. 마지막 원소가 이번 달 */
-  spend: HomeSpendPoint[];
   quickMenu: { key: IconKey; label: string; tab?: string }[];
   bannerTitle: string;
   bannerBody: string;
 }
 
 export interface Brand {
-  group: string;
   short: string;
   service: string;
   serviceTagline: string;

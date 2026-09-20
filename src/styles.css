@@ -355,9 +355,9 @@ ol {
   font-size: var(--fs-lg);
   margin-top: 4px;
 }
-.iconbtn {
-  display: inline-flex;
-  color: var(--mute);
+.sectiontitle .link {
+  margin-left: auto;
+  font-size: var(--fs-sm);
 }
 
 .lbl {
@@ -387,11 +387,6 @@ ol {
   line-height: 1.65;
   color: var(--mute);
   padding: 2px 2px 4px;
-}
-.tabintro {
-  font-size: var(--fs-base);
-  color: var(--ink-2);
-  padding: 2px 2px 0;
 }
 .empty {
   padding: 26px 10px;
@@ -606,36 +601,6 @@ ol {
   flex: none;
 }
 
-.spendcard .row {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 12px;
-}
-.delta {
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  color: var(--mute);
-}
-.delta.down { color: var(--save); }
-.delta.up { color: var(--down); }
-
-.spark {
-  display: flex;
-  align-items: flex-end;
-  gap: 4px;
-  height: 42px;
-  flex: none;
-}
-.spark .bar {
-  width: 8px;
-  border-radius: 3px;
-  background: #dbe2f3;
-}
-.spark .bar.on {
-  background: var(--brand);
-}
-
 /* ── 상시 분석 허브 ───────────────────────────────────────── */
 
 .hero {
@@ -649,60 +614,6 @@ ol {
   line-height: 1.6;
   color: var(--ink-2);
   padding: 0 2px;
-}
-
-.minigraph {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 320 / 210;
-  flex: none;
-  display: block;
-  margin: 2px 0;
-}
-.mg-edge {
-  fill: none;
-  stroke: #c7d2f0;
-  stroke-width: 1.6;
-  stroke-dasharray: 3 4;
-}
-.mg-center rect {
-  fill: #fff;
-  stroke: #dbe3f7;
-  stroke-width: 1.5;
-  filter: drop-shadow(0 6px 14px rgba(47, 99, 245, 0.14));
-}
-.mg-centerbody {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  color: var(--brand);
-  text-align: center;
-}
-.mg-centerbody b {
-  font-size: var(--fs-svg-xl);
-  color: var(--ink);
-  line-height: 1.3;
-  padding: 0 6px;
-}
-.mg-sat circle {
-  fill: #fff;
-  stroke: #e3e8f3;
-  stroke-width: 1.4;
-}
-.mg-satbody {
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--brand);
-}
-.mg-label {
-  font-size: var(--fs-svg-lg);
-  font-weight: 600;
-  fill: var(--ink-2);
 }
 
 .triggerlist {
@@ -742,15 +653,6 @@ ol {
   gap: 6px;
   color: var(--mute);
   flex: none;
-}
-.linkcount {
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  color: var(--brand);
-  background: var(--brand-soft);
-  border-radius: 999px;
-  padding: 2px 7px;
-  font-style: normal;
 }
 
 /* ── 분석 중 ─────────────────────────────────────────────── */
@@ -912,17 +814,6 @@ ol {
 }
 .targetcard .body span {
   font-size: var(--fs-sm);
-  color: var(--mute);
-}
-.targetcard .tail {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  flex: none;
-}
-.targetcard .tail em {
-  font-style: normal;
-  font-size: var(--fs-xs);
   color: var(--mute);
 }
 
@@ -1219,28 +1110,6 @@ ol {
 .checklist .tx {
   font-size: var(--fs-base);
   line-height: 1.6;
-  color: var(--ink-2);
-}
-
-.decided {
-  border-radius: var(--r-lg);
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  background: var(--brand-soft);
-  border: 1px solid #d5e0ff;
-}
-.decided.switch {
-  background: #e6f5f0;
-  border-color: #c8e8df;
-}
-.decided b {
-  font-size: var(--fs-md);
-}
-.decided p {
-  font-size: var(--fs-sm);
-  line-height: 1.65;
   color: var(--ink-2);
 }
 
@@ -1828,31 +1697,6 @@ ol {
   color: var(--ink-2);
 }
 
-.flowbar {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  flex-wrap: wrap;
-  padding: 2px 2px 0;
-}
-.flowbar span {
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  color: var(--mute);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 3px 9px;
-}
-.flowbar span.on {
-  color: #fff;
-  background: var(--brand-deep);
-  border-color: var(--brand-deep);
-}
-.flowbar span + span::before {
-  content: '';
-}
-
 .prow.off .body b,
 .prow.off .tail .amt {
   color: var(--mute);
@@ -1910,10 +1754,6 @@ ol {
 }
 .onetime .note {
   margin-top: 4px;
-}
-
-.earlycard .cardtitle .amt {
-  color: var(--warn);
 }
 
 /* ── 연계 가입 제안 ───────────────────────────────────────── */
@@ -2101,18 +1941,3 @@ ol {
   background: var(--warn);
 }
 
-.nextup {
-  border-radius: var(--r-lg);
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  background: var(--surface-2);
-  border: 1px dashed var(--line);
-}
-.nextup b { font-size: var(--fs-md); }
-.nextup p {
-  font-size: var(--fs-sm);
-  line-height: 1.65;
-  color: var(--ink-2);
-}

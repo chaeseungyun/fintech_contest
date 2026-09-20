@@ -8,7 +8,6 @@ import { Evidence } from './screens/Evidence';
 import { Home } from './screens/Home';
 import { Impact } from './screens/Impact';
 import { More } from './screens/More';
-import { Products } from './screens/Products';
 import { Hub } from './screens/Hub';
 import { Timeline } from './screens/Timeline';
 import { Verdict } from './screens/Verdict';
@@ -26,7 +25,6 @@ import {
 const TAB_SCREEN: Record<Tab, () => JSX.Element> = {
   home: Home,
   assets: Assets,
-  products: Products,
   benefits: Benefits,
   more: More,
 };

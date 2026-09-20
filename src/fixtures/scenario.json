@@ -7,7 +7,6 @@
   },
 
   "brand": {
-    "group": "누리금융그룹",
     "short": "FinStay AI",
     "service": "FinStay AI",
     "serviceTagline": "유지·변경·추가 가입까지 함께 판단합니다"
@@ -18,15 +17,6 @@
     "greeting": "좋은 하루 되세요.",
     "bannerTitle": "보유 금융상품을\n상시 분석하고 있습니다.",
     "bannerBody": "유지·변경·추가 가입의 손익을 연결 관계까지 계산해 비교합니다.",
-    "spend": [
-      { "month": "3월", "amount": 620000 },
-      { "month": "4월", "amount": 700000 },
-      { "month": "5월", "amount": 780000 },
-      { "month": "6월", "amount": 900000 },
-      { "month": "7월", "amount": 1050000 },
-      { "month": "8월", "amount": 1410000 },
-      { "month": "9월", "amount": 1240000 }
-    ],
     "quickMenu": [
       { "key": "account", "label": "계좌", "tab": "assets" },
       { "key": "card", "label": "카드", "tab": "assets" },
@@ -47,9 +37,7 @@
       "productId": "card_nuri_tok",
       "action": "cancel_card",
       "label": "카드 해지/변경",
-      "sublabel": "연회비, 혜택, 연결된 우대조건",
       "icon": "card",
-      "nodeLabel": "카드 해지/변경",
       "verb": "해지",
       "savings": [
         { "kind": "annual_fee", "label": "연회비", "note": "카드 해지 시" }
@@ -60,9 +48,7 @@
       "productId": "loan_nuri_mortgage",
       "action": "refinance_loan",
       "label": "대출 변경",
-      "sublabel": "금리, 한도, 우대금리 영향",
       "icon": "loan",
-      "nodeLabel": "대출 변경",
       "verb": "변경",
       "savings": []
     },
@@ -71,9 +57,7 @@
       "productId": "dep_nuri_term",
       "action": "cancel_deposit",
       "label": "예·적금 해지/변경",
-      "sublabel": "금리, 우대조건, 자동이체 영향",
       "icon": "deposit",
-      "nodeLabel": "예·적금 해지",
       "verb": "해지",
       "caveat": "중도해지 이자 손실은 해지 시 한 번 확정되는 금액이라 연 단위 합계와 따로 표시합니다.",
       "savings": []
@@ -83,9 +67,7 @@
       "productId": "ins_nuri_care",
       "action": "cancel_insurance",
       "label": "보험 해지/변경",
-      "sublabel": "보장, 보험료, 제휴 혜택 영향",
       "icon": "insurance",
-      "nodeLabel": "보험 해지",
       "verb": "해지",
       "caveat": "해지로 사라지는 보장은 금액으로 계산하지 않았습니다.",
       "savings": [
@@ -97,9 +79,7 @@
       "productId": "acct_nuri_salary",
       "action": "change_bank",
       "label": "급여통장 변경",
-      "sublabel": "우대금리, 수수료, 연결된 실적 조건",
       "icon": "account",
-      "nodeLabel": "급여통장 변경",
       "verb": "변경",
       "savings": []
     }

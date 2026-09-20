@@ -12,7 +12,6 @@ import { Home } from './Home';
 import { Hub } from './Hub';
 import { Impact } from './Impact';
 import { More } from './More';
-import { Products } from './Products';
 import { Timeline } from './Timeline';
 import { Verdict } from './Verdict';
 import { BASE_SCENARIO } from '../state/store';
@@ -41,7 +40,7 @@ describe('화면 스모크', () => {
   });
 
   it('탭 화면들', () => {
-    for (const node of [<Assets key="a" />, <Products key="p" />, <Benefits key="b" />, <More key="m" />]) {
+    for (const node of [<Assets key="a" />, <Benefits key="b" />, <More key="m" />]) {
       const html = draw(node);
       expect(html.length).toBeGreaterThan(200);
       expect(html).not.toContain('SwitchPoint');
@@ -53,7 +52,9 @@ describe('화면 스모크', () => {
   it('허브', () => {
     const html = draw(<Hub />);
     expect(html).toContain('상시 분석');
-    expect(html).toContain('실행 안내');
+    expect(html).toContain('손익을 따져볼 항목');
+    // 트리거마다 한 행. 판단이 끝나기 전에는 실행 안내 문구가 없다
+    expect((html.match(/triggerrow/g) ?? []).length).toBe(BASE_SCENARIO.triggers.length);
   });
 
   for (const triggerId of TRIGGERS) {
@@ -68,7 +69,7 @@ describe('화면 스모크', () => {
         expect(html.length).toBeGreaterThan(300);
       }
       expect(plan).toContain('실행 안내');
-      expect(verdict).toContain('절차 안내받기');
+      expect(verdict).toMatch(/절차 (보기|안내받기)/);
       expect(verdict).not.toContain('해지합니다');
     });
   }
@@ -82,9 +83,11 @@ describe('화면 스모크', () => {
     expect(html.length).toBeGreaterThan(300);
   });
 
-  it('예·적금 해지는 중도해지 이자를 보여준다', () => {
+  it('예·적금 해지는 중도해지 이자를 영향 화면과 실행 안내에서만 보여준다', () => {
     const open: Action[] = [{ type: 'push', route: { name: 'verdict', triggerId: 'deposit_cancel' } }];
     expect(draw(<Impact triggerId="deposit_cancel" />, open)).toContain('중도해지 이자 손실');
-    expect(draw(<Verdict triggerId="deposit_cancel" />, open)).toContain('중도해지 이자 손실');
+    expect(draw(<ActionPlan triggerId="deposit_cancel" />, open)).toContain('중도해지 이자 손실');
+    // 판단 화면에는 별도 카드가 없다 (트리거 caveat 문장은 데이터라 남는다)
+    expect(draw(<Verdict triggerId="deposit_cancel" />, open)).not.toContain('만기까지 두면');
   });
 });

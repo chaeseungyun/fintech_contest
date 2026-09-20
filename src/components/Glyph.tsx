@@ -81,18 +81,6 @@ const PATHS: Record<string, JSX.Element> = {
       <path d="M6 10v10h12V10" />
     </>
   ),
-  search: (
-    <>
-      <circle cx="11" cy="11" r="6.5" />
-      <path d="m16 16 4.5 4.5" />
-    </>
-  ),
-  bell: (
-    <>
-      <path d="M6.5 10a5.5 5.5 0 0 1 11 0c0 4 1.5 5.5 1.5 5.5H5S6.5 14 6.5 10Z" />
-      <path d="M10 18.5a2 2 0 0 0 4 0" />
-    </>
-  ),
   menu: (
     <>
       <path d="M4 7h16" />
@@ -115,13 +103,6 @@ const PATHS: Record<string, JSX.Element> = {
     <>
       <path d="M2.5 12S6 6 12 6s9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
       <circle cx="12" cy="12" r="2.8" />
-    </>
-  ),
-  dots: (
-    <>
-      <circle cx="12" cy="5.5" r="1.4" />
-      <circle cx="12" cy="12" r="1.4" />
-      <circle cx="12" cy="18.5" r="1.4" />
     </>
   ),
   arrow: (

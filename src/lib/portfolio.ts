@@ -1,6 +1,6 @@
 // 홈·자산 탭이 읽는 보유 현황. products 배열 하나에서 전부 집계한다.
 
-import type { HomeSpendPoint, Product, Scenario, Tagged } from './types';
+import type { Product, Scenario, Tagged } from './types';
 import { ASSET_TYPES, tag } from './types';
 
 export interface AssetGroup {
@@ -49,27 +49,4 @@ export function totalDebt(scenario: Scenario): Tagged<number> {
     .filter((p) => p.type === 'loan')
     .reduce((acc, p) => acc + amountOf(p), 0);
   return tag(sum, 'calc');
-}
-
-export interface SpendSummary {
-  points: HomeSpendPoint[];
-  current: Tagged<number>;
-  /** 전월 대비 증감률. 전월이 없으면 null */
-  delta: Tagged<number> | null;
-  max: number;
-}
-
-export function spendSummary(scenario: Scenario): SpendSummary {
-  const points = scenario.home.spend;
-  const current = points[points.length - 1];
-  const prev = points[points.length - 2];
-  return {
-    points,
-    current: tag(current ? current.amount : 0, 'holding'),
-    delta:
-      current && prev && prev.amount > 0
-        ? tag((current.amount - prev.amount) / prev.amount, 'calc')
-        : null,
-    max: Math.max(1, ...points.map((p) => p.amount)),
-  };
 }

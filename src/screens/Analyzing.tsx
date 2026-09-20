@@ -4,8 +4,8 @@ import { Glyph } from '../components/Glyph';
 import { useStore } from '../state/store';
 
 /** 한 단계가 끝나는 데 걸리는 시간(ms). 계산 자체는 즉시 끝나고, 이건 진행 표시용이다. */
-const STEP_MS = 700;
-const FINISH_MS = 500;
+const STEP_MS = 500;
+const FINISH_MS = 400;
 
 /**
  * 분석 중 화면. 단계 문구와 숫자는 derive() 가 이미 계산해 둔 결과(d.steps)를 읽는다 —

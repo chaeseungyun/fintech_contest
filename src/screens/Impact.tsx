@@ -111,7 +111,7 @@ export function Impact({ triggerId }: { triggerId: string }) {
 
   return (
     <AppShell
-      title="분석 결과"
+      title="영향 분석"
       onBack={() => dispatch({ type: 'back' })}
       hideTabBar
       footer={
@@ -134,23 +134,17 @@ export function Impact({ triggerId }: { triggerId: string }) {
           </b>
           <span>{center.facts.last4 ? `(${center.facts.last4})` : d.trigger.label}</span>
         </span>
-        {d.savings.length > 0 && (
-          <span className="tail">
-            <em>{d.savings[0].label}</em>
-            <Amount value={d.savings[0].annualAmount} short />
-          </span>
-        )}
       </div>
 
       <h3 className="sectiontitle">
         연결된 금융상품에 미치는 영향
         <button
           type="button"
-          className="iconbtn"
-          aria-label="연결 관계도 보기"
+          className="link"
           onClick={() => dispatch({ type: 'push', route: { name: 'connections', triggerId } })}
         >
-          <Glyph name="info" size={17} />
+          관계도 보기
+          <Glyph name="chevron" size={14} />
         </button>
       </h3>
 

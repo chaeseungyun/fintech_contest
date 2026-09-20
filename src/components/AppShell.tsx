@@ -14,7 +14,6 @@ interface Props {
   footer?: ReactNode;
   /** 탭바를 감출 화면(분석 흐름) */
   hideTabBar?: boolean;
-  tone?: 'plain' | 'brand';
   children: ReactNode;
 }
 
@@ -25,13 +24,12 @@ export function AppShell({
   header,
   footer,
   hideTabBar,
-  tone = 'plain',
   children,
 }: Props) {
   const { state, dispatch } = useStore();
 
   return (
-    <div className={`app tone-${tone}`}>
+    <div className="app">
       <div className="statusbar">
         <span className="time">9:41</span>
         <span className="sig" aria-hidden="true">

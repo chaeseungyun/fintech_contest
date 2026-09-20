@@ -21,41 +21,41 @@ describe('판단과 실행 안내는 같은 방향을 본다', () => {
   }
 });
 
-describe('유지 판단의 안내', () => {
-  const plan = derive(scenario, CARD).actionPlan;
+describe('유지 판단의 안내 — 유지 절차는 없고 해지 절차만 낸다', () => {
+  const d = derive(scenario, CARD);
+  const plan = d.actionPlan;
 
-  it('그대로 두기 → 지킬 조건 → 다시 볼 시점 → 그래도 바꾼다면', () => {
-    expect(keys(CARD)).toEqual(['keep-decide', 'keep-rules', 'keep-review', 'keep-alt']);
+  it('유지 단계가 하나도 없다 — 그대로 두는 데 절차는 없다', () => {
+    expect(plan.kind).toBe('keep');
+    expect(keys(CARD).some((k) => k.startsWith('keep'))).toBe(false);
   });
 
-  it('지킬 조건은 살아있는 연결만큼 나온다', () => {
-    const d = derive(scenario, CARD);
-    const rules = plan.steps.find((s) => s.key === 'keep-rules')!;
-    expect(rules.bullets).toHaveLength(d.items.filter((i) => i.judgment.active).length);
+  it('머리글에는 유지가 유리하다고 적고, 절차는 해지 절차다', () => {
+    expect(plan.summary).toContain('유지');
+    expect(plan.title).toBe(`${d.center.shortName ?? d.center.name} ${d.trigger.verb} 절차`);
   });
 
-  it('그래도 바꾼다면 — 새 상품 먼저, 판정일 이후, 그다음 해지 순서다', () => {
-    const alt = plan.steps.find((s) => s.key === 'keep-alt')!;
-    const newFirst = alt.bullets.findIndex((b) => b.includes('먼저 만듭니다'));
-    const wait = alt.bullets.findIndex((b) => b.includes('판정이 끝난 뒤'));
-    const act = alt.bullets.findIndex((b) => b.includes('해지 신청'));
-    expect(newFirst).toBeGreaterThanOrEqual(0);
-    expect(newFirst).toBeLessThan(wait);
-    expect(wait).toBeLessThan(act);
+  it('새 상품 먼저 → 판정일 이후 → 해지 신청 순서다', () => {
+    const k = keys(CARD);
+    expect(k.indexOf('new-first')).toBeGreaterThanOrEqual(0);
+    expect(k.indexOf('new-first')).toBeLessThan(k.indexOf('wait'));
+    expect(k.indexOf('wait')).toBeLessThan(k.indexOf('execute'));
   });
 
   it('기한은 안전 시점에서 온다 — 문구에 날짜를 적지 않는다', () => {
-    const d = derive(scenario, CARD);
-    const alt = plan.steps.find((s) => s.key === 'keep-alt')!;
-    expect(alt.when?.value).toBe(d.timing.safeFrom.value);
-    expect(alt.whenLabel).toBe(`${formatKoMD(d.timing.safeAfter.value)} 이후`);
+    const exec = plan.steps.find((s) => s.key === 'execute')!;
+    expect(exec.when?.value).toBe(d.timing.safeFrom.value);
+    expect(exec.whenLabel).toBe(`${formatKoMD(d.timing.safeFrom.value)} 이후`);
   });
 
   it('회복 불가 항목을 빠뜨리지 않는다', () => {
-    const d = derive(scenario, CARD);
-    const alt = plan.steps.find((s) => s.key === 'keep-alt')!;
+    const step = plan.steps.find((s) => s.key === 'unrecoverable');
+    if (d.unrecoverable.length === 0) {
+      expect(step).toBeUndefined();
+      return;
+    }
     for (const u of d.unrecoverable) {
-      expect(alt.bullets.some((b) => b.includes(u.product.shortName ?? u.product.name))).toBe(true);
+      expect(step!.bullets.some((b) => b.includes(u.product.shortName ?? u.product.name))).toBe(true);
     }
   });
 });
@@ -86,14 +86,14 @@ describe('변경 판단의 안내', () => {
 describe('중도해지 이자는 안내에도 남는다', () => {
   it('예·적금 해지는 유지 판단이지만 일회성 손실을 그래도 적는다', () => {
     const d = derive(scenario, DEPOSIT);
-    const alt = d.actionPlan.steps.find((s) => s.key === 'keep-alt')!;
+    const early = d.actionPlan.steps.find((s) => s.key === 'early')!;
     expect(d.earlyTermination).not.toBeNull();
-    expect(alt.bullets.some((b) => b.includes('중도해지 이자'))).toBe(true);
+    expect(early.detail).toContain('중도해지');
+    expect(early.source).toBe(d.earlyTermination!.loss.source);
   });
 
-  it('중도해지 손실이 없는 시나리오에는 그 문구가 없다', () => {
-    const alt = derive(scenario, CARD).actionPlan.steps.find((s) => s.key === 'keep-alt')!;
-    expect(alt.bullets.some((b) => b.includes('중도해지'))).toBe(false);
+  it('중도해지 손실이 없는 시나리오에는 그 단계가 없다', () => {
+    expect(keys(CARD)).not.toContain('early');
   });
 });
 
@@ -140,7 +140,7 @@ describe('안내는 새로 계산하지 않는다', () => {
           .filter((x): x is string => x !== null),
       );
       for (const step of d.actionPlan.steps) {
-        if (step.when && step.key !== 'keep-review') expect(known.has(step.when.value)).toBe(true);
+        if (step.when) expect(known.has(step.when.value)).toBe(true);
       }
     }
   });

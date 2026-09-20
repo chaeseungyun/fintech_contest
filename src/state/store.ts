@@ -11,12 +11,11 @@ import type { Scenario } from '../lib/types';
 export const BASE_SCENARIO = fixture as unknown as Scenario;
 
 /** 하단 탭바. 홈이 기본 */
-export type Tab = 'home' | 'assets' | 'products' | 'benefits' | 'more';
+export type Tab = 'home' | 'assets' | 'benefits' | 'more';
 
 export const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'home', label: '홈', icon: 'home' },
   { id: 'assets', label: '자산', icon: 'invest' },
-  { id: 'products', label: '상품', icon: 'deposit' },
   { id: 'benefits', label: '혜택', icon: 'benefit' },
   { id: 'more', label: '전체', icon: 'grid' },
 ];

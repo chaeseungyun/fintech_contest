@@ -4,14 +4,13 @@
 import { buildActionPlan, type ActionPlan, type PlanLink } from './actionplan';
 import { addonProposals, type AddonProposal } from './addon';
 import { addOffset, daysBetween, maxISO } from './dates';
-import { formatKoMD, formatKoYMD, formatMonths, formatWonShort, withJosa } from './format';
+import { formatKoMD, formatKoYMD, formatWonShort, withJosa } from './format';
 import { buildGraph, incomingConditions, productById, unsupportedForDocs, type Graph } from './graph';
 import { horizonProjection, type Horizon } from './horizon';
 import {
   computeSafeTiming,
   evaluateCondition,
   latestRecoverAt,
-  requirementLabel,
   type Judgment,
   type SafeTiming,
 } from './interpreter';
@@ -177,12 +176,9 @@ export function derive(scenario: Scenario, triggerId?: string): Derived {
 
   const actionPlan = buildActionPlan({
     kind: verdict.kind,
-    today,
     trigger,
     center,
     timing,
-    horizon,
-    links: active.map(toPlanLink),
     best: recommendation.best,
     unrecoverable: unrecoverable.map(toPlanLink),
     earlyTermination: early,
@@ -209,14 +205,9 @@ export function derive(scenario: Scenario, triggerId?: string): Derived {
       trigger,
       center,
       items: active,
-      total,
-      savings,
-      savingsTotal,
-      horizon,
       timing,
       unrecoverable,
       recommendation,
-      earlyTermination: early,
     }),
     steps: buildSteps({ conditions, unsupported, items, total, savingsTotal }),
     timing,
@@ -236,9 +227,6 @@ const shortName = (p: Product) => p.shortName ?? p.name;
 function toPlanLink(item: ImpactItem): PlanLink {
   return {
     productName: shortName(item.product),
-    requirement: requirementLabel(item.condition),
-    cycleLabel: item.judgment.cycleLabel.value,
-    recoverable: item.judgment.recoverable,
     recoverAt: item.judgment.recoverAt?.value ?? null,
   };
 }
@@ -291,61 +279,21 @@ function buildVerdict(ctx: {
   };
 }
 
+/**
+ * 최종 판단 화면의 "꼭 확인하세요". 같은 화면의 차트·합계와 겹치는 금액 비교는 넣지 않는다 —
+ * 연결 상태·회복 불가·이번 달 판정 마감·갈아타기 순서처럼 판단을 뒤집을 수 있는 조건만 적는다.
+ */
 function buildChecklist(ctx: {
   trigger: Trigger;
   center: Product;
   items: ImpactItem[];
-  total: Tagged<number>;
-  savings: SavingItem[];
-  savingsTotal: Tagged<number>;
-  horizon: Horizon;
   timing: SafeTiming;
   unrecoverable: ImpactItem[];
   recommendation: Recommendation;
-  earlyTermination: EarlyTermination | null;
 }): ChecklistItem[] {
-  const {
-    trigger,
-    center,
-    items,
-    total,
-    savings,
-    savingsTotal,
-    horizon,
-    timing,
-    unrecoverable,
-    recommendation,
-    earlyTermination: early,
-  } = ctx;
+  const { trigger, center, items, timing, unrecoverable, recommendation } = ctx;
   const name = shortName(center);
   const list: ChecklistItem[] = [];
-
-  if (savingsTotal.value > 0) {
-    const label = savings.map((s) => s.label).join('·');
-    list.push({
-      key: 'compare',
-      text:
-        total.value > savingsTotal.value
-          ? `${label} ${formatWonShort(savingsTotal.value)} 절감보다 연결된 금융 혜택 손실 ${formatWonShort(total.value)}이 더 큽니다.`
-          : `${label} ${formatWonShort(savingsTotal.value)} 절감이 연결된 혜택 손실 ${formatWonShort(total.value)}보다 큽니다.`,
-      source: 'calc',
-    });
-  } else if (total.value > 0) {
-    list.push({
-      key: 'compare',
-      text: `${trigger.verb} 시 줄어드는 비용은 없고, 연결된 혜택 ${formatWonShort(total.value)}이 사라집니다.`,
-      source: 'calc',
-    });
-  }
-
-  const rec = horizon.recommended;
-  if (rec.months > 0) {
-    list.push({
-      key: 'horizon',
-      text: `${formatMonths(rec.months)} 유지 시 약 ${formatWonShort(rec.value.value)}의 이익이 예상됩니다.`,
-      source: rec.value.source,
-    });
-  }
 
   if (items.length > 0) {
     list.push({
@@ -380,16 +328,6 @@ function buildChecklist(ctx: {
       key: 'switch-order',
       text: `${withJosa(newName, '을/를')} 먼저 만든 뒤${when} ${withJosa(name, '을/를')} ${trigger.verb}하면 연결 ${best.preserved.length}건이 유지됩니다.`,
       source: best.netAfter.source,
-    });
-  }
-
-  if (early) {
-    list.push({
-      key: 'early-termination',
-      text: `중도해지하면 약정이자 ${formatWonShort(early.fullInterest.value)} 대신 ${formatWonShort(
-        early.earlyInterest.value,
-      )}만 받아 ${formatWonShort(early.loss.value)}을 덜 받습니다. 한 번 확정되는 금액이라 위 연 단위 손익과 따로 봅니다.`,
-      source: early.loss.source,
     });
   }
 
