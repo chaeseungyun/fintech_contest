@@ -18,7 +18,9 @@ import { formatMonths } from './format';
 import type { ISODate, Tagged } from './types';
 import { tag } from './types';
 
-export const DEFAULT_HORIZON_MONTHS = [0, 6, 12, 24];
+// 1년 안에서 분기 단위. 유지 손익은 개월 수에 비례하므로 1년을 넘는 구간은 배수일 뿐 정보가 없다.
+// 회복 불가 조건의 만기가 1년보다 멀면 마지막 구간(1년)으로 떨어진다 — 그 경우는 문구로 만기를 따로 적는다.
+export const DEFAULT_HORIZON_MONTHS = [0, 3, 6, 9, 12];
 
 export interface HorizonPoint {
   months: number;
@@ -31,9 +33,19 @@ export interface HorizonPoint {
   recommended: boolean;
 }
 
+/**
+ * 추천 구간을 고른 이유. 화면 문구는 이걸 보고 고른다 — 구간 숫자만 보고 문장을 지어내지 않는다.
+ *   now            지금 실행이 이미 이득
+ *   recover        회복 불가 조건의 만기를 넘기는 가장 이른 구간
+ *   recover-beyond 만기가 마지막 구간보다도 멀어 마지막 구간으로 떨어짐 (문구에 만기를 따로 적을 것)
+ *   positive       순손익이 양으로 돌아서는 가장 이른 구간
+ */
+export type HorizonReason = 'now' | 'recover' | 'recover-beyond' | 'positive';
+
 export interface Horizon {
   points: HorizonPoint[];
   recommended: HorizonPoint;
+  reason: HorizonReason;
   /** 지금 실행했을 때의 연 기준 순손익 */
   netAnnual: Tagged<number>;
   /** 축을 그릴 때 쓰는 최대 절대값. 0 이면 1 로 둔다(0 나누기 방지) */
@@ -75,7 +87,7 @@ export function horizonProjection(input: HorizonInput): Horizon {
     amount: m === 0 ? net : holdValue(annualLoss, savings, m),
   }));
 
-  const recommendedMonths = pickRecommended(raw, { today, net, recoverBy });
+  const { months: recommendedMonths, reason } = pickRecommended(raw, { today, net, recoverBy });
 
   const points: HorizonPoint[] = raw.map((p) => ({
     months: p.months,
@@ -89,6 +101,7 @@ export function horizonProjection(input: HorizonInput): Horizon {
   return {
     points,
     recommended: points.find((p) => p.recommended) ?? points[0],
+    reason,
     netAnnual: tag(net, 'calc'),
     scale,
   };
@@ -97,20 +110,20 @@ export function horizonProjection(input: HorizonInput): Horizon {
 function pickRecommended(
   raw: { months: number; amount: number }[],
   ctx: { today: ISODate; net: number; recoverBy: ISODate | null },
-): number {
-  if (ctx.net >= 0) return 0;
+): { months: number; reason: HorizonReason } {
+  if (ctx.net >= 0) return { months: 0, reason: 'now' };
 
   const holds = raw.filter((p) => p.months > 0);
-  if (holds.length === 0) return 0;
+  if (holds.length === 0) return { months: 0, reason: 'now' };
+  const last = holds[holds.length - 1].months;
 
   if (ctx.recoverBy !== null) {
     const covering = holds.find(
       (p) => compareISO(addOffset(ctx.today, { months: p.months }), ctx.recoverBy as ISODate) >= 0,
     );
-    if (covering) return covering.months;
-    return holds[holds.length - 1].months;
+    return covering ? { months: covering.months, reason: 'recover' } : { months: last, reason: 'recover-beyond' };
   }
 
   const positive = holds.find((p) => p.amount > 0);
-  return positive ? positive.months : holds[holds.length - 1].months;
+  return { months: positive ? positive.months : last, reason: 'positive' };
 }

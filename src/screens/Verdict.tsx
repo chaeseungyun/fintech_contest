@@ -4,13 +4,29 @@ import { Glyph } from '../components/Glyph';
 import { HorizonChart } from '../components/HorizonChart';
 import { RecommendCard } from '../components/RecommendCard';
 import { SourceTag } from '../components/SourceTag';
-import { formatMonths, withJosa } from '../lib/format';
+import type { Derived } from '../lib/derive';
+import { formatKoMD, formatKoYMD, formatMonths } from '../lib/format';
 import { useStore } from '../state/store';
+
+/** 차트 아래 한 줄. 추천 구간을 고른 이유(horizon.reason)에 맞춰 쓴다 — 구간 숫자만 보고 문장을 짓지 않는다. */
+function horizonNote(d: Derived): string {
+  const { verb } = d.trigger;
+  const held = formatMonths(d.horizon.recommended.months);
+  switch (d.horizon.reason) {
+    case 'now':
+      return `지금 ${verb}해도 연 기준으로 손해가 아닙니다.`;
+    case 'recover':
+      return `${held} 유지하면 되돌릴 수 없는 우대의 만기(${formatKoMD(d.recoverBy!)})를 넘깁니다.`;
+    case 'recover-beyond':
+      return `되돌릴 수 없는 우대의 만기가 ${formatKoYMD(d.recoverBy!)}라 적어도 ${held} 이상 유지해야 합니다.`;
+    case 'positive':
+      return `${held}만 유지해도 이익으로 돌아섭니다. 더 오래 둘수록 이익은 커집니다.`;
+  }
+}
 
 export function Verdict({ triggerId }: { triggerId: string }) {
   const { derived: d, dispatch } = useStore();
   const v = d.verdict;
-  const name = d.center.shortName ?? d.center.name;
 
   return (
     <AppShell
@@ -76,11 +92,7 @@ export function Verdict({ triggerId }: { triggerId: string }) {
           <SourceTag source={d.netAnnual.source} />
         </h3>
         <HorizonChart horizon={d.horizon} />
-        <p className="chartnote">
-          {d.horizon.recommended.months === 0
-            ? `지금 ${d.trigger.verb}해도 연 기준으로 손해가 아닙니다.`
-            : `${formatMonths(d.horizon.recommended.months)} 유지하면 ${withJosa(name, '과/와')} 연결된 우대 조건이 한 바퀴를 돕니다.`}
-        </p>
+        <p className="chartnote">{horizonNote(d)}</p>
       </section>
 
       <RecommendCard />

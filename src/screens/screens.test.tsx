@@ -74,6 +74,15 @@ describe('화면 스모크', () => {
     });
   }
 
+  it('차트 아래 문구는 추천 이유를 따른다', () => {
+    const at = (triggerId: string) =>
+      draw(<Verdict triggerId={triggerId} />, [{ type: 'push', route: { name: 'verdict', triggerId } }]);
+    expect(at('card_cancel')).toContain('9개월 유지하면 되돌릴 수 없는 우대의 만기(3월 20일)를 넘깁니다');
+    expect(at('loan_change')).toContain('3개월만 유지해도 이익으로 돌아섭니다');
+    expect(at('insurance_cancel')).toContain('지금 해지해도 연 기준으로 손해가 아닙니다');
+    expect(at('card_cancel')).not.toContain('한 바퀴');
+  });
+
   it('근거 화면', () => {
     const triggerId = 'card_cancel';
     const productId = 'loan_nuri_mortgage';

@@ -778,7 +778,7 @@
   "expected": {
     "note": "코드가 계산해야 할 값. 하드코딩 금지 — 검증용 기대치로만 사용한다.",
     "totalAssets": 125400000,
-    "horizonMonths": [0, 6, 12, 24],
+    "horizonMonths": [0, 3, 6, 9, 12],
     "earlyTermination": {
       "dep_nuri_term": {
         "fullDays": 365,
@@ -817,8 +817,8 @@
         },
         "safeAfter": "2026-09-30",
         "unrecoverable": [{ "conditionId": "k2", "until": "2027-03-20" }],
-        "horizon": [-164000, 67000, 164000, 328000],
-        "recommendedMonths": 12,
+        "horizon": [-164000, 18500, 67000, 115500, 164000],
+        "recommendedMonths": 9,
         "verdict": "keep",
         "recommendation": {
           "hurdle": 164000,
@@ -846,8 +846,8 @@
         },
         "safeAfter": "2026-09-30",
         "unrecoverable": [{ "conditionId": "c4", "until": "2027-03-20" }],
-        "horizon": [-510000, 255000, 510000, 1020000],
-        "recommendedMonths": 12,
+        "horizon": [-510000, 127500, 255000, 382500, 510000],
+        "recommendedMonths": 9,
         "verdict": "keep",
         "recommendation": { "hurdle": 510000, "ranked": [], "netAfter": {}, "preserved": {}, "best": null }
       },
@@ -862,8 +862,8 @@
         "nextJudgmentDates": { "l1": "2026-09-30", "l2": "2026-09-20" },
         "safeAfter": "2026-09-30",
         "unrecoverable": [],
-        "horizon": [-50000, 25000, 50000, 100000],
-        "recommendedMonths": 6,
+        "horizon": [-50000, 12500, 25000, 37500, 50000],
+        "recommendedMonths": 3,
         "verdict": "keep",
         "recommendation": { "hurdle": 50000, "ranked": [], "netAfter": {}, "preserved": {}, "best": null }
       },
@@ -875,8 +875,8 @@
         "nextJudgmentDates": { "p1": "2026-09-15" },
         "safeAfter": "2026-09-15",
         "unrecoverable": [],
-        "horizon": [-60000, 30000, 60000, 120000],
-        "recommendedMonths": 6,
+        "horizon": [-60000, 15000, 30000, 45000, 60000],
+        "recommendedMonths": 3,
         "verdict": "keep",
         "recommendation": { "hurdle": 60000, "ranked": [], "netAfter": {}, "preserved": {}, "best": null }
       },
@@ -888,7 +888,7 @@
         "nextJudgmentDates": { "n1": "2026-09-30" },
         "safeAfter": "2026-09-30",
         "unrecoverable": [],
-        "horizon": [780000, -798000, -780000, -1560000],
+        "horizon": [780000, -807000, -798000, -789000, -780000],
         "recommendedMonths": 0,
         "verdict": "switch",
         "recommendation": {
