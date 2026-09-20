@@ -1,11 +1,23 @@
 import { formatSignedWonShort } from '../lib/format';
-import type { Horizon } from '../lib/horizon';
+import type { Horizon, HorizonReason } from '../lib/horizon';
 
 /**
- * 시점별 예상 손익. 0 을 기준선으로 위/아래로 자란다.
- * 막대 높이·위치는 horizon.points 의 값에서만 나온다 — 화면에 숫자를 쓰지 않는다.
+ * 강조 막대에 붙는 배지. 이유에 따라 다르다 — 첫 양수 구간(positive)은 "추천 시점" 이 아니라
+ * 손익분기라서 그렇게 적는다. 변경 시점은 판정일·만기 같은 확인된 사건으로 정한다.
  */
-export function HorizonChart({ horizon }: { horizon: Horizon }) {
+const BADGE: Record<HorizonReason, string> = {
+  now: '추천',
+  recover: '만기 이후',
+  'recover-beyond': '최소 유지',
+  positive: '손익분기',
+};
+
+/**
+ * 유지 기간별 예상 손익. 0 을 기준선으로 위/아래로 자란다.
+ * 막대 높이·위치는 horizon.points 의 값에서만 나온다 — 화면에 숫자를 쓰지 않는다.
+ * quiet 면 강조 막대·배지를 그리지 않는다 — 절감이 없어 손익분기 자체가 없을 때.
+ */
+export function HorizonChart({ horizon, quiet = false }: { horizon: Horizon; quiet?: boolean }) {
   const values = horizon.points.map((p) => p.value.value);
   const posMax = Math.max(0, ...values);
   const negMax = Math.max(0, ...values.map((v) => -v));
@@ -29,14 +41,14 @@ export function HorizonChart({ horizon }: { horizon: Horizon }) {
               ? { bottom: `calc(${100 - base}% + ${h}% + 3px)` }
               : { top: `calc(${base}% + ${h}% + 3px)` };
             return (
-              <div key={p.months} className={`col${p.recommended ? ' rec' : ''}`}>
+              <div key={p.months} className={`col${p.recommended && !quiet ? ' rec' : ''}`}>
                 <span
                   className={`bar ${up ? 'up' : 'down'}`}
                   style={barStyle}
                   title={`${p.label} ${formatSignedWonShort(v)}`}
                 />
                 <span className={`val ${up ? 'up' : 'down'}`} style={labelStyle}>
-                  {p.recommended && <b className="badge">추천</b>}
+                  {p.recommended && !quiet && <b className="badge">{BADGE[horizon.reason]}</b>}
                   {formatSignedWonShort(v)}
                 </span>
               </div>
@@ -46,7 +58,7 @@ export function HorizonChart({ horizon }: { horizon: Horizon }) {
       </div>
       <div className="xaxis">
         {horizon.points.map((p) => (
-          <span key={p.months} className={p.recommended ? 'on' : undefined}>
+          <span key={p.months} className={p.recommended && !quiet ? 'on' : undefined}>
             {p.label}
           </span>
         ))}

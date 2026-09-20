@@ -2,7 +2,7 @@ import { Amount } from './Amount';
 import { ContactSheet } from './ContactSheet';
 import { Glyph, TYPE_ICON } from './Glyph';
 import { SourceTag } from './SourceTag';
-import { toContact } from '../lib/actionplan';
+import { planBasisLabel, toContact } from '../lib/actionplan';
 import { formatWonShort } from '../lib/format';
 import type { CandidateResult, ChainLink } from '../lib/recommend';
 import { tag } from '../lib/types';
@@ -10,15 +10,22 @@ import { useStore } from '../state/store';
 
 const names = (links: ChainLink[]) => links.map((l) => l.product.shortName ?? l.product.name).join('·');
 
-function CandidateRow({ result }: { result: CandidateResult }) {
+function CandidateRow({ result, triggerId }: { result: CandidateResult; triggerId: string }) {
   const { state, derived: d, dispatch } = useStore();
   const { candidate: c } = result;
   const open = state.expandedCandidateId === c.id;
+  const chosen = d.chosen?.candidate.id === c.id;
   const r = d.recommendation;
   const contact = toContact(c.institution, c.contact);
 
+  // 절차의 기준 안으로 고른다. 앱이 대신 고르지 않는다 — 여기서 누른 것만 실행 안내가 따른다.
+  const choose = () => {
+    dispatch({ type: 'chooseCandidate', triggerId, candidateId: c.id });
+    dispatch({ type: 'push', route: { name: 'actionplan', triggerId } });
+  };
+
   return (
-    <div className={`crow${open ? ' open' : ''}${result.recommended ? ' rec' : ''}`}>
+    <div className={`crow${open ? ' open' : ''}${result.recommended ? ' rec' : ''}${chosen ? ' chosen' : ''}`}>
       <button
         type="button"
         className="head"
@@ -35,7 +42,7 @@ function CandidateRow({ result }: { result: CandidateResult }) {
           <span>{result.basisLabel}</span>
         </span>
         <span className="tail">
-          {result.recommended && <em className="pick">추천</em>}
+          {chosen ? <em className="pick on">절차 기준</em> : result.recommended && <em className="pick">이득</em>}
           <Amount value={result.netAfter} signed short />
           <Glyph name="down" size={16} className="caret" />
         </span>
@@ -118,14 +125,20 @@ function CandidateRow({ result }: { result: CandidateResult }) {
             <p className="note danger">가입 자격 미충족: “{c.eligibility.sourceText}”</p>
           )}
 
-          {contact && (
-            <ContactSheet
-              id={`cand:${c.id}`}
-              contact={contact}
-              label="신청 경로 보기"
-              intro={`신청은 ${c.institution} 공식 채널에서 직접 합니다. 이 앱은 가입을 대신 처리하지 않습니다.`}
-            />
-          )}
+          <div className="rowactions">
+            {contact && (
+              <ContactSheet
+                id={`cand:${c.id}`}
+                contact={contact}
+                label="신청 경로 보기"
+                intro={`신청은 ${c.institution} 공식 채널에서 직접 합니다. 이 앱은 가입을 대신 처리하지 않습니다.`}
+              />
+            )}
+            <button type="button" className="choosebtn" onClick={choose}>
+              이 안으로 절차 보기
+              <Glyph name="chevron" size={14} />
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -133,13 +146,20 @@ function CandidateRow({ result }: { result: CandidateResult }) {
 }
 
 /**
- * 갈아타기 추천. 이미 계산한 손실을 문턱으로 삼아, 그걸 넘는 후보만 추천한다.
+ * 갈아타기 비교. 이미 계산한 손실을 문턱으로 삼아, 그걸 넘는 후보에 "이득" 을 붙인다.
  * 후보가 하나도 없으면 아무것도 그리지 않는다.
+ * 절차의 기준 안은 사용자가 고른다 — "새 상품 없이" 도 하나의 안이다.
  */
-export function RecommendCard() {
-  const { derived: d } = useStore();
+export function RecommendCard({ triggerId }: { triggerId: string }) {
+  const { derived: d, dispatch } = useStore();
   const r = d.recommendation;
   if (r.results.length === 0) return null;
+  const noneChosen = d.chosen === null;
+
+  const chooseNone = () => {
+    dispatch({ type: 'chooseCandidate', triggerId, candidateId: null });
+    dispatch({ type: 'push', route: { name: 'actionplan', triggerId } });
+  };
 
   return (
     <section className={`card recommend${r.best ? '' : ' none'}`}>
@@ -151,13 +171,30 @@ export function RecommendCard() {
 
       <div className="candlist">
         {r.results.map((res) => (
-          <CandidateRow key={res.candidate.id} result={res} />
+          <CandidateRow key={res.candidate.id} result={res} triggerId={triggerId} />
         ))}
+
+        <div className={`crow plain${noneChosen ? ' chosen' : ''}`}>
+          <button type="button" className="head" onClick={chooseNone}>
+            <span className="ico tint-deposit">
+              <Glyph name="arrow" size={19} />
+            </span>
+            <span className="body">
+              <b>{planBasisLabel(null, d.trigger)}</b>
+              <span>대체 상품 없이 정리할 때의 절차</span>
+            </span>
+            <span className="tail">
+              {noneChosen && <em className="pick on">절차 기준</em>}
+              <Glyph name="chevron" size={16} />
+            </span>
+          </button>
+        </div>
       </div>
 
       <p className="note">
         지금 실적을 새 상품으로 그대로 옮긴다고 가정한 계산입니다.
         {r.linkCount > r.preservableCount && ' 가입 시점에 확정된 우대는 어떤 상품으로도 살리지 못합니다.'}
+        {' '}절차는 여기서 고른 안을 따릅니다 — 앱이 대신 고르지 않습니다.
       </p>
     </section>
   );

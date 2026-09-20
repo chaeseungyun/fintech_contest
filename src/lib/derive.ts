@@ -1,7 +1,7 @@
 // 화면들이 공유하는 파생 값. 시나리오 하나 + 트리거 하나에서 전부 계산한다.
 // 화면은 이 결과만 읽는다. 값을 복사해 갖지 않는다.
 
-import { buildActionPlan, type ActionPlan, type PlanLink } from './actionplan';
+import { buildActionPlan, type ActionPlan, type PlanDue, type PlanLink } from './actionplan';
 import { addonProposals, type AddonProposal } from './addon';
 import { addOffset, daysBetween, maxISO } from './dates';
 import { formatKoMD, formatKoYMD, formatWonShort, withJosa } from './format';
@@ -11,6 +11,7 @@ import {
   computeSafeTiming,
   evaluateCondition,
   latestRecoverAt,
+  requirementLabel,
   type Judgment,
   type SafeTiming,
 } from './interpreter';
@@ -23,7 +24,7 @@ import {
   type LossBreakdown,
   type SavingItem,
 } from './money';
-import { recommend, type Recommendation } from './recommend';
+import { recommend, type CandidateResult, type Recommendation } from './recommend';
 import type { Condition, ISODate, MappedCondition, Product, Scenario, Source, Tagged, Trigger } from './types';
 import { candidatesFor, defaultTrigger, tag, triggerById } from './types';
 
@@ -52,7 +53,12 @@ export interface Axis {
   safeFromPct: number;
 }
 
-export type VerdictKind = 'keep' | 'switch';
+/**
+ * keep    확인된 조건에서는 유지가 유리
+ * switch  확인된 조건에서는 지금 바꿔도 금액상 손해 없음
+ * pending 핵심 입력이 빠져 전체 유불리를 판정하지 않음 — 확인된 항목의 소계만 낸다
+ */
+export type VerdictKind = 'keep' | 'switch' | 'pending';
 
 export interface Verdict {
   kind: VerdictKind;
@@ -61,6 +67,22 @@ export interface Verdict {
   highlight: string;
   tail: string;
   body: string;
+}
+
+/**
+ * 금액 옆에 항상 붙는 비교 기준. "무엇을 무엇과, 어떤 기간으로, 언제 기준으로, 무슨 가정으로"
+ * 비교했는지 — 화면이 문장을 지어내지 않고 이 값을 그대로 그린다.
+ */
+export interface ComparisonBasis {
+  /** "톡톡카드 해지" */
+  change: string;
+  /** "그대로 유지" */
+  versus: string;
+  /** "연 기준" */
+  period: string;
+  asOf: ISODate;
+  /** "실적·금리 현행 유지" */
+  assumption: string;
 }
 
 export interface ChecklistItem {
@@ -80,6 +102,9 @@ export interface Derived {
   trigger: Trigger;
   center: Product;
   graph: Graph;
+  /** 비교에 빠진 핵심 입력. 비어 있지 않으면 verdict.kind 가 pending */
+  missing: string[];
+  basis: ComparisonBasis;
   /** 금액 큰 순 */
   items: ImpactItem[];
   /** 손실이 실제로 발생하는 건수 */
@@ -93,6 +118,8 @@ export interface Derived {
   verdict: Verdict;
   /** 손실을 넘어서는 갈아타기 후보. 후보가 없으면 results 가 빈 배열 */
   recommendation: Recommendation;
+  /** 사용자가 절차의 기준으로 고른 후보. 고르지 않았으면 null (새 상품 없이) */
+  chosen: CandidateResult | null;
   /** 보유 상품을 그대로 두고 더하면 이득인 후보. 변경 대상과 같은 종류는 뺀다 */
   addons: AddonProposal;
   /** 판단 이후 실제로 밟을 순서. 계산을 새로 하지 않고 위 값들을 엮는다 */
@@ -100,6 +127,8 @@ export interface Derived {
   /** 변경 대상이 정기예금일 때의 일회성 중도해지 이자 손실. 연 단위 합계에 더하지 않는다 */
   earlyTermination: EarlyTermination | null;
   checklist: ChecklistItem[];
+  /** 유지를 택할 때 지켜야 할 조건. 절차가 아니라 조건 목록이다 */
+  maintain: ChecklistItem[];
   steps: AnalysisStep[];
   timing: SafeTiming;
   /** 회복 불가 조건의 회복 시점 중 가장 늦은 날 */
@@ -113,9 +142,15 @@ export interface Derived {
   unsupported: Condition[];
 }
 
-export function derive(scenario: Scenario, triggerId?: string): Derived {
+export interface DeriveOptions {
+  /** 사용자가 절차의 기준으로 고른 후보 id. 없거나 null 이면 "새 상품 없이" */
+  chosenCandidateId?: string | null;
+}
+
+export function derive(scenario: Scenario, triggerId?: string, options: DeriveOptions = {}): Derived {
   const today = scenario.meta.today;
   const trigger = triggerId ? triggerById(scenario, triggerId) : defaultTrigger(scenario);
+  const missing = trigger.missing ?? [];
   const centerId = trigger.productId;
   const center = productById(scenario, centerId);
   const conditions = incomingConditions(scenario, centerId);
@@ -161,7 +196,7 @@ export function derive(scenario: Scenario, triggerId?: string): Derived {
     conditions.map((c) => c.sourceDoc),
   );
 
-  const verdict = buildVerdict({ trigger, center, items: active, horizon, savings });
+  const verdict = buildVerdict({ trigger, center, items: active, horizon, savings, missing });
 
   const recommendation = recommend({
     trigger,
@@ -170,6 +205,10 @@ export function derive(scenario: Scenario, triggerId?: string): Derived {
     netAnnual: horizon.netAnnual.value,
     candidates: candidatesFor(scenario, trigger.id),
   });
+  const chosen =
+    options.chosenCandidateId == null
+      ? null
+      : (recommendation.results.find((r) => r.candidate.id === options.chosenCandidateId) ?? null);
 
   const addons = addonProposals(scenario, { excludeType: center.type });
   const early = earlyTermination(center, today);
@@ -179,8 +218,10 @@ export function derive(scenario: Scenario, triggerId?: string): Derived {
     trigger,
     center,
     timing,
-    best: recommendation.best,
+    chosen,
     unrecoverable: unrecoverable.map(toPlanLink),
+    dueThisMonth: recoverable.filter((i) => i.judgment.countsForSafeAfter).map(toPlanDue),
+    missing,
     earlyTermination: early,
   });
 
@@ -189,6 +230,14 @@ export function derive(scenario: Scenario, triggerId?: string): Derived {
     trigger,
     center,
     graph: buildGraph(scenario, centerId),
+    missing,
+    basis: {
+      change: `${shortName(center)} ${trigger.verb}`,
+      versus: '그대로 유지',
+      period: '연 기준',
+      asOf: today,
+      assumption: '실적·금리 현행 유지',
+    },
     items,
     affectedCount: items.filter((i) => i.effectiveLoss.value > 0).length,
     total,
@@ -198,6 +247,7 @@ export function derive(scenario: Scenario, triggerId?: string): Derived {
     horizon,
     verdict,
     recommendation,
+    chosen,
     addons,
     actionPlan,
     earlyTermination: early,
@@ -208,7 +258,9 @@ export function derive(scenario: Scenario, triggerId?: string): Derived {
       timing,
       unrecoverable,
       recommendation,
+      chosen,
     }),
+    maintain: buildMaintain(active),
     steps: buildSteps({ conditions, unsupported, items, total, savingsTotal }),
     timing,
     recoverBy,
@@ -231,6 +283,10 @@ function toPlanLink(item: ImpactItem): PlanLink {
   };
 }
 
+function toPlanDue(item: ImpactItem): PlanDue {
+  return { productName: shortName(item.product), date: item.judgment.nextJudgmentDate.value as ISODate };
+}
+
 function productNames(items: ImpactItem[]): string {
   const seen: string[] = [];
   for (const i of items) {
@@ -240,7 +296,9 @@ function productNames(items: ImpactItem[]): string {
   return seen.join('·');
 }
 
-// ── 최종 판단 ──────────────────────────────────────────────────────────
+// ── 비교 결과 ──────────────────────────────────────────────────────────
+// 헤드라인은 "확인된 조건에서는" 으로 한정한다. 계산에 넣은 조건 밖의 일(미래 금리·상품 존속)은
+// 예측하지 않는다. 핵심 입력이 빠졌으면 결론 대신 보류를 적는다.
 
 function buildVerdict(ctx: {
   trigger: Trigger;
@@ -248,15 +306,28 @@ function buildVerdict(ctx: {
   items: ImpactItem[];
   horizon: Horizon;
   savings: SavingItem[];
+  missing: string[];
 }): Verdict {
-  const { trigger, center, items, horizon, savings } = ctx;
+  const { trigger, center, items, horizon, savings, missing } = ctx;
   const name = shortName(center);
   const net = horizon.netAnnual.value;
+
+  if (missing.length > 0) {
+    const known =
+      items.length > 0 ? `연결된 ${productNames(items)}의 우대 혜택이 어떻게 달라지는지는 확인됐지만, ` : '';
+    return {
+      kind: 'pending',
+      lead: '확인된 조건만으로는',
+      highlight: '전체 손익을 판정할 수 없습니다.',
+      tail: '',
+      body: `${known}${missing.join('·')}이 없어 ${trigger.verb} 후 얻는 쪽을 계산하지 못했습니다. 그 값이 확인되면 같은 기간으로 비교합니다. 아래는 확인된 항목의 변화 소계입니다.`,
+    };
+  }
 
   if (net < 0) {
     return {
       kind: 'keep',
-      lead: '지금은',
+      lead: '확인된 조건에서는',
       highlight: `${withJosa(name, '을/를')} 유지하는 것이`,
       tail: '유리합니다.',
       body:
@@ -269,8 +340,8 @@ function buildVerdict(ctx: {
   const savingLabel = savings.length > 0 ? savings.map((s) => s.label).join('·') : '비용';
   return {
     kind: 'switch',
-    lead: '지금',
-    highlight: `${withJosa(name, '을/를')} ${trigger.verb}해도`,
+    lead: '확인된 조건에서는',
+    highlight: `${withJosa(name, '을/를')} 지금 ${trigger.verb}해도`,
     tail: '금액상 손해는 없습니다.',
     body:
       items.length > 0
@@ -280,7 +351,7 @@ function buildVerdict(ctx: {
 }
 
 /**
- * 최종 판단 화면의 "꼭 확인하세요". 같은 화면의 차트·합계와 겹치는 금액 비교는 넣지 않는다 —
+ * 비교 결과 화면의 "꼭 확인하세요". 같은 화면의 차트·합계와 겹치는 금액 비교는 넣지 않는다 —
  * 연결 상태·회복 불가·이번 달 판정 마감·갈아타기 순서처럼 판단을 뒤집을 수 있는 조건만 적는다.
  */
 function buildChecklist(ctx: {
@@ -290,8 +361,9 @@ function buildChecklist(ctx: {
   timing: SafeTiming;
   unrecoverable: ImpactItem[];
   recommendation: Recommendation;
+  chosen: CandidateResult | null;
 }): ChecklistItem[] {
-  const { trigger, center, items, timing, unrecoverable, recommendation } = ctx;
+  const { trigger, center, items, timing, unrecoverable, recommendation, chosen } = ctx;
   const name = shortName(center);
   const list: ChecklistItem[] = [];
 
@@ -319,21 +391,35 @@ function buildChecklist(ctx: {
     });
   }
 
-  // 연결을 살리는 갈아타기는 순서가 핵심이다 — 새 상품을 먼저 만들고, 판정이 끝난 뒤 옮긴다
-  const best = recommendation.best;
-  if (best && best.preserved.length > 0) {
-    const newName = best.candidate.shortName ?? best.candidate.name;
+  // 연결을 살리는 갈아타기는 순서가 핵심이다 — 새 상품을 먼저 만들고, 판정이 끝난 뒤 옮긴다.
+  // 사용자가 고른 안이 있으면 그 안, 없으면 후보 중 하나를 "예" 로 든다 — 앱의 선택으로 적지 않는다.
+  const pick = chosen ?? recommendation.best;
+  if (pick && pick.preserved.length > 0) {
+    const newName = pick.candidate.shortName ?? pick.candidate.name;
     const when = timing.alreadySafe ? '' : ` ${formatKoMD(timing.safeAfter.value)} 이후에`;
+    const head = chosen ? `선택한 ${withJosa(newName, '을/를')}` : `예를 들어 ${withJosa(newName, '을/를')}`;
     list.push({
       key: 'switch-order',
-      text: `${withJosa(newName, '을/를')} 먼저 만든 뒤${when} ${withJosa(name, '을/를')} ${trigger.verb}하면 연결 ${best.preserved.length}건이 유지됩니다.`,
-      source: best.netAfter.source,
+      text: `${head} 먼저 만든 뒤${when} ${withJosa(name, '을/를')} ${trigger.verb}하면 연결 ${pick.preserved.length}건이 유지됩니다.`,
+      source: pick.netAfter.source,
     });
   }
 
   if (trigger.caveat) list.push({ key: 'caveat', text: trigger.caveat, source: 'doc' });
 
   return list;
+}
+
+/**
+ * 유지를 택할 때 지켜야 할 조건. 살아있는 조건의 실적 기준과 판정 주기를 그대로 옮긴다 —
+ * "유지에는 절차가 없다" 는 원칙은 그대로다. 절차가 아니라 조건 목록이다.
+ */
+function buildMaintain(active: ImpactItem[]): ChecklistItem[] {
+  return active.map((i) => ({
+    key: `keep-${i.condition.id}`,
+    text: `${shortName(i.product)} 우대 — ${requirementLabel(i.condition)} · ${i.judgment.cycleLabel.value}`,
+    source: i.judgment.cycleLabel.source,
+  }));
 }
 
 function buildSteps(ctx: {
@@ -349,8 +435,8 @@ function buildSteps(ctx: {
   return [
     {
       key: 'extract',
-      label: '약관 원문에서 조건 추출',
-      detail: `${conditions.length + unsupported.length}개 문장 중 ${conditions.length}건 매핑`,
+      label: '약관에서 추출해 둔 조건 불러오기',
+      detail: `샘플 문장 ${conditions.length + unsupported.length}개 중 ${conditions.length}건 매핑 · 실시간 추출 없음`,
     },
     {
       key: 'link',

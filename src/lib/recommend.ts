@@ -7,7 +7,8 @@
 //                       (PERMANENT 는 가입 시점에 확정된 조건이라 상품을 바꿔도 못 살린다)
 //   갈아탄 뒤 순손익   = netAnnual + 유지되는 연결의 손실 합 + 후보 자체 혜택(연) − 후보 비용(연)
 //   후보 비용          = 트리거의 savings[].kind 를 후보 facts 에 그대로 적용 (연회비 → 연회비, 보험료 → 보험료)
-//   추천               = 갈아탄 뒤 순손익 > 0 이고 자격 미충족이 아닌 것. 순손익 큰 순으로 정렬
+//   추천(recommended)  = 갈아탄 뒤 순손익 > 0 이고 자격 미충족이 아닌 것. 순손익 큰 순으로 정렬.
+//                       화면에는 "이득" 표시로만 쓴다 — 절차의 기준 안은 사용자가 고른다 (derive.chosen)
 //
 // satisfies 가 UNSUPPORTED 면 아무 연결도 유지되지 않는다고 보수적으로 계산하고 linkUnknown 을 켠다.
 
@@ -208,7 +209,7 @@ function buildHeadline(ctx: {
       linkCount > 0 && !best.linkUnknown ? ` 연결 ${best.preserved.length}/${linkCount}이 유지돼` : '';
     return {
       title: '그래도 갈아탄다면',
-      body: `연 ${formatWonShort(hurdle)} 이상 이득인 상품만 추천합니다. ${withJosa(name, '으로/로')} 옮기면${links} 연 ${gain} 이득입니다.`,
+      body: `연 ${formatWonShort(hurdle)}의 손실을 넘는 후보에 '이득' 을 붙였습니다. ${withJosa(name, '으로/로')} 옮기면${links} 연 ${gain} 이득입니다. 어느 안으로 갈지는 직접 고릅니다.`,
     };
   }
   return {

@@ -1949,3 +1949,207 @@ ol {
   background: var(--warn);
 }
 
+
+/* ── 목업 수정(2026-09-20) — 은행 안의 기능·샘플 표시·비교 기준·보류·기준 안 ───── */
+
+/* 홈 상단: 은행 이름 옆 샘플 칩. 데모임을 처음 보는 사람에게 바로 알린다 */
+.homehead .samplechip {
+  margin-left: 8px;
+  margin-right: auto;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  color: var(--src-user);
+  background: var(--src-user-bg);
+  white-space: nowrap;
+}
+
+/* 분석 중: 연출과 구현을 구분하는 한 줄 */
+.analyzing .samplenote {
+  font-size: var(--fs-xs);
+  color: var(--mute);
+  margin-top: -6px;
+}
+
+/* 허브 행: 확인 필요 입력 */
+.triggerrow .body em.need {
+  font-style: normal;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--warn);
+  margin-top: 2px;
+}
+
+/* 비교 기준 스트립 — 금액 가까이에 항상 붙는다 */
+.basisstrip {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 1px dashed var(--line);
+}
+.basisstrip > div {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.basisstrip > div:first-child {
+  grid-column: 1 / -1;
+}
+.basisstrip dt,
+.basisstrip dd {
+  margin: 0;
+}
+.basisstrip dt {
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  color: var(--mute);
+  letter-spacing: 0.2px;
+}
+.basisstrip dd {
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+.basisstrip dd b {
+  color: var(--ink);
+}
+
+/* 영향 화면의 세 묶음 번호 */
+.sectiontitle .no {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--brand-deep);
+  color: #fff;
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+  margin-right: 2px;
+}
+.empty.small {
+  padding: 14px 12px;
+  font-size: var(--fs-sm);
+  text-align: left;
+  line-height: 1.55;
+}
+
+/* 보류: 소계 카드·판정 카드·안내 머리글 */
+.totalcard.pending {
+  background: var(--warn-bg);
+  border-color: #f0dfc2;
+}
+.totalcard .note {
+  margin-top: 6px;
+}
+.verdictcard.pending {
+  background: linear-gradient(150deg, #fdf6ec, #fbeedc 60%, #fff6e8);
+  border-color: #f0dfc2;
+}
+.verdictcard.pending .mark {
+  background: var(--warn);
+  box-shadow: 0 8px 20px rgba(180, 83, 9, 0.28);
+}
+.verdictcard.pending em {
+  color: var(--warn);
+}
+.planhead.pending {
+  background: var(--warn-bg);
+  border-color: #f0dfc2;
+}
+.planhead.pending .mark {
+  background: var(--warn);
+}
+
+/* 차트 부제 */
+.chartsub {
+  font-size: var(--fs-xs);
+  color: var(--mute);
+  margin-top: -4px;
+}
+
+/* 유지 조건 목록 */
+.checklist.maintain .mk {
+  background: var(--src-calc-bg);
+  color: var(--src-calc);
+}
+.checklist.maintain .note {
+  margin-top: 4px;
+}
+
+/* 후보 행: 기준 안 선택 */
+.crow.chosen {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 1px var(--brand) inset;
+}
+.crow .pick.on {
+  background: var(--brand-deep);
+}
+.crow.plain .head {
+  cursor: pointer;
+}
+.crow.plain .head .tail {
+  color: var(--mute);
+}
+.crow .rowactions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 4px;
+}
+.choosebtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  background: var(--brand);
+  color: #fff;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+
+/* 실행 안내 머리글의 기준 안 */
+.planhead .basisrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: var(--fs-sm);
+}
+.planhead .basisrow .k {
+  color: var(--mute);
+  font-weight: 600;
+}
+.planhead .basisrow .link {
+  margin-left: auto;
+  font-size: var(--fs-sm);
+}
+
+/* 창구 시트: 샘플 표시 */
+.contactsheet .sample {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--line);
+  font-size: var(--fs-xs);
+  line-height: 1.55;
+  color: var(--mute);
+}
+
+/* 영향 항목 상세: 가정한 실적 */
+.irow .detail .v.assumed {
+  color: var(--warn);
+  font-weight: 600;
+}

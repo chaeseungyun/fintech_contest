@@ -1,9 +1,11 @@
 import { AppShell } from '../components/AppShell';
 import { Amount } from '../components/Amount';
+import { BasisStrip } from '../components/BasisStrip';
 import { Glyph, TYPE_ICON } from '../components/Glyph';
 import { SourceTag } from '../components/SourceTag';
 import { formatKoMD, formatKoYMD, formatWon, formatWonShort } from '../lib/format';
 import type { ImpactItem } from '../lib/derive';
+import { METRIC_STATUS_LABEL } from '../lib/interpreter';
 import { useStore } from '../state/store';
 import { tag } from '../lib/types';
 
@@ -55,6 +57,15 @@ function ImpactRow({ item, triggerId }: { item: ImpactItem; triggerId: string })
               )}
             </span>
           </div>
+          {/* "충족" 이 무엇에 기대고 있는지. 실적 값이 없으면 가정이라고 적는다 */}
+          <div className="f">
+            <span className="k">실적 확인</span>
+            <span className={`v${j.metricStatus === 'assumed' ? ' assumed' : ''}`}>
+              {METRIC_STATUS_LABEL[j.metricStatus]}
+              {j.metricStatus === 'verified' && <SourceTag source="holding" />}
+              {j.metricStatus === 'user' && <SourceTag source="user" />}
+            </span>
+          </div>
           {item.loss.principal && (
             <div className="f">
               <span className="k">계산 원금</span>
@@ -88,6 +99,11 @@ function ImpactRow({ item, triggerId }: { item: ImpactItem; triggerId: string })
             </button>
           </div>
           {!j.active && <p className="note">지금도 받지 못하는 혜택이라 손실 0원으로 두었습니다.</p>}
+          {j.metricStatus === 'assumed' && (
+            <p className="note warn">
+              실적 값이 없어 충족으로 가정했습니다. 근거 화면에서 기준을 바꾸거나 해당 없음으로 뺄 수 있습니다.
+            </p>
+          )}
           {j.recoverable && !j.countsForSafeAfter && j.active && (
             <p className="note">
               판정일이 다음 달({formatKoMD(j.nextJudgmentDate.value!)})이라 이번 달 안전 시점 계산에서
@@ -108,6 +124,7 @@ function ImpactRow({ item, triggerId }: { item: ImpactItem; triggerId: string })
 export function Impact({ triggerId }: { triggerId: string }) {
   const { derived: d, dispatch } = useStore();
   const center = d.center;
+  const pending = d.verdict.kind === 'pending';
 
   return (
     <AppShell
@@ -120,7 +137,7 @@ export function Impact({ triggerId }: { triggerId: string }) {
           className="btn primary"
           onClick={() => dispatch({ type: 'push', route: { name: 'verdict', triggerId } })}
         >
-          최종 판단 보기
+          비교 결과 보기
         </button>
       }
     >
@@ -136,18 +153,12 @@ export function Impact({ triggerId }: { triggerId: string }) {
         </span>
       </div>
 
-      <h3 className="sectiontitle">
-        연결된 금융상품에 미치는 영향
-        <button
-          type="button"
-          className="link"
-          onClick={() => dispatch({ type: 'push', route: { name: 'connections', triggerId } })}
-        >
-          관계도 보기
-          <Glyph name="chevron" size={14} />
-        </button>
-      </h3>
+      <BasisStrip basis={d.basis} />
 
+      {/* ① 상품 자체 변화 — 바꾸면 안 내게 되는 비용. 근거가 없으면 없다고 적는다 */}
+      <h3 className="sectiontitle">
+        <span className="no">1</span>상품 자체 변화
+      </h3>
       <div className="impactlist">
         {d.savings.map((s) => (
           <div key={s.kind} className="irow saving">
@@ -165,44 +176,71 @@ export function Impact({ triggerId }: { triggerId: string }) {
             </div>
           </div>
         ))}
-
-        {d.items.map((item) => (
-          <ImpactRow key={item.condition.id} item={item} triggerId={triggerId} />
-        ))}
-
-        {d.items.length === 0 && d.savings.length === 0 && (
-          <p className="empty">이 변경에 걸린 우대 조건이 없습니다.</p>
+        {d.savings.length === 0 && (
+          <p className="empty small">
+            {d.missing.length > 0
+              ? `${d.missing.join('·')}이 확인되지 않아 ${d.trigger.verb} 후 얻는 쪽은 계산에서 비워 두었습니다.`
+              : `${d.trigger.verb}로 줄어드는 비용이 보유 상품 정보에 없습니다.`}
+          </p>
         )}
       </div>
 
-      <div className={`totalcard ${d.netAnnual.value >= 0 ? 'good' : 'bad'}`}>
-        <span className="lbl">연간 예상 손익</span>
+      {/* ② 다른 상품 연결 영향 */}
+      <h3 className="sectiontitle">
+        <span className="no">2</span>연결된 상품에 미치는 영향
+        <button
+          type="button"
+          className="link"
+          onClick={() => dispatch({ type: 'push', route: { name: 'connections', triggerId } })}
+        >
+          관계도 보기
+          <Glyph name="chevron" size={14} />
+        </button>
+      </h3>
+      <div className="impactlist">
+        {d.items.map((item) => (
+          <ImpactRow key={item.condition.id} item={item} triggerId={triggerId} />
+        ))}
+        {d.items.length === 0 && <p className="empty small">이 변경에 걸린 우대 조건이 없습니다.</p>}
+      </div>
+
+      <div className={`totalcard ${pending ? 'pending' : d.netAnnual.value >= 0 ? 'good' : 'bad'}`}>
+        <span className="lbl">{pending ? '확인된 항목의 변화 소계' : '연간 예상 손익'}</span>
         <Amount value={d.netAnnual} signed short size="xl" />
         <span className="basis">
           (절감 {formatWonShort(d.savingsTotal.value)} − 손실 {formatWonShort(d.total.value)})
           <SourceTag source={d.netAnnual.source} />
         </span>
+        {pending && (
+          <p className="note warn">전체 비교 보류 — {d.missing.join('·')} 확인 필요. 이 소계만으로 유불리를 결론짓지 않습니다.</p>
+        )}
       </div>
 
+      {/* ③ 변경 비용 — 일회성. 연 단위 합계와 같은 축에 올리지 않는다 */}
       {d.earlyTermination && (
-        <div className="onetime">
-          <span className="lbl">
-            중도해지 이자 손실 <em>일회성</em>
-          </span>
-          <Amount
-            value={tag(-d.earlyTermination.loss.value, d.earlyTermination.loss.source)}
-            signed
-            short
-            size="lg"
-          />
-          <span className="basis">
-            {d.earlyTermination.basisLabel} <SourceTag source={d.earlyTermination.loss.source} />
-          </span>
-          <p className="note">
-            해지할 때 한 번 확정되는 금액이라 위 연 단위 합계에 더하지 않았습니다. 상품마다 만기가
-            달라 같은 축에 올릴 수 없습니다.
-          </p>
-        </div>
+        <>
+          <h3 className="sectiontitle">
+            <span className="no">3</span>변경 비용 · 일회성
+          </h3>
+          <div className="onetime">
+            <span className="lbl">
+              중도해지 이자 손실 <em>합계 미반영</em>
+            </span>
+            <Amount
+              value={tag(-d.earlyTermination.loss.value, d.earlyTermination.loss.source)}
+              signed
+              short
+              size="lg"
+            />
+            <span className="basis">
+              {d.earlyTermination.basisLabel} <SourceTag source={d.earlyTermination.loss.source} />
+            </span>
+            <p className="note">
+              해지할 때 한 번 확정되는 금액이라 위 연 단위 합계에 더하지 않았습니다. 상품마다 만기가
+              달라 같은 축에 올릴 수 없습니다.
+            </p>
+          </div>
+        </>
       )}
 
       <button

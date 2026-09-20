@@ -41,8 +41,13 @@ export interface AppState {
   selectedConditionId: string | null;
   /** 화면 3에서 펼친 상세 항목 */
   expandedConditionId: string | null;
-  /** 최종 판단 화면의 갈아타기 후보 중 펼친 것 */
+  /** 비교 결과 화면의 갈아타기 후보 중 펼친 것 */
   expandedCandidateId: string | null;
+  /**
+   * 트리거별로 사용자가 절차의 기준으로 고른 후보 id. 없으면 "새 상품 없이".
+   * 앱이 고른 추천을 기본값으로 넣지 않는다 — 절차는 고객이 고른 안을 따른다.
+   */
+  chosen: Record<string, string | null>;
   /** 펼친 창구 정보(ContactSheet). 실행 안내 단계·추천/제안 후보 행이 같은 키 공간을 쓴다 */
   expandedStepKey: string | null;
 }
@@ -56,6 +61,7 @@ export type Action =
   | { type: 'selectCondition'; conditionId: string | null }
   | { type: 'toggleExpanded'; conditionId: string }
   | { type: 'toggleCandidate'; candidateId: string }
+  | { type: 'chooseCandidate'; triggerId: string; candidateId: string | null }
   | { type: 'edit'; conditionId: string; edit: ConditionEdit }
   | { type: 'removeCondition'; conditionId: string }
   | { type: 'toggleStep'; stepKey: string }
@@ -70,6 +76,7 @@ export function initialState(): AppState {
     selectedConditionId: null,
     expandedConditionId: null,
     expandedCandidateId: null,
+    chosen: {},
     expandedStepKey: null,
   };
 }
@@ -101,6 +108,8 @@ export function reducer(state: AppState, action: Action): AppState {
         expandedCandidateId: state.expandedCandidateId === action.candidateId ? null : action.candidateId,
         expandedStepKey: null,
       };
+    case 'chooseCandidate':
+      return { ...state, chosen: { ...state.chosen, [action.triggerId]: action.candidateId } };
     case 'edit':
       return {
         ...state,
@@ -150,5 +159,9 @@ export function useStore(): Store {
 /** 상태 → 유효 시나리오 → 파생값. 화면 밖에서도(테스트) 쓸 수 있게 분리. */
 export function select(state: AppState): { scenario: Scenario; derived: Derived } {
   const scenario = applyEdits(BASE_SCENARIO, state.edits, state.removed);
-  return { scenario, derived: derive(scenario, activeTriggerId(state, scenario)) };
+  const triggerId = activeTriggerId(state, scenario);
+  return {
+    scenario,
+    derived: derive(scenario, triggerId, { chosenCandidateId: state.chosen[triggerId] ?? null }),
+  };
 }

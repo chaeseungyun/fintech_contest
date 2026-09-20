@@ -9,14 +9,15 @@
   "brand": {
     "short": "FinStay AI",
     "service": "FinStay AI",
-    "serviceTagline": "유지·변경·추가 가입까지 함께 판단합니다"
+    "serviceTagline": "유지·변경·추가 가입까지 함께 판단합니다",
+    "bank": "누리은행"
   },
 
   "home": {
     "userName": "최연수",
     "greeting": "좋은 하루 되세요.",
     "bannerTitle": "보유 금융상품을\n상시 분석하고 있습니다.",
-    "bannerBody": "유지·변경·추가 가입의 손익을 연결 관계까지 계산해 비교합니다.",
+    "bannerBody": "상품 하나를 바꾸면 다른 상품의 우대 혜택도 달라질 수 있습니다. 유지·변경의 손익을 연결 관계까지 계산해 비교합니다.",
     "quickMenu": [
       { "key": "account", "label": "계좌", "tab": "assets" },
       { "key": "card", "label": "카드", "tab": "assets" },
@@ -50,6 +51,7 @@
       "label": "대출 변경",
       "icon": "loan",
       "verb": "변경",
+      "missing": ["새 대출의 적용금리·상환 조건"],
       "savings": []
     },
     {
@@ -60,6 +62,7 @@
       "icon": "deposit",
       "verb": "해지",
       "caveat": "중도해지 이자 손실은 해지 시 한 번 확정되는 금액이라 연 단위 합계와 따로 표시합니다.",
+      "missing": ["해지 후 자금의 대체 수익(재예치 금리 등)"],
       "savings": []
     },
     {
@@ -81,6 +84,7 @@
       "label": "급여통장 변경",
       "icon": "account",
       "verb": "변경",
+      "missing": ["옮길 은행 급여통장의 우대 혜택"],
       "savings": []
     }
   ],
@@ -848,7 +852,7 @@
         "unrecoverable": [{ "conditionId": "c4", "until": "2027-03-20" }],
         "horizon": [-510000, 127500, 255000, 382500, 510000],
         "recommendedMonths": 9,
-        "verdict": "keep",
+        "verdict": "pending",
         "recommendation": { "hurdle": 510000, "ranked": [], "netAfter": {}, "preserved": {}, "best": null }
       },
       "loan_change": {
@@ -864,7 +868,7 @@
         "unrecoverable": [],
         "horizon": [-50000, 12500, 25000, 37500, 50000],
         "recommendedMonths": 3,
-        "verdict": "keep",
+        "verdict": "pending",
         "recommendation": { "hurdle": 50000, "ranked": [], "netAfter": {}, "preserved": {}, "best": null }
       },
       "deposit_cancel": {
@@ -877,7 +881,7 @@
         "unrecoverable": [],
         "horizon": [-60000, 15000, 30000, 45000, 60000],
         "recommendedMonths": 3,
-        "verdict": "keep",
+        "verdict": "pending",
         "recommendation": { "hurdle": 60000, "ranked": [], "netAfter": {}, "preserved": {}, "best": null }
       },
       "insurance_cancel": {

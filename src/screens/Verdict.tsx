@@ -1,5 +1,6 @@
 import { AddonCard } from '../components/AddonCard';
 import { AppShell } from '../components/AppShell';
+import { BasisStrip } from '../components/BasisStrip';
 import { Glyph } from '../components/Glyph';
 import { HorizonChart } from '../components/HorizonChart';
 import { RecommendCard } from '../components/RecommendCard';
@@ -8,7 +9,10 @@ import type { Derived } from '../lib/derive';
 import { formatKoMD, formatKoYMD, formatMonths } from '../lib/format';
 import { useStore } from '../state/store';
 
-/** 차트 아래 한 줄. 추천 구간을 고른 이유(horizon.reason)에 맞춰 쓴다 — 구간 숫자만 보고 문장을 짓지 않는다. */
+/**
+ * 차트 아래 한 줄. 구간을 고른 이유(horizon.reason)에 맞춰 쓴다 — 구간 숫자만 보고 문장을 짓지 않는다.
+ * 'positive' 는 "최적 변경 시점" 이 아니라 손익분기다. 변경 시점은 판정일·만기 같은 확인된 사건으로 정한다.
+ */
 function horizonNote(d: Derived): string {
   const { verb } = d.trigger;
   const held = formatMonths(d.horizon.recommended.months);
@@ -16,58 +20,56 @@ function horizonNote(d: Derived): string {
     case 'now':
       return `지금 ${verb}해도 연 기준으로 손해가 아닙니다.`;
     case 'recover':
-      return `${held} 유지하면 되돌릴 수 없는 우대의 만기(${formatKoMD(d.recoverBy!)})를 넘깁니다.`;
+      return `${held} 유지하면 되돌릴 수 없는 우대의 만기(${formatKoMD(d.recoverBy!)})를 넘깁니다. 그 전에 바꾸면 그 우대는 만기까지 복구되지 않습니다.`;
     case 'recover-beyond':
       return `되돌릴 수 없는 우대의 만기가 ${formatKoYMD(d.recoverBy!)}라 적어도 ${held} 이상 유지해야 합니다.`;
-    case 'positive':
-      return `${held}만 유지해도 이익으로 돌아섭니다. 더 오래 둘수록 이익은 커집니다.`;
+    case 'positive': {
+      const cost = d.savings.map((s) => s.label).join('·');
+      return d.savings.length > 0
+        ? `${held} 이상 유지하면 지켜지는 혜택이 ${cost}를 넘어섭니다(손익분기). 바꾸는 시점은 아래 판정일 기준으로 정하세요.`
+        : `유지 기간이 길수록 지켜지는 혜택이 커집니다. 바꾸는 시점은 아래 판정일 기준으로 정하세요.`;
+    }
   }
 }
+
+const MARK: Record<Derived['verdict']['kind'], 'check' | 'arrow' | 'info'> = {
+  keep: 'check',
+  switch: 'arrow',
+  pending: 'info',
+};
 
 export function Verdict({ triggerId }: { triggerId: string }) {
   const { derived: d, dispatch } = useStore();
   const v = d.verdict;
+  const pending = v.kind === 'pending';
+
+  const toPlan = () => dispatch({ type: 'push', route: { name: 'actionplan', triggerId } });
+  const toHub = () => dispatch({ type: 'popTo', name: 'hub' });
 
   return (
     <AppShell
-      title="최종 판단"
+      title="비교 결과"
       onBack={() => dispatch({ type: 'back' })}
       hideTabBar
       footer={
-        v.kind === 'keep' ? (
-          // 유지 판정: 강조 버튼은 다음 분석. 해지 절차는 "그래도" 를 붙여 한 단계 아래에 둔다.
+        v.kind === 'switch' ? (
           <>
-            <button
-              type="button"
-              className="btn primary"
-              onClick={() => dispatch({ type: 'popTo', name: 'hub' })}
-            >
-              다른 항목도 분석해보기
+            <button type="button" className="btn primary" onClick={toPlan}>
+              {d.trigger.verb} 절차 안내받기
             </button>
-            <button
-              type="button"
-              className="btn text"
-              onClick={() => dispatch({ type: 'push', route: { name: 'actionplan', triggerId } })}
-            >
-              그래도 {d.trigger.verb}한다면 · 절차 보기
+            <button type="button" className="btn text" onClick={toHub}>
+              다른 항목도 분석해보기
               <Glyph name="chevron" size={14} />
             </button>
           </>
         ) : (
+          // 유지·보류: 강조 버튼은 다음 분석. 해지 절차는 "그래도" 를 붙여 한 단계 아래에 둔다.
           <>
-            <button
-              type="button"
-              className="btn primary"
-              onClick={() => dispatch({ type: 'push', route: { name: 'actionplan', triggerId } })}
-            >
-              {d.trigger.verb} 절차 안내받기
-            </button>
-            <button
-              type="button"
-              className="btn text"
-              onClick={() => dispatch({ type: 'popTo', name: 'hub' })}
-            >
+            <button type="button" className="btn primary" onClick={toHub}>
               다른 항목도 분석해보기
+            </button>
+            <button type="button" className="btn text" onClick={toPlan}>
+              그래도 {d.trigger.verb}한다면 · 절차 보기
               <Glyph name="chevron" size={14} />
             </button>
           </>
@@ -76,26 +78,55 @@ export function Verdict({ triggerId }: { triggerId: string }) {
     >
       <div className={`verdictcard ${v.kind}`}>
         <span className="mark" aria-hidden="true">
-          <Glyph name={v.kind === 'keep' ? 'check' : 'arrow'} size={26} />
+          <Glyph name={MARK[v.kind]} size={26} />
         </span>
         <h2>
           {v.lead}
           <br />
-          <em>{v.highlight}</em> {v.tail}
+          <em>{v.highlight}</em>
+          {v.tail && ` ${v.tail}`}
         </h2>
         <p>{v.body}</p>
       </div>
 
+      <BasisStrip basis={d.basis} />
+
       <section className="card">
         <h3 className="cardtitle">
-          시점별 예상 손익
+          유지 기간별 예상 손익
           <SourceTag source={d.netAnnual.source} />
         </h3>
-        <HorizonChart horizon={d.horizon} />
+        <p className="chartsub">
+          지금 {d.trigger.verb} 대비{pending && ' · 확인된 항목만'}
+        </p>
+        {/* 절감이 없으면 손익분기가 없다 — 첫 양수 구간을 강조하지 않는다 */}
+        <HorizonChart horizon={d.horizon} quiet={d.horizon.reason === 'positive' && d.savings.length === 0} />
         <p className="chartnote">{horizonNote(d)}</p>
       </section>
 
-      <RecommendCard />
+      {d.maintain.length > 0 && (
+        <section className="card checklist maintain">
+          <h3 className="cardtitle">
+            유지를 택한다면 지킬 조건
+            <Glyph name="check" size={16} />
+          </h3>
+          <ul>
+            {d.maintain.map((c) => (
+              <li key={c.key}>
+                <span className="mk" aria-hidden="true">
+                  <Glyph name="check" size={14} />
+                </span>
+                <span className="tx">
+                  {c.text} <SourceTag source={c.source} />
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="note">유지에는 절차가 없습니다. 위 실적만 판정일까지 유지되면 우대가 이어집니다.</p>
+        </section>
+      )}
+
+      <RecommendCard triggerId={triggerId} />
 
       <AddonCard proposal={d.addons} />
 
@@ -119,8 +150,8 @@ export function Verdict({ triggerId }: { triggerId: string }) {
       </section>
 
       <p className="footnote">
-        이 판단은 보유 상품 정보와 약관에서 추출한 조건만으로 계산한 결과입니다. 실제 적용은 각 금융사
-        약관을 따릅니다.
+        이 결과는 보유 상품 정보와 약관에서 추출한 조건만으로 계산했습니다. 미래 금리 변동이나 상품
+        존속은 예측하지 않으며, 실제 적용은 각 금융사 약관을 따릅니다.
       </p>
     </AppShell>
   );

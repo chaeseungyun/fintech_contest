@@ -3,7 +3,7 @@ import { Amount } from '../components/Amount';
 import { Glyph } from '../components/Glyph';
 import { QuickMenu } from '../components/QuickMenu';
 import { SourceTag } from '../components/SourceTag';
-import { formatKoMD, formatMD } from '../lib/format';
+import { formatKoMD, formatKoYMD, formatMD } from '../lib/format';
 import { totalAssets } from '../lib/portfolio';
 import { watchSummary } from '../lib/watch';
 import { useStore } from '../state/store';
@@ -20,7 +20,9 @@ export function Home() {
     <AppShell
       header={
         <div className="homehead">
-          <span className="logo">{brand.short}</span>
+          {/* 홈 상단은 은행이다. 이 기능(brand.service)은 그 안의 메뉴·배너로만 나온다 */}
+          <span className="logo">{brand.bank}</span>
+          <span className="samplechip">샘플 데이터 · 기준일 {formatKoYMD(scenario.meta.today)}</span>
           <div className="homehead-actions">
             <button type="button" aria-label="전체메뉴" onClick={() => dispatch({ type: 'selectTab', tab: 'more' })}>
               <Glyph name="menu" size={22} />
@@ -73,16 +75,13 @@ export function Home() {
         </p>
 
         <div className="watchlist">
+          {/* 점검 행은 혜택 탭(상시 점검)으로 간다. 해지 분석으로 바로 튀지 않는다 — 분석 진입은 허브에서만 */}
           {watch.dueSoon.slice(0, 3).map((r) => (
             <button
               key={r.condition.id}
               type="button"
               className="wrow"
-              disabled={r.triggerId === null}
-              onClick={() =>
-                r.triggerId &&
-                dispatch({ type: 'push', route: { name: 'analyzing', triggerId: r.triggerId } })
-              }
+              onClick={() => dispatch({ type: 'selectTab', tab: 'benefits' })}
             >
               <span className="d">{formatMD(r.judgment.nextJudgmentDate.value!)}</span>
               <span className="body">

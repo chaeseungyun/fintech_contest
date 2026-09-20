@@ -6,6 +6,8 @@ import {
   evaluateAll,
   evaluateCondition,
   latestRecoverAt,
+  METRIC_STATUS_LABEL,
+  metricStatus,
   metricUnit,
 } from './interpreter';
 import type { ISODate, MappedCondition } from './types';
@@ -94,6 +96,36 @@ describe('실적 미충족은 이미 미적용', () => {
   it('threshold 나 currentValue 가 없으면 충족으로 본다', () => {
     const j = evaluateCondition(byId('k2'), scenario.meta.today, scenario.products);
     expect(j.active).toBe(true);
+  });
+});
+
+describe('실적 확인 상태 — 빈 값을 조용히 충족으로 처리하지 않는다', () => {
+  const at = (id: string) => evaluateCondition(byId(id), scenario.meta.today, scenario.products).metricStatus;
+
+  it('실적 값이 있으면 확인됨', () => {
+    expect(at('k1')).toBe('verified');
+    expect(at('c2')).toBe('verified');
+  });
+
+  it('PERMANENT 는 가입 시 확정이라 재판정이 없다', () => {
+    expect(at('k2')).toBe('fixed');
+    expect(at('c4')).toBe('fixed');
+  });
+
+  it('실적 값이 없고 사용자가 확인한 것은 사용자 확인', () => {
+    expect(byId('c1').metric.currentValue).toBeUndefined();
+    expect(at('c1')).toBe('user');
+  });
+
+  it('실적 값이 없고 확인도 없으면 가정 — 라벨이 그렇게 말한다', () => {
+    const cond: MappedCondition = {
+      ...byId('c1'),
+      metric: { ...byId('c1').metric, source: 'doc' },
+    };
+    expect(metricStatus(cond)).toBe('assumed');
+    expect(METRIC_STATUS_LABEL.assumed).toContain('가정');
+    // 계산은 그대로 충족으로 두되(값이 없으니), 상태로 드러낸다
+    expect(evaluateCondition(cond, scenario.meta.today, scenario.products).active).toBe(true);
   });
 });
 

@@ -15,7 +15,7 @@ export interface TriggerExpectation {
   unrecoverable: { conditionId: string; until: ISODate }[];
   horizon: number[];
   recommendedMonths: number;
-  verdict: 'keep' | 'switch';
+  verdict: 'keep' | 'switch' | 'pending';
   recommendation: RecommendationExpectation;
 }
 

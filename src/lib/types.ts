@@ -190,6 +190,11 @@ export interface Trigger {
   verb: string;
   /** 변경 후에도 금액으로 계산하지 않는 것 (보장 상실 등) */
   caveat?: string;
+  /**
+   * 비교에 빠진 핵심 입력(새 대출 적용금리 등). 하나라도 있으면 전체 유불리를 판정하지 않고
+   * "확인된 항목의 변화 소계" 만 낸다 — 반대편 숫자 없이 결론을 내지 않는다.
+   */
+  missing?: string[];
   savings: Saving[];
 }
 
@@ -266,6 +271,8 @@ export interface Brand {
   short: string;
   service: string;
   serviceTagline: string;
+  /** 이 기능이 들어가 있는 은행. 홈 상단은 은행, 내부 배너는 서비스명이다 */
+  bank: string;
 }
 
 export interface Scenario {

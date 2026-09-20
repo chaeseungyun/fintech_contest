@@ -23,6 +23,31 @@ export interface Judgment {
   inactiveReason: string | null;
   /** 안전 시점 계산에 들어가는가: 회복 가능 + 살아있음 + 이번 달 안의 판정일 */
   countsForSafeAfter: boolean;
+  /** "충족" 판단이 무엇에 기대고 있는가. 실적 값이 없으면 충족으로 *가정* 한 것이라 그렇게 적는다 */
+  metricStatus: MetricStatus;
+}
+
+/**
+ * 실적 충족 판단의 근거 상태.
+ *   verified 실적 데이터(currentValue)로 확인
+ *   user     실적 값은 없지만 사용자가 충족으로 확인
+ *   assumed  실적 값이 없어 충족으로 가정 — 빈 값을 조용히 충족으로 처리하지 않고 드러낸다
+ *   fixed    가입 시 확정된 조건이라 재판정이 없다 (PERMANENT)
+ */
+export type MetricStatus = 'verified' | 'user' | 'assumed' | 'fixed';
+
+export const METRIC_STATUS_LABEL: Record<MetricStatus, string> = {
+  verified: '실적 데이터로 확인',
+  user: '사용자가 충족으로 확인',
+  assumed: '실적 값 없음 · 충족으로 가정',
+  fixed: '가입 시 확정 · 재판정 없음',
+};
+
+export function metricStatus(cond: MappedCondition): MetricStatus {
+  if (cond.expr.op === 'PERMANENT') return 'fixed';
+  if (cond.metric.currentValue !== undefined) return 'verified';
+  if (cond.metric.source === 'user_confirmed') return 'user';
+  return 'assumed';
 }
 
 export interface SafeTiming {
@@ -46,7 +71,7 @@ export function resolveAnchor(anchor: string, product: Product): ISODate | null 
   }
 }
 
-/** 현재 실적이 기준을 넘는가. 실적 데이터가 없거나 기준이 없으면 충족으로 본다. */
+/** 현재 실적이 기준을 넘는가. 실적 데이터가 없거나 기준이 없으면 충족으로 *가정* 한다 — metricStatus 가 그 사실을 드러낸다. */
 export function isMetricMet(cond: MappedCondition): boolean {
   const { threshold, currentValue } = cond.metric;
   if (threshold === null || currentValue === undefined) return true;
@@ -167,6 +192,7 @@ export function evaluateCondition(
     active,
     inactiveReason: inactiveReason(cond),
     countsForSafeAfter: recoverable && active && inThisMonth,
+    metricStatus: metricStatus(cond),
   };
 }
 

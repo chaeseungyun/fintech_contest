@@ -197,12 +197,25 @@ describe('문장', () => {
 });
 
 describe('체크리스트 연동', () => {
-  it('연결을 살리는 추천이 있으면 실행 순서 항목이 붙는다', () => {
+  it('연결을 살리는 후보가 있으면 실행 순서 항목이 붙는다 — 고르기 전에는 "예를 들어" 로 적는다', () => {
     const d = derive(scenario, CARD);
     const item = d.checklist.find((c) => c.key === 'switch-order')!;
     expect(item).toBeDefined();
-    expect(item.text).toBe('스마트카드를 먼저 만든 뒤 9월 30일 이후에 톡톡카드를 해지하면 연결 2건이 유지됩니다.');
+    expect(item.text).toBe('예를 들어 스마트카드를 먼저 만든 뒤 9월 30일 이후에 톡톡카드를 해지하면 연결 2건이 유지됩니다.');
     expect(item.source).toBe('calc');
+  });
+
+  it('후보를 고르면 그 안을 "선택한" 으로 적는다', () => {
+    const d = derive(scenario, CARD, { chosenCandidateId: 'card_nuri_smart' });
+    const item = d.checklist.find((c) => c.key === 'switch-order')!;
+    expect(item.text.startsWith('선택한 스마트카드를')).toBe(true);
+  });
+
+  it('추천 문구는 "추천합니다" 대신 이득 표시와 직접 고름을 말한다', () => {
+    const r = derive(scenario, CARD).recommendation;
+    expect(r.headline.body).toContain("'이득'");
+    expect(r.headline.body).toContain('직접 고릅니다');
+    expect(r.headline.body).not.toContain('추천합니다');
   });
 
   it('유지되는 연결이 없으면 순서 항목이 없다', () => {

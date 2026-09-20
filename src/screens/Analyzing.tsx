@@ -49,6 +49,8 @@ export function Analyzing({ triggerId }: { triggerId: string }) {
         <p className="target">
           {d.center.institution} {d.center.name} · {d.trigger.label}
         </p>
+        {/* 연출과 구현을 구분한다 — 약관을 방금 읽은 것처럼 보이지 않게 */}
+        <p className="samplenote">시연용 샘플 조건으로 계산합니다 · 실시간 약관 추출·AI 호출 없음</p>
 
         <div className="progress" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
           <span style={{ width: `${pct}%` }} />
