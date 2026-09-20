@@ -24,7 +24,7 @@
       { "key": "invest", "label": "투자", "tab": "assets" },
       { "key": "insurance", "label": "보험", "tab": "assets" },
       { "key": "benefit", "label": "혜택", "tab": "benefits" },
-      { "key": "ai", "label": "FinStay AI" },
+      { "key": "ai" },
       { "key": "grid", "label": "전체메뉴", "tab": "more" }
     ]
   },

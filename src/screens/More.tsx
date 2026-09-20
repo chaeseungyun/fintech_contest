@@ -1,23 +1,10 @@
 import { AppShell } from '../components/AppShell';
-import { Glyph } from '../components/Glyph';
+import { QuickMenu } from '../components/QuickMenu';
 import { SOURCE_LABEL } from '../components/SourceTag';
 import type { Source } from '../lib/types';
-import { useStore, type Tab } from '../state/store';
+import { useStore } from '../state/store';
 
 const SOURCES: Source[] = ['doc', 'calc', 'holding', 'user'];
-
-/** 'ai' 는 서비스명이 들어갈 자리다 — 이름은 scenario.brand 에서 읽는다. 여기에 적지 않는다. */
-const MENU: { key: string; label?: string; tab?: Tab }[] = [
-  { key: 'account', label: '계좌 조회', tab: 'assets' },
-  { key: 'card', label: '카드', tab: 'assets' },
-  { key: 'loan', label: '대출', tab: 'assets' },
-  { key: 'deposit', label: '예·적금', tab: 'assets' },
-  { key: 'invest', label: '투자', tab: 'assets' },
-  { key: 'insurance', label: '보험', tab: 'assets' },
-  { key: 'benefit', label: '혜택', tab: 'benefits' },
-  { key: 'autopay', label: '자동이체', tab: 'assets' },
-  { key: 'ai' },
-];
 
 export function More() {
   const { state, scenario, dispatch } = useStore();
@@ -25,25 +12,8 @@ export function More() {
 
   return (
     <AppShell title="전체">
-      <div className="menugrid">
-        {MENU.map((m) => (
-          <button
-            key={m.key}
-            type="button"
-            className="quick"
-            onClick={() =>
-              m.tab
-                ? dispatch({ type: 'selectTab', tab: m.tab })
-                : dispatch({ type: 'push', route: { name: 'hub' } })
-            }
-          >
-            <span className="ico">
-              <Glyph name={m.key as never} size={23} />
-            </span>
-            <span className="qlabel">{m.label ?? scenario.brand.service}</span>
-          </button>
-        ))}
-      </div>
+      {/* 홈과 같은 목록. 자기 자신(전체)으로 가는 항목만 뺀다 */}
+      <QuickMenu exclude={['more']} />
 
       <section className="card">
         <h3 className="cardtitle">화면에 붙는 출처 태그</h3>

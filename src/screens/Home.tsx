@@ -1,11 +1,12 @@
 import { AppShell } from '../components/AppShell';
 import { Amount } from '../components/Amount';
 import { Glyph } from '../components/Glyph';
+import { QuickMenu } from '../components/QuickMenu';
 import { SourceTag } from '../components/SourceTag';
 import { formatKoMD, formatMD } from '../lib/format';
 import { totalAssets } from '../lib/portfolio';
 import { watchSummary } from '../lib/watch';
-import { useStore, type Tab } from '../state/store';
+import { useStore } from '../state/store';
 
 export function Home() {
   const { scenario, dispatch } = useStore();
@@ -44,21 +45,7 @@ export function Home() {
         </span>
       </button>
 
-      <div className="quickgrid">
-        {home.quickMenu.map((q) => (
-          <button
-            key={q.label}
-            type="button"
-            className={q.key === 'ai' ? 'quick ai' : 'quick'}
-            onClick={() => (q.tab ? dispatch({ type: 'selectTab', tab: q.tab as Tab }) : openAi())}
-          >
-            <span className={`ico tint-${q.key}`}>
-              <Glyph name={q.key} size={23} />
-            </span>
-            <span className="qlabel">{q.label}</span>
-          </button>
-        ))}
-      </div>
+      <QuickMenu />
 
       <button type="button" className="aibanner" onClick={openAi}>
         <div className="txt">

@@ -256,7 +256,8 @@ export interface Eligibility {
 export interface HomeData {
   userName: string;
   greeting: string;
-  quickMenu: { key: IconKey; label: string; tab?: string }[];
+  /** label 이 없으면 brand.service 를 쓴다 (`ai` 항목) */
+  quickMenu: { key: IconKey; label?: string; tab?: string }[];
   bannerTitle: string;
   bannerBody: string;
 }
