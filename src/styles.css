@@ -1894,42 +1894,51 @@ ol {
 .contactbtn .caret {
   transition: transform 0.18s ease;
 }
-.pstep.open .contactbtn .caret {
+.contactbtn[aria-expanded='true'] .caret {
   transform: rotate(180deg);
 }
-.pstep .contact {
+.contactsheet {
   margin-top: 4px;
   padding: 4px 12px 10px;
   border-radius: var(--r-sm);
-  background: var(--surface-2);
+  background: var(--surface);
   border: 1px solid var(--line);
 }
-.pstep .contact .f .v {
+.contactsheet .intro {
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  color: var(--ink-2);
+  padding: 6px 0 2px;
+}
+.contactsheet .f {
+  padding: 6px 0;
+}
+.contactsheet .f .v {
   text-align: right;
   font-size: var(--fs-sm);
 }
-.pstep .contact .muted {
+.contactsheet .muted {
   font-style: normal;
   color: var(--mute);
 }
-.pstep .contact .ask {
+.contactsheet .ask {
   padding-top: 9px;
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
-.pstep .contact .ask b {
+.contactsheet .ask b {
   font-size: var(--fs-sm);
   color: var(--warn);
 }
-.pstep .contact .ask li {
+.contactsheet .ask li {
   position: relative;
   padding-left: 12px;
   font-size: var(--fs-sm);
   line-height: 1.6;
   color: var(--ink-2);
 }
-.pstep .contact .ask li::before {
+.contactsheet .ask li::before {
   content: '';
   position: absolute;
   left: 2px;

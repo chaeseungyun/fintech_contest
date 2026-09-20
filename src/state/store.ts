@@ -43,7 +43,7 @@ export interface AppState {
   expandedConditionId: string | null;
   /** 최종 판단 화면의 갈아타기 후보 중 펼친 것 */
   expandedCandidateId: string | null;
-  /** 실행 안내에서 펼친 창구 정보 */
+  /** 펼친 창구 정보(ContactSheet). 실행 안내 단계·추천/제안 후보 행이 같은 키 공간을 쓴다 */
   expandedStepKey: string | null;
 }
 
@@ -99,6 +99,7 @@ export function reducer(state: AppState, action: Action): AppState {
       return {
         ...state,
         expandedCandidateId: state.expandedCandidateId === action.candidateId ? null : action.candidateId,
+        expandedStepKey: null,
       };
     case 'edit':
       return {

@@ -83,6 +83,30 @@ describe('화면 스모크', () => {
     expect(html.length).toBeGreaterThan(300);
   });
 
+  it('제안·추천 후보의 "신청 경로 보기"는 창구 정보를 펼칠 뿐 신청을 실행하지 않는다', () => {
+    // 혜택 탭: 연계 가입 제안
+    const addonId = BASE_SCENARIO.candidates!.find((c) => c.mode === 'add')!.id;
+    const benefits = draw(<Benefits />, [
+      { type: 'toggleCandidate', candidateId: addonId },
+      { type: 'toggleStep', stepKey: `addon:${addonId}` },
+    ]);
+    expect(benefits).toContain('신청 경로 보기');
+    expect(benefits).toContain('공식 채널에서 직접 합니다');
+    expect(benefits).toContain('창구에서 꼭 물어볼 것');
+    expect(benefits).not.toMatch(/신청하기|신청 완료|가입 완료/);
+
+    // 최종 판단: 갈아타기 추천
+    const open: Action[] = [
+      { type: 'push', route: { name: 'verdict', triggerId: 'card_cancel' } },
+      { type: 'toggleCandidate', candidateId: 'card_nuri_smart' },
+      { type: 'toggleStep', stepKey: 'cand:card_nuri_smart' },
+    ];
+    const verdict = draw(<Verdict triggerId="card_cancel" />, open);
+    expect(verdict).toContain('신청 경로 보기');
+    expect(verdict).toContain('공식 채널에서 직접 합니다');
+    expect(verdict).not.toMatch(/신청하기|신청 완료|가입 완료/);
+  });
+
   it('예·적금 해지는 중도해지 이자를 영향 화면과 실행 안내에서만 보여준다', () => {
     const open: Action[] = [{ type: 'push', route: { name: 'verdict', triggerId: 'deposit_cancel' } }];
     expect(draw(<Impact triggerId="deposit_cancel" />, open)).toContain('중도해지 이자 손실');

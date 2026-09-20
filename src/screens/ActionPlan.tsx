@@ -1,4 +1,5 @@
 import { AppShell } from '../components/AppShell';
+import { ContactSheet } from '../components/ContactSheet';
 import { Glyph } from '../components/Glyph';
 import { SourceTag } from '../components/SourceTag';
 import type { ActionStep } from '../lib/actionplan';
@@ -9,11 +10,8 @@ import { useStore } from '../state/store';
  * 순서·기한·창구·확인할 질문만 보여준다. 문구와 순서는 전부 derive().actionPlan 에서 온다.
  */
 function StepRow({ step, index }: { step: ActionStep; index: number }) {
-  const { state, dispatch } = useStore();
-  const open = state.expandedStepKey === step.key;
-
   return (
-    <li className={`pstep${open ? ' open' : ''}`}>
+    <li className="pstep">
       <span className="no" aria-hidden="true">
         {index + 1}
       </span>
@@ -38,63 +36,7 @@ function StepRow({ step, index }: { step: ActionStep; index: number }) {
           </ul>
         )}
 
-        {step.contact && (
-          <>
-            <button
-              type="button"
-              className="contactbtn"
-              aria-expanded={open}
-              onClick={() => dispatch({ type: 'toggleStep', stepKey: step.key })}
-            >
-              <Glyph name="phone" size={15} />
-              {step.contact.institution} 창구 정보
-              <Glyph name="down" size={14} className="caret" />
-            </button>
-
-            {open && (
-              <div className="contact">
-                <div className="f">
-                  <span className="k">담당</span>
-                  <span className="v">
-                    <span className="val">{step.contact.dept}</span>
-                  </span>
-                </div>
-                <div className="f">
-                  <span className="k">신청 경로</span>
-                  <span className="v">
-                    <span className="val">{step.contact.channels.join(' / ')}</span>
-                  </span>
-                </div>
-                <div className="f">
-                  <span className="k">운영 시간</span>
-                  <span className="v">
-                    <span className="val">{step.contact.hours}</span>
-                  </span>
-                </div>
-                <div className="f">
-                  <span className="k">대표번호</span>
-                  <span className="v">
-                    {step.contact.tel ? (
-                      <span className="val">{step.contact.tel}</span>
-                    ) : (
-                      <em className="muted">공식 앱·홈페이지에서 확인</em>
-                    )}
-                  </span>
-                </div>
-                {step.contact.ask.length > 0 && (
-                  <div className="ask">
-                    <b>창구에서 꼭 물어볼 것</b>
-                    <ul>
-                      {step.contact.ask.map((a) => (
-                        <li key={a}>{a}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-            )}
-          </>
-        )}
+        {step.contact && <ContactSheet id={step.key} contact={step.contact} />}
       </div>
     </li>
   );

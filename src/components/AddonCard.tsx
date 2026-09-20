@@ -1,6 +1,8 @@
 import { Amount } from './Amount';
+import { ContactSheet } from './ContactSheet';
 import { Glyph, TYPE_ICON } from './Glyph';
 import { SourceTag } from './SourceTag';
+import { toContact } from '../lib/actionplan';
 import type { AddonProposal, AddonResult } from '../lib/addon';
 import { tag } from '../lib/types';
 import { useStore } from '../state/store';
@@ -13,6 +15,7 @@ function AddonRow({ result }: { result: AddonResult }) {
   const { state, dispatch } = useStore();
   const { candidate: c } = result;
   const open = state.expandedCandidateId === c.id;
+  const contact = toContact(c.institution, c.contact);
 
   return (
     <div className={`crow${open ? ' open' : ''}${result.recommended ? ' rec' : ''}`}>
@@ -83,6 +86,15 @@ function AddonRow({ result }: { result: AddonResult }) {
           )}
           {result.eligibility === 'unmet' && c.eligibility && (
             <p className="note danger">가입 자격 미충족: “{c.eligibility.sourceText}”</p>
+          )}
+
+          {contact && (
+            <ContactSheet
+              id={`addon:${c.id}`}
+              contact={contact}
+              label="신청 경로 보기"
+              intro={`신청은 ${c.institution} 공식 채널에서 직접 합니다. 이 앱은 가입을 대신 처리하지 않습니다.`}
+            />
           )}
         </div>
       )}
