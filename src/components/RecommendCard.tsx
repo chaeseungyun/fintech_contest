@@ -194,7 +194,6 @@ export function RecommendCard({ triggerId }: { triggerId: string }) {
       <p className="note">
         지금 실적을 새 상품으로 그대로 옮긴다고 가정한 계산입니다.
         {r.linkCount > r.preservableCount && ' 가입 시점에 확정된 우대는 어떤 상품으로도 살리지 못합니다.'}
-        {' '}절차는 여기서 고른 안을 따릅니다 — 앱이 대신 고르지 않습니다.
       </p>
     </section>
   );

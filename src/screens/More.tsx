@@ -4,7 +4,7 @@ import { SOURCE_LABEL } from '../components/SourceTag';
 import type { Source } from '../lib/types';
 import { useStore } from '../state/store';
 
-const SOURCES: Source[] = ['doc', 'calc', 'holding', 'user'];
+const SOURCES: Source[] = ['doc', 'holding', 'user'];
 
 export function More() {
   const { state, scenario, dispatch } = useStore();
@@ -25,7 +25,7 @@ export function More() {
           ))}
         </ul>
         <p className="note">
-          모든 수치는 값과 출처를 같은 객체로 들고 다닙니다. 상세 화면에서 태그를 확인할 수 있습니다.
+          모든 수치는 값과 출처를 같은 객체로 들고 다닙니다. 태그가 없는 값은 이 앱의 계산 결과입니다.
         </p>
       </section>
 

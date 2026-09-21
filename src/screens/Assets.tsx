@@ -67,7 +67,7 @@ export function Assets() {
       ))}
 
       <p className="footnote">
-        보유 상품 정보는 마이데이터 연동 샘플입니다. 금액에는 &lsquo;보유 상품 정보&rsquo; 태그가 붙습니다.
+        보유 상품 정보는 마이데이터 연동 샘플입니다.
       </p>
     </AppShell>
   );

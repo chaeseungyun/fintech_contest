@@ -2,7 +2,6 @@ import { AddonCard } from '../components/AddonCard';
 import { AppShell } from '../components/AppShell';
 import { Amount } from '../components/Amount';
 import { Glyph, TYPE_ICON } from '../components/Glyph';
-import { SourceTag } from '../components/SourceTag';
 import { addonProposals } from '../lib/addon';
 import { formatKoMD, formatMD } from '../lib/format';
 import { benefitLabel } from '../lib/money';
@@ -23,11 +22,11 @@ export function Benefits() {
     <AppShell title="혜택">
       <div className="card summarycard">
         <span className="lbl">
-          지금 받고 있는 우대 혜택 <SourceTag source={watch.activeTotal.source} />
+          지금 받고 있는 우대 혜택
         </span>
         <Amount value={watch.activeTotal} short size="xl" prefix="연" />
         <span className="sub">
-          약관에서 추출한 조건 {watch.linkCount}건 · 상품 {watch.productCount}개 <SourceTag source="doc" />
+          약관에서 추출한 조건 {watch.linkCount}건 · 상품 {watch.productCount}개
         </span>
       </div>
 
@@ -40,7 +39,6 @@ export function Benefits() {
             ? `가장 이른 판정일은 ${formatKoMD(watch.nextDate)}입니다. 이번 달에 ${watch.dueSoon.length}건이 남았습니다.`
             : '이번 달 판정은 모두 끝났습니다. 지금 바꿔도 이번 달 혜택은 지킵니다.'}
         </span>
-        <SourceTag source="calc" />
       </div>
 
       <div className="plist card">

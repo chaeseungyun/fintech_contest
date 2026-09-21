@@ -2,7 +2,6 @@ import { AppShell } from '../components/AppShell';
 import { Amount } from '../components/Amount';
 import { Glyph } from '../components/Glyph';
 import { QuickMenu } from '../components/QuickMenu';
-import { SourceTag } from '../components/SourceTag';
 import { formatKoMD, formatKoYMD, formatMD } from '../lib/format';
 import { totalAssets } from '../lib/portfolio';
 import { watchSummary } from '../lib/watch';
@@ -66,7 +65,6 @@ export function Home() {
       <section className="card watchcard">
         <h3 className="cardtitle">
           이번 달 점검
-          <SourceTag source={watch.activeTotal.source} />
         </h3>
         <p className="chartnote">
           {watch.nextDate

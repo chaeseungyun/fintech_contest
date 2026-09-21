@@ -89,7 +89,7 @@ export function Verdict({ triggerId }: { triggerId: string }) {
         <p>{v.body}</p>
       </div>
 
-      <BasisStrip basis={d.basis} />
+      <BasisStrip basis={d.basis} compact />
 
       <section className="card">
         <h3 className="cardtitle">

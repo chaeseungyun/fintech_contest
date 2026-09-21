@@ -127,11 +127,11 @@ export function AddonCard({ proposal, title }: { proposal: AddonProposal; title?
         ))}
       </div>
 
-      <p className="note">
-        {proposal.inactiveCount > 0
-          ? `실적 미달로 꺼져 있는 조건 ${proposal.inactiveCount}건을 후보가 대신 채울 수 있는지까지 함께 계산했습니다.`
-          : '지금은 실적 미달로 꺼진 조건이 없어 후보 자체 혜택만으로 계산했습니다.'}
-      </p>
+      {proposal.inactiveCount > 0 && (
+        <p className="note">
+          실적 미달로 꺼져 있는 조건 {proposal.inactiveCount}건을 후보가 대신 채울 수 있는지까지 함께 계산했습니다.
+        </p>
+      )}
     </section>
   );
 }

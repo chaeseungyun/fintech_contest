@@ -254,7 +254,6 @@ export function derive(scenario: Scenario, triggerId?: string, options: DeriveOp
     checklist: buildChecklist({
       trigger,
       center,
-      items: active,
       timing,
       unrecoverable,
       recommendation,
@@ -357,23 +356,14 @@ function buildVerdict(ctx: {
 function buildChecklist(ctx: {
   trigger: Trigger;
   center: Product;
-  items: ImpactItem[];
   timing: SafeTiming;
   unrecoverable: ImpactItem[];
   recommendation: Recommendation;
   chosen: CandidateResult | null;
 }): ChecklistItem[] {
-  const { trigger, center, items, timing, unrecoverable, recommendation, chosen } = ctx;
+  const { trigger, center, timing, unrecoverable, recommendation, chosen } = ctx;
   const name = shortName(center);
   const list: ChecklistItem[] = [];
-
-  if (items.length > 0) {
-    list.push({
-      key: 'links',
-      text: `현재 ${withJosa(name, '은/는')} ${productNames(items)} ${items.length}개 상품의 우대 조건과 연결되어 있습니다.`,
-      source: 'doc',
-    });
-  }
 
   for (const u of unrecoverable) {
     list.push({
