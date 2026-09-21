@@ -55,9 +55,12 @@ describe('화면 스모크', () => {
   it('허브 — 항목마다 한 행, 금액은 미리 보여주지 않는다', () => {
     const html = draw(<Hub />);
     expect(html).toContain('상시 분석');
-    expect(html).toContain('손익을 따져볼 항목');
+    // "분석 중" 의 증거 — watch 숫자가 허브에도 있다
+    expect(html).toContain('계속 보고 있습니다');
+    expect(html).toContain('이번 달 우대 확인일');
+    expect(html).toContain('미리 보기');
     expect(html).toContain('상품 하나를 바꾸면');
-    expect(html).toContain('바꿔도 되는 시점 안내');
+    expect(html).toContain('실행 순서 안내');
     expect((html.match(/triggerrow/g) ?? []).length).toBe(BASE_SCENARIO.triggers.length);
     expect(html).toContain('연결 혜택');
     // 사전 계산된 순손익(−16.4만원 등)을 허브에 적지 않는다

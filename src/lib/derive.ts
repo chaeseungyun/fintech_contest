@@ -432,7 +432,7 @@ function buildSteps(ctx: {
     },
     {
       key: 'link',
-      label: '연결된 금융상품 탐색',
+      label: '연결된 금융상품 확인',
       detail: `${new Set(items.map((i) => i.product.id)).size}개 상품이 이 변경에 걸려 있음`,
     },
     {

@@ -615,7 +615,54 @@ ol {
   padding: 0 2px;
 }
 
-/* 허브 상단 3단계 — 이 메뉴가 뭘 해 주는지 한 줄로 */
+/* 허브 상단 — 상시 분석의 증거 한 줄. 홈 배너의 live 줄과 같은 점 */
+.livecard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--r-lg);
+  background: var(--brand-soft);
+  text-align: left;
+}
+.livecard .body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+.livecard .body b {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--fs-base);
+  color: var(--brand-ink);
+}
+.livecard .body span {
+  font-size: var(--fs-xs);
+  color: var(--ink-2);
+}
+.livecard .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--save);
+  flex: none;
+  animation: pulse 2.2s ease-in-out infinite;
+}
+.livecard .tail {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex: none;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--brand);
+}
+
+/* 허브 상단 3단계 — 항목을 누르면 이 순서로 */
 .howto {
   display: flex;
   gap: 6px;

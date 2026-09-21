@@ -42,10 +42,11 @@ export function Analyzing({ triggerId }: { triggerId: string }) {
           </span>
         </div>
 
+        {/* 상시 분석이 이미 찾아 둔 연결에 이 변경을 넣어 보는 것이다 — 처음 분석하는 것처럼 쓰지 않는다 */}
         <h2>
           {scenario.brand.service}가
           <br />
-          연결된 영향을 분석하고 있습니다
+          미리 찾아 둔 연결로 손익을 계산하고 있습니다
         </h2>
         <p className="target">
           {d.center.institution} {d.center.name} · {d.trigger.label}
