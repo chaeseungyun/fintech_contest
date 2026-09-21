@@ -60,6 +60,8 @@ export interface ActionPlan {
 /** 회복 불가 조건 한 줄. derive 가 ImpactItem 에서 만들어 넘긴다 */
 export interface PlanLink {
   productName: string;
+  /** "우대금리 0.25%p" — 어떤 혜택이 사라지는지 */
+  perk: string;
   recoverAt: ISODate | null;
 }
 
@@ -211,11 +213,11 @@ function switchSteps(input: ActionPlanInput): ActionStep[] {
     steps.push({
       key: 'wait',
       title: `${formatKoMD(timing.safeAfter.value)}까지 기다립니다`,
-      detail: `이번 달 판정이 ${formatKoMD(
+      detail: `이번 달 우대 확인이 ${formatKoMD(
         timing.safeAfter.value,
-      )}에 끝납니다. 그 전에 실행하면 이번 달 혜택이 함께 빠집니다. 지난 뒤에는 아래 항목이 적용됐는지 확인하세요.`,
-      bullets: dueThisMonth.map((d) => `${d.productName} — ${formatMD(d.date)} 판정 결과가 적용됐는지`),
-      whenLabel: `${formatKoMD(timing.safeFrom.value)}부터 · 이번 달 판정 종료 후`,
+      )}에 끝나 이번 달 우대가 확정됩니다. 그 전에 실행하면 이번 달 혜택이 함께 빠집니다. 지난 뒤에는 아래 우대가 실제로 적용됐는지 확인하세요.`,
+      bullets: dueThisMonth.map((d) => `${d.productName} — ${formatMD(d.date)} 확인 결과 우대가 적용됐는지`),
+      whenLabel: `${formatKoMD(timing.safeFrom.value)}부터 · 이번 달 우대 확인 완료 후`,
       when: timing.safeFrom,
       contact: null,
       source: timing.safeAfter.source,
@@ -240,10 +242,10 @@ function switchSteps(input: ActionPlanInput): ActionStep[] {
   if (unrecoverable.length > 0) {
     steps.push({
       key: 'unrecoverable',
-      title: '되돌릴 수 없는 항목을 확인합니다',
-      detail: '가입 시점에 확정된 우대라 다시 가입해도 만기 전에는 복구되지 않습니다. 이걸 감수할지 정한 뒤 다음 단계로 가세요.',
+      title: `${trigger.verb}하면 되돌아오지 않는 우대를 확인합니다`,
+      detail: `${withJosa(name, '을/를')} 보유한 조건으로 가입 때 확정된 우대라, ${withJosa(name, '을/를')} 다시 만들어도 만기 전에는 되돌아오지 않습니다. 이걸 감수할지 정한 뒤 다음 단계로 가세요.`,
       bullets: unrecoverable.map(
-        (l) => `${l.productName} — ${l.recoverAt ? `${formatKoYMD(l.recoverAt)}까지` : '복구 불가'}`,
+        (l) => `${l.productName}의 ${l.perk} — ${l.recoverAt ? `만기 ${formatKoYMD(l.recoverAt)}까지 이 우대 없이` : '만기 정보 없음'}`,
       ),
       whenLabel: null,
       when: null,
@@ -257,7 +259,7 @@ function switchSteps(input: ActionPlanInput): ActionStep[] {
     title: `${withJosa(name, '을/를')} ${trigger.verb} 신청합니다`,
     detail: `${center.institution}에 직접 신청해야 합니다. 이 앱은 신청을 대신 처리하지 않습니다.`,
     bullets: [],
-    whenLabel: timing.alreadySafe ? '지금 가능' : `${formatKoMD(timing.safeFrom.value)} 이후 · 판정 결과 확인 후`,
+    whenLabel: timing.alreadySafe ? '지금 가능' : `${formatKoMD(timing.safeFrom.value)} 이후 · 우대 확인 완료 후`,
     when: timing.alreadySafe ? null : timing.safeFrom,
     contact: toContact(center.institution, center.contact),
     source: 'holding',

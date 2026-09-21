@@ -31,6 +31,12 @@ export function Hub() {
         ))}
       </h2>
       <p className="herosub">{scenario.home.bannerBody}</p>
+      {/* 처음 보는 사람용 — 이 메뉴가 뭘 해 주는지 세 단계로. 항목을 고르면 이 순서대로 진행된다 */}
+      <ol className="howto">
+        <li>연결된 상품 찾기</li>
+        <li>바꿀 때 손익 계산</li>
+        <li>바꿔도 되는 시점 안내</li>
+      </ol>
 
       <h3 className="sectiontitle">유지·변경 손익을 따져볼 항목</h3>
 

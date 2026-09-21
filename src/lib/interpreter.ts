@@ -15,7 +15,7 @@ export interface Judgment {
   recoverable: boolean;
   /** PERMANENT: until 앵커를 상품 facts 에 바인딩한 회복 시점 */
   recoverAt: Tagged<ISODate> | null;
-  /** "매월 15일 재산정" 같은 주기 설명. 출처는 조건의 provenance.cycle */
+  /** "매월 15일 실적 확인" 같은 주기 설명. 출처는 조건의 provenance.cycle */
   cycleLabel: Tagged<string>;
   /** 실적 기준이 현재 충족되어 혜택이 살아있는가. 미충족이면 이미 미적용 상태 */
   active: boolean;
@@ -40,7 +40,7 @@ export const METRIC_STATUS_LABEL: Record<MetricStatus, string> = {
   verified: '실적 데이터로 확인',
   user: '사용자가 충족으로 확인',
   assumed: '실적 값 없음 · 충족으로 가정',
-  fixed: '가입 시 확정 · 재판정 없음',
+  fixed: '가입 시 확정 · 매달 확인 없음',
 };
 
 export function metricStatus(cond: MappedCondition): MetricStatus {
@@ -110,15 +110,15 @@ export function cycleLabel(cond: MappedCondition): string {
   const { op, params } = cond.expr;
   switch (op) {
     case 'RECUR':
-      return `매월 ${params.from?.dayOfMonth}일 재산정`;
+      return `매월 ${params.from?.dayOfMonth}일 실적 확인`;
     case 'ROLLING':
       return params.settleOn?.anchor === 'month_end'
-        ? '전월 실적, 매월 말일 확정'
-        : `전월 실적, 매월 ${params.settleOn?.dayOfMonth}일 확정`;
+        ? '매월 말일 전월 실적 확인'
+        : `매월 ${params.settleOn?.dayOfMonth}일 전월 실적 확인`;
     case 'COUNT':
-      return `매월 ${params.checkOn?.dayOfMonth}일 확인`;
+      return `매월 ${params.checkOn?.dayOfMonth}일 실적 확인`;
     case 'PERMANENT':
-      return '가입 시 확정, 만기까지 고정';
+      return '가입 때 확정 · 매달 확인 없음';
   }
 }
 

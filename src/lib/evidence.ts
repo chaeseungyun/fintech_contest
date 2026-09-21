@@ -54,7 +54,7 @@ export function evidenceFields(item: ImpactItem, target: Product): EvidenceField
   }
 
   // 판정 주기
-  const cycleField: EvidenceField = { key: 'cycle', label: '판정 주기', display: judgment.cycleLabel };
+  const cycleField: EvidenceField = { key: 'cycle', label: '확인 주기', display: judgment.cycleLabel };
   if (CYCLE_EDITABLE.has(condition.expr.op)) {
     const dom =
       condition.expr.op === 'RECUR'
@@ -108,7 +108,7 @@ export function evidenceFields(item: ImpactItem, target: Product): EvidenceField
   if (judgment.nextJudgmentDate.value !== null) {
     fields.push({
       key: 'next',
-      label: '다음 판정일',
+      label: '다음 우대 확인일',
       display: tag(formatKoYMD(judgment.nextJudgmentDate.value), judgment.nextJudgmentDate.source),
     });
   } else if (judgment.recoverAt) {
@@ -116,7 +116,7 @@ export function evidenceFields(item: ImpactItem, target: Product): EvidenceField
       key: 'recoverAt',
       label: '회복 시점',
       display: tag(`만기 ${formatKoYMD(judgment.recoverAt.value)}`, judgment.recoverAt.source),
-      note: '판정일 없음 · 만기까지 고정',
+      note: '매달 확인 없음 · 만기까지 고정',
     });
   }
 

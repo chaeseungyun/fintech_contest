@@ -14,7 +14,7 @@ describe('비교 결과 — 핵심 입력이 빠지면 결론을 내지 않는�
       const d = derive(scenario, id);
       expect(d.missing.length).toBeGreaterThan(0);
       expect(d.verdict.kind).toBe('pending');
-      expect(d.verdict.highlight).toContain('판정할 수 없습니다');
+      expect(d.verdict.highlight).toContain('비교할 수 없습니다');
       expect(d.verdict.body).toContain(d.missing[0]);
       // 손실 쪽 소계는 그대로 계산한다 — 확인된 항목의 변화 소계
       expect(d.netAnnual.value).toBe(EXPECTED.triggers[id].netAnnual);

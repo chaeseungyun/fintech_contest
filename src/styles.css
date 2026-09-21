@@ -615,6 +615,44 @@ ol {
   padding: 0 2px;
 }
 
+/* 허브 상단 3단계 — 이 메뉴가 뭘 해 주는지 한 줄로 */
+.howto {
+  display: flex;
+  gap: 6px;
+  padding: 0 2px;
+  margin: 2px 0 4px;
+  list-style: none;
+  counter-reset: step;
+}
+.howto li {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 10px;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink-2);
+}
+.howto li::before {
+  counter-increment: step;
+  content: counter(step);
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--brand-deep);
+  color: #fff;
+  font-size: var(--fs-2xs);
+  font-weight: 700;
+}
+
 .triggerlist {
   display: flex;
   flex-direction: column;
@@ -879,6 +917,12 @@ ol {
   flex-direction: column;
   gap: 7px;
   background: var(--surface-2);
+}
+/* 펼친 내역 첫 줄 — 쉬운 말 한 문장 */
+.irow .detail .plain {
+  font-size: var(--fs-base);
+  line-height: 1.6;
+  color: var(--ink);
 }
 .irow .detail .links {
   display: flex;
@@ -1149,6 +1193,15 @@ ol {
   height: 8px;
   border-radius: 4px;
   background: rgba(47, 99, 245, 0.16);
+}
+/* 구간 이름을 막대 위에 얹는다 — 뭘 해도 되는 구간인지 색만으로 말하지 않는다 */
+.axis .safelabel {
+  position: absolute;
+  top: 2px;
+  margin-left: 4px;
+  font-size: var(--fs-2xs);
+  color: var(--brand);
+  white-space: nowrap;
 }
 .axis .pt {
   position: absolute;

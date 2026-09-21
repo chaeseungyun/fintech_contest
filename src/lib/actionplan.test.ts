@@ -93,7 +93,7 @@ describe('유지 판단의 안내 — 유지 절차는 없고 해지 절차만 �
     const exec = plan.steps.find((s) => s.key === 'execute')!;
     expect(exec.when?.value).toBe(d.timing.safeFrom.value);
     expect(exec.whenLabel).toContain(formatKoMD(d.timing.safeFrom.value));
-    expect(exec.whenLabel).toContain('판정 결과 확인 후');
+    expect(exec.whenLabel).toContain('우대 확인 완료 후');
     expect(exec.whenLabel).not.toContain('안전');
   });
 
@@ -106,7 +106,7 @@ describe('유지 판단의 안내 — 유지 절차는 없고 해지 절차만 �
       const name = i.product.shortName ?? i.product.name;
       expect(wait.bullets.some((b) => b.includes(name) && b.includes(formatMD(i.judgment.nextJudgmentDate.value!)))).toBe(true);
     }
-    expect(wait.whenLabel).toContain('이번 달 판정 종료 후');
+    expect(wait.whenLabel).toContain('이번 달 우대 확인 완료 후');
     expect(wait.whenLabel).not.toContain('안전');
   });
 

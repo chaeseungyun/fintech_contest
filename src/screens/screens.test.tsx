@@ -57,6 +57,7 @@ describe('화면 스모크', () => {
     expect(html).toContain('상시 분석');
     expect(html).toContain('손익을 따져볼 항목');
     expect(html).toContain('상품 하나를 바꾸면');
+    expect(html).toContain('바꿔도 되는 시점 안내');
     expect((html.match(/triggerrow/g) ?? []).length).toBe(BASE_SCENARIO.triggers.length);
     expect(html).toContain('연결 혜택');
     // 사전 계산된 순손익(−16.4만원 등)을 허브에 적지 않는다
@@ -85,11 +86,16 @@ describe('화면 스모크', () => {
       }
       expect(plan).toContain('실행 안내');
       expect(plan).toContain('기준 안');
-      expect(verdict).toMatch(/절차 (보기|안내받기)/);
-      expect(verdict).not.toContain('해지합니다');
+      // 결론 먼저 — 비교 결과는 결론·차트까지만, 이유·후보·절차 진입은 결과 상세에
       expect(verdict).toContain('비교 결과');
+      expect(verdict).toContain('분석 과정 보기');
       expect(verdict).not.toContain('최종 판단');
-      expect(impact).toContain('비교 결과 보기');
+      expect(verdict).not.toContain('해지합니다');
+      expect(verdict).not.toContain('유지를 택한다면');
+      expect(verdict).not.toContain('꼭 확인하세요');
+      expect(impact).toContain('결과 상세');
+      expect(impact).toMatch(/절차 (보기|안내받기)/);
+      expect(impact).toContain('꼭 확인하세요');
       // 비교 기준 스트립은 영향·비교 결과 양쪽에
       expect(impact).toContain('basisstrip');
       expect(verdict).toContain('basisstrip');
@@ -107,13 +113,13 @@ describe('화면 스모크', () => {
     expect(impact).toContain('전체 비교 보류');
     expect(impact).not.toContain('연간 예상 손익');
     expect(verdict).toContain('verdictcard pending');
-    expect(verdict).toContain('전체 손익을 판정할 수 없습니다');
+    expect(verdict).toContain('전체 손익을 비교할 수 없습니다');
     expect(verdict).not.toContain('유지하는 것이');
   });
 
-  it('유지 조건 목록은 비교 결과에 있고 절차 화면에는 없다', () => {
+  it('유지 조건 목록은 결과 상세에 있고 절차 화면에는 없다', () => {
     const open: Action[] = [{ type: 'push', route: { name: 'verdict', triggerId: 'card_cancel' } }];
-    expect(draw(<Verdict triggerId="card_cancel" />, open)).toContain('유지를 택한다면 지킬 조건');
+    expect(draw(<Impact triggerId="card_cancel" />, open)).toContain('유지를 택한다면 지킬 조건');
     expect(draw(<ActionPlan triggerId="card_cancel" />, open)).not.toContain('유지를 택한다면');
   });
 
@@ -131,20 +137,25 @@ describe('화면 스모크', () => {
     expect(after).toContain('스마트카드로 갈아타기');
     expect(after).toContain('스마트카드 발급 가능 여부');
     expect(after).toContain('다른 안 고르기');
-    // 후보 카드에는 고르는 버튼이 있고, 추천 배지는 "이득" 이다
-    const verdict = draw(<Verdict triggerId="card_cancel" />, [
+    // 후보 카드(결과 상세)에는 고르는 버튼이 있고, 추천 배지는 "이득" 이다
+    const impact = draw(<Impact triggerId="card_cancel" />, [
       ...base,
       { type: 'toggleCandidate', candidateId: 'card_nuri_smart' },
     ]);
-    expect(verdict).toContain('이 안으로 절차 보기');
-    expect(verdict).toContain('>이득<');
-    expect(verdict).not.toContain('>추천<');
+    expect(impact).toContain('이 안으로 절차 보기');
+    expect(impact).toContain('>이득<');
+    expect(impact).not.toContain('>추천<');
   });
 
   it('차트 아래 문구는 추천 이유를 따른다', () => {
     const at = (triggerId: string) =>
       draw(<Verdict triggerId={triggerId} />, [{ type: 'push', route: { name: 'verdict', triggerId } }]);
-    expect(at('card_cancel')).toContain('9개월 유지하면 되돌릴 수 없는 우대의 만기(3월 20일)를 넘깁니다');
+    const card = at('card_cancel');
+    // 상품·혜택·만기·결과를 전부 적는다 — "우대의 만기" 같은 내부 표현은 쓰지 않는다
+    expect(card).toContain('정기예금의 우대금리 0.25%p는 톡톡카드를 보유한 조건으로 가입 때 확정된 것이라');
+    expect(card).toContain('만기(2027년 3월 20일)까지 이 우대 없이 이어지고 톡톡카드를 다시 만들어도 되돌아오지 않습니다');
+    expect(card).toContain('차트에서는 9개월 구간부터입니다');
+    expect(card).not.toContain('우대의 만기');
     // 첫 양수 구간을 "최적 시점" 이라 부르지 않는다 — 손익분기다
     expect(at('loan_change')).toContain('유지 기간이 길수록 지켜지는 혜택이 커집니다');
     // 절감이 없으면 손익분기도 없다 — 강조 막대·배지를 그리지 않는다
@@ -176,17 +187,26 @@ describe('화면 스모크', () => {
     expect(benefits).toContain('창구에서 꼭 물어볼 것');
     expect(benefits).not.toMatch(/신청하기|신청 완료|가입 완료/);
 
-    // 비교 결과: 갈아타기 후보
+    // 결과 상세: 갈아타기 후보
     const open: Action[] = [
       { type: 'push', route: { name: 'verdict', triggerId: 'card_cancel' } },
       { type: 'toggleCandidate', candidateId: 'card_nuri_smart' },
       { type: 'toggleStep', stepKey: 'cand:card_nuri_smart' },
     ];
-    const verdict = draw(<Verdict triggerId="card_cancel" />, open);
-    expect(verdict).toContain('신청 경로 보기');
-    expect(verdict).toContain('공식 채널에서 직접 합니다');
-    expect(verdict).toContain('시연용 샘플 창구 정보');
-    expect(verdict).not.toMatch(/신청하기|신청 완료|가입 완료/);
+    const impact = draw(<Impact triggerId="card_cancel" />, open);
+    expect(impact).toContain('신청 경로 보기');
+    expect(impact).toContain('공식 채널에서 직접 합니다');
+    expect(impact).toContain('시연용 샘플 창구 정보');
+    expect(impact).not.toMatch(/신청하기|신청 완료|가입 완료/);
+  });
+
+  it('펼친 항목 첫 줄은 쉬운 말 한 문장 — 무엇을 바꾸면 어느 상품의 어떤 우대가 빠져 얼마가 달라지는지', () => {
+    const open: Action[] = [
+      { type: 'push', route: { name: 'verdict', triggerId: 'card_cancel' } },
+      { type: 'toggleExpanded', conditionId: 'k1' },
+    ];
+    const html = draw(<Impact triggerId="card_cancel" />, open);
+    expect(html).toContain('톡톡카드를 해지하면 주담대의 우대금리 0.2%p가 빠져 대출 이자가 연 120,000원 늘어납니다.');
   });
 
   it('예·적금 해지는 중도해지 이자를 영향 화면과 실행 안내에서만 보여준다', () => {

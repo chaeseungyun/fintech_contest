@@ -68,8 +68,8 @@ export function Home() {
         </h3>
         <p className="chartnote">
           {watch.nextDate
-            ? `${formatKoMD(watch.nextDate)}부터 우대 판정이 시작됩니다. 이번 달에 ${watch.dueSoon.length}건이 남았습니다.`
-            : '이번 달 우대 판정은 모두 끝났습니다.'}
+            ? `${formatKoMD(watch.nextDate)}부터 은행이 우대 실적을 확인합니다. 이번 달에 ${watch.dueSoon.length}건이 남았습니다.`
+            : '이번 달 우대 확인은 모두 끝났습니다.'}
         </p>
 
         <div className="watchlist">

@@ -54,17 +54,24 @@ export function formatRateDelta(value: number): string {
   return `${sign}${pct}%p`;
 }
 
+/** "우대금리 0.25%p" · "월 2,000원 할인" — 조건이 주는 혜택 한 덩어리. 부호 없음 */
+export function perkLabel(cond: MappedCondition): string {
+  const { effect } = cond.binds;
+  return effect.kind === 'rate_delta'
+    ? `우대금리 ${formatRateDelta(effect.value).replace(/^[−+]/, '')}`
+    : `월 ${effect.value.toLocaleString('ko-KR')}원 할인`;
+}
+
 export function basisLabel(cond: MappedCondition, holder: Product): string {
   const { effect } = cond.binds;
   if (effect.kind === 'rate_delta') {
     const principal = principalOf(holder);
-    const pct = formatRateDelta(effect.value).replace(/^[−+]/, '');
-    const head = `우대금리 ${pct} 소멸`;
+    const head = `${perkLabel(cond)} 소멸`;
     if (!principal) return head;
     const noun = holder.type === 'loan' ? '잔액' : '원금';
     return `${head} · ${noun} ${formatWonCompact(principal.value)}`;
   }
-  return `월 ${effect.value.toLocaleString('ko-KR')}원 할인 중단`;
+  return `${perkLabel(cond)} 중단`;
 }
 
 /** 혜택 관점 문구. 같은 조건을 "지금 받고 있는 것"으로 읽을 때 쓴다. */
@@ -72,13 +79,12 @@ export function benefitLabel(cond: MappedCondition, holder: Product): string {
   const { effect } = cond.binds;
   if (effect.kind === 'rate_delta') {
     const principal = principalOf(holder);
-    const pct = formatRateDelta(effect.value).replace(/^[−+]/, '');
-    const head = `우대금리 ${pct} 적용 중`;
+    const head = `${perkLabel(cond)} 적용 중`;
     if (!principal) return head;
     const noun = holder.type === 'loan' ? '잔액' : '원금';
     return `${head} · ${noun} ${formatWonCompact(principal.value)}`;
   }
-  return `월 ${effect.value.toLocaleString('ko-KR')}원 할인 중`;
+  return `${perkLabel(cond)} 중`;
 }
 
 export function lossBreakdown(cond: MappedCondition, holder: Product): LossBreakdown {

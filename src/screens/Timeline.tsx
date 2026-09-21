@@ -2,7 +2,8 @@ import { AppShell } from '../components/AppShell';
 import { Glyph, TYPE_ICON } from '../components/Glyph';
 import { SourceTag } from '../components/SourceTag';
 import type { AxisPoint, ImpactItem } from '../lib/derive';
-import { formatKoMD, formatKoYMD, formatMD } from '../lib/format';
+import { formatKoMD, formatKoYMD, formatMD, withJosa } from '../lib/format';
+import { perkLabel } from '../lib/money';
 import { useStore } from '../state/store';
 
 const POINT_CLASS: Record<AxisPoint['kind'], string> = {
@@ -24,10 +25,11 @@ const x = (pct: number) => `${6 + pct * 0.88}%`;
 
 export function Timeline() {
   const { derived: d, dispatch } = useStore();
+  const center = d.center.shortName ?? d.center.name;
   const { axis, timing } = d;
 
   return (
-    <AppShell title="판정일과 안전 시점" onBack={() => dispatch({ type: 'back' })} hideTabBar>
+    <AppShell title="우대 확인일과 변경 가능 구간" onBack={() => dispatch({ type: 'back' })} hideTabBar>
       <div className="card">
         <h3 className="cardtitle">
           오늘 {formatKoMD(d.today)} 기준
@@ -40,6 +42,9 @@ export function Timeline() {
             className="safezone"
             style={{ left: x(axis.safeFromPct), width: `calc(${x(100)} - ${x(axis.safeFromPct)})` }}
           />
+          <div className="safelabel" style={{ left: x(axis.safeFromPct) }}>
+            변경 가능 구간
+          </div>
           {axis.points.map((p, i) => (
             <div
               key={`${p.date}-${p.conditionId ?? 'today'}-${i}`}
@@ -57,13 +62,15 @@ export function Timeline() {
 
         <p className="axisnote">
           {timing.alreadySafe ? (
-            <>이번 달 판정은 모두 끝났습니다. 지금 실행해도 이번 달 혜택은 지킵니다.</>
+            <>이번 달 우대 확인은 모두 끝나 이번 달 우대가 확정됐습니다. 지금 실행해도 이번 달 혜택은 잃지 않습니다.</>
           ) : (
             <>
-              <b>{formatKoMD(timing.safeAfter.value)}</b>이 지나면 이번 달 판정이 모두 끝납니다.
+              <b>{formatKoMD(timing.safeAfter.value)}</b>이 지나면 이번 달 우대 확인이 모두 끝나 이번 달 우대가
+              확정됩니다. 그 뒤에 바꿔도 이번 달 혜택은 잃지 않습니다.
             </>
           )}
         </p>
+        <p className="footnote">우대 확인일은 은행이 실적을 채웠는지 보고 그 달 우대를 줄지 정하는 날입니다. 이 날이 지나면 그 달 우대는 확정되어, 그 뒤에 바꿔도 그 달 혜택은 잃지 않습니다.</p>
 
         {d.deferredNextMonth.length > 0 && (
           <p className="note">
@@ -73,7 +80,7 @@ export function Timeline() {
                   `${i.product.shortName ?? i.product.name} ${formatMD(i.judgment.nextJudgmentDate.value!)}`,
               )
               .join(', ')}
-            은 다음 달 판정이라 계산에서 뺐습니다. 옮긴 뒤 실적을 다시 채우면 유지됩니다.
+            은 다음 달에 확인하는 조건이라 계산에서 뺐습니다. 옮긴 뒤 실적을 다시 채우면 유지됩니다.
           </p>
         )}
       </div>
@@ -95,7 +102,7 @@ export function Timeline() {
               </span>
               <span className="tail">
                 {!j.active ? (
-                  <em className="muted">판정 제외</em>
+                  <em className="muted">확인 제외</em>
                 ) : date === null ? (
                   <em className="danger">회복 불가</em>
                 ) : (
@@ -118,10 +125,10 @@ export function Timeline() {
         <div key={item.condition.id} className="card warncard">
           <h3 className="cardtitle">{item.product.name} · 회복 불가</h3>
           <p>
-            가입 시점에 우대가 확정되는 조건이라 판정일이 없습니다. 조건이 깨지면 만기{' '}
-            <b>{formatKoYMD(item.judgment.recoverAt!.value)}</b>
+            {perkLabel(item.condition)}는 가입 때 확정된 것이라 매달 확인하지 않습니다. {withJosa(center, '을/를')}{' '}
+            {d.trigger.verb}하면 만기 <b>{formatKoYMD(item.judgment.recoverAt!.value)}</b>
             <SourceTag source={item.judgment.recoverAt!.source} />
-            까지 되돌릴 수 없습니다.
+            까지 이 우대 없이 이어지고, 다시 만들어도 되돌아오지 않습니다.
           </p>
         </div>
       ))}

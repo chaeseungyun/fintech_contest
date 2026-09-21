@@ -16,7 +16,8 @@ export function Analyzing({ triggerId }: { triggerId: string }) {
   const [done, setDone] = useState(0);
   const total = d.steps.length;
 
-  const goResult = () => dispatch({ type: 'replace', route: { name: 'impact', triggerId } });
+  // 결론부터 보여준다. 이유(항목별 영향)는 비교 결과에서 한 단계 들어간다.
+  const goResult = () => dispatch({ type: 'replace', route: { name: 'verdict', triggerId } });
 
   useEffect(() => {
     if (done >= total) {

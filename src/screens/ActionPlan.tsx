@@ -52,7 +52,7 @@ export function ActionPlan({ triggerId }: { triggerId: string }) {
       footer={
         <>
           <button type="button" className="btn ghost" onClick={() => dispatch({ type: 'back' })}>
-            비교 결과로 돌아가기
+            결과 상세로 돌아가기
           </button>
           <button type="button" className="btn text" onClick={() => dispatch({ type: 'selectTab', tab: 'home' })}>
             홈으로
@@ -90,7 +90,7 @@ export function ActionPlan({ triggerId }: { triggerId: string }) {
         className="btn ghost"
         onClick={() => dispatch({ type: 'push', route: { name: 'timeline', triggerId } })}
       >
-        판정일·안전 시점 다시 보기
+        우대 확인일·변경 가능 구간 다시 보기
       </button>
 
       {plan.notes.map((n) => (

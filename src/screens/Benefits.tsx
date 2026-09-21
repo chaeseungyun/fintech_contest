@@ -36,8 +36,8 @@ export function Benefits() {
         </span>
         <span className="tx">
           {watch.nextDate
-            ? `가장 이른 판정일은 ${formatKoMD(watch.nextDate)}입니다. 이번 달에 ${watch.dueSoon.length}건이 남았습니다.`
-            : '이번 달 판정은 모두 끝났습니다. 지금 바꿔도 이번 달 혜택은 지킵니다.'}
+            ? `가장 이른 우대 확인일은 ${formatKoMD(watch.nextDate)}입니다. 이번 달에 ${watch.dueSoon.length}건이 남았습니다.`
+            : '이번 달 우대 확인은 모두 끝나 이번 달 우대가 확정됐습니다. 지금 바꿔도 이번 달 혜택은 잃지 않습니다.'}
         </span>
       </div>
 
@@ -75,7 +75,7 @@ export function Benefits() {
                 <em className={`due${r.dueThisMonth && r.judgment.active ? ' soon' : ''}`}>
                   {r.judgment.active
                     ? date
-                      ? `${formatMD(date)} 판정`
+                      ? `${formatMD(date)} 확인`
                       : '만기까지 고정'
                     : '실적 미달'}
                 </em>
@@ -97,7 +97,7 @@ export function Benefits() {
 
       <p className="footnote">
         혜택 하나가 다른 상품의 유지 조건에 걸려 있습니다. 그 상품을 바꾸면 이 혜택도 함께 움직입니다.
-        판정일이 지나야 그 달의 우대가 확정됩니다.
+        우대 확인일은 은행이 실적을 채웠는지 보고 그 달 우대를 줄지 정하는 날입니다. 이 날이 지나면 그 달 우대는 확정되어, 그 뒤에 바꿔도 그 달 혜택은 잃지 않습니다.
       </p>
     </AppShell>
   );

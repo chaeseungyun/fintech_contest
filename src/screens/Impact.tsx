@@ -2,12 +2,28 @@ import { AppShell } from '../components/AppShell';
 import { Amount } from '../components/Amount';
 import { BasisStrip } from '../components/BasisStrip';
 import { Glyph, TYPE_ICON } from '../components/Glyph';
+import { RecommendCard } from '../components/RecommendCard';
 import { SourceTag } from '../components/SourceTag';
-import { formatKoMD, formatKoYMD, formatWon, formatWonShort } from '../lib/format';
+import { formatKoMD, formatKoYMD, formatWon, formatWonShort, withJosa } from '../lib/format';
 import type { ImpactItem } from '../lib/derive';
 import { METRIC_STATUS_LABEL } from '../lib/interpreter';
+import { perkLabel } from '../lib/money';
 import { useStore } from '../state/store';
 import { tag } from '../lib/types';
+
+/**
+ * 펼친 내역 첫 줄 — 이 변경이 이 상품에 무슨 일을 일으키는지 한 문장.
+ * "우대금리 0.2%p 소멸 · 잔액 1.5억" 을 처음 보는 사람 말로 다시 쓴다. 값은 전부 계산 결과에서 온다.
+ */
+function plainEffect(item: ImpactItem, center: string, verb: string): string {
+  const name = item.product.shortName ?? item.product.name;
+  const head = `${withJosa(center, '을/를')} ${verb}하면 ${name}의 ${perkLabel(item.condition)}`;
+  const won = formatWon(item.effectiveLoss.value);
+  if (item.condition.binds.effect.kind === 'monthly_benefit') return `${head}이 끊겨 연 ${won}을 더 내게 됩니다.`;
+  return item.product.type === 'loan'
+    ? `${head}가 빠져 대출 이자가 연 ${won} 늘어납니다.`
+    : `${head}가 빠져 받는 이자가 연 ${won} 줄어듭니다.`;
+}
 
 function ImpactRow({ item, triggerId }: { item: ImpactItem; triggerId: string }) {
   const { state, derived: d, dispatch } = useStore();
@@ -37,14 +53,17 @@ function ImpactRow({ item, triggerId }: { item: ImpactItem; triggerId: string })
 
       {open && (
         <div className="detail">
+          {j.active && (
+            <p className="plain">{plainEffect(item, d.center.shortName ?? d.center.name, d.trigger.verb)}</p>
+          )}
           <div className="f">
-            <span className="k">판정 주기</span>
+            <span className="k">확인 주기</span>
             <span className="v">
               {j.cycleLabel.value} <SourceTag source={j.cycleLabel.source} />
             </span>
           </div>
           <div className="f">
-            <span className="k">{j.nextJudgmentDate.value === null ? '회복 시점' : '다음 판정일'}</span>
+            <span className="k">{j.nextJudgmentDate.value === null ? '회복 시점' : '다음 우대 확인일'}</span>
             <span className="v">
               {j.nextJudgmentDate.value === null ? (
                 <>
@@ -106,7 +125,7 @@ function ImpactRow({ item, triggerId }: { item: ImpactItem; triggerId: string })
           )}
           {j.recoverable && !j.countsForSafeAfter && j.active && (
             <p className="note">
-              판정일이 다음 달({formatKoMD(j.nextJudgmentDate.value!)})이라 이번 달 안전 시점 계산에서
+              우대 확인일이 다음 달({formatKoMD(j.nextJudgmentDate.value!)})이라 이번 달 변경 가능 구간 계산에서
               뺐습니다.
             </p>
           )}
@@ -121,24 +140,47 @@ function ImpactRow({ item, triggerId }: { item: ImpactItem; triggerId: string })
   );
 }
 
+/**
+ * 비교 결과에서 "분석 과정 보기" 로 들어오는 화면. 항목별 영향(①②③) → 유지 조건 → 갈아타기 후보 → 체크리스트.
+ * 절차의 기준 안(store.chosen)은 여기 후보 카드에서 고른다.
+ */
 export function Impact({ triggerId }: { triggerId: string }) {
   const { derived: d, dispatch } = useStore();
   const center = d.center;
-  const pending = d.verdict.kind === 'pending';
+  const v = d.verdict;
+  const pending = v.kind === 'pending';
+
+  const toPlan = () => dispatch({ type: 'push', route: { name: 'actionplan', triggerId } });
+  const toHub = () => dispatch({ type: 'popTo', name: 'hub' });
 
   return (
     <AppShell
-      title="영향 분석"
+      title="결과 상세"
       onBack={() => dispatch({ type: 'back' })}
       hideTabBar
       footer={
-        <button
-          type="button"
-          className="btn primary"
-          onClick={() => dispatch({ type: 'push', route: { name: 'verdict', triggerId } })}
-        >
-          비교 결과 보기
-        </button>
+        v.kind === 'switch' ? (
+          <>
+            <button type="button" className="btn primary" onClick={toPlan}>
+              {d.trigger.verb} 절차 안내받기
+            </button>
+            <button type="button" className="btn text" onClick={toHub}>
+              다른 항목도 분석해보기
+              <Glyph name="chevron" size={14} />
+            </button>
+          </>
+        ) : (
+          // 유지·보류: 강조 버튼은 다음 분석. 해지 절차는 "그래도" 를 붙여 한 단계 아래에 둔다.
+          <>
+            <button type="button" className="btn primary" onClick={toHub}>
+              다른 항목도 분석해보기
+            </button>
+            <button type="button" className="btn text" onClick={toPlan}>
+              그래도 {d.trigger.verb}한다면 · 절차 보기
+              <Glyph name="chevron" size={14} />
+            </button>
+          </>
+        )
       }
     >
       <div className="card targetcard">
@@ -204,9 +246,10 @@ export function Impact({ triggerId }: { triggerId: string }) {
         {d.items.length === 0 && <p className="empty small">이 변경에 걸린 우대 조건이 없습니다.</p>}
       </div>
 
+      {/* 비교 결과에서 본 숫자의 근거 — 절감·손실로 쪼개 보여주는 자리라 크게 다시 그리지 않는다 */}
       <div className={`totalcard ${pending ? 'pending' : d.netAnnual.value >= 0 ? 'good' : 'bad'}`}>
-        <span className="lbl">{pending ? '확인된 항목의 변화 소계' : '연간 예상 손익'}</span>
-        <Amount value={d.netAnnual} signed short size="xl" />
+        <span className="lbl">{pending ? '확인된 항목의 변화 소계' : '연간 예상 손익 · 합계 근거'}</span>
+        <Amount value={d.netAnnual} signed short size="lg" />
         <span className="basis">
           (절감 {formatWonShort(d.savingsTotal.value)} − 손실 {formatWonShort(d.total.value)})
           <SourceTag source={d.netAnnual.source} />
@@ -248,8 +291,51 @@ export function Impact({ triggerId }: { triggerId: string }) {
         className="btn ghost"
         onClick={() => dispatch({ type: 'push', route: { name: 'timeline', triggerId } })}
       >
-        판정일·안전 시점 자세히 보기
+        우대 확인일·변경 가능 구간 자세히 보기
       </button>
+
+      {d.maintain.length > 0 && (
+        <section className="card checklist maintain">
+          <h3 className="cardtitle">
+            유지를 택한다면 지킬 조건
+            <Glyph name="check" size={16} />
+          </h3>
+          <ul>
+            {d.maintain.map((c) => (
+              <li key={c.key}>
+                <span className="mk" aria-hidden="true">
+                  <Glyph name="check" size={14} />
+                </span>
+                <span className="tx">
+                  {c.text} <SourceTag source={c.source} />
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="note">유지에는 절차가 없습니다. 위 실적만 우대 확인일까지 유지되면 우대가 이어집니다.</p>
+        </section>
+      )}
+
+      <RecommendCard triggerId={triggerId} />
+
+      <section className="card checklist">
+        <h3 className="cardtitle">
+          꼭 확인하세요
+          <Glyph name="info" size={16} />
+        </h3>
+        <ul>
+          {d.checklist.map((c) => (
+            <li key={c.key}>
+              <span className="mk" aria-hidden="true">
+                <Glyph name="check" size={14} />
+              </span>
+              <span className="tx">
+                {c.text} <SourceTag source={c.source} />
+              </span>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <p className="footnote">
         모든 금액은 연 단위입니다. 상품마다 만기가 달라 총액으로는 더할 수 없습니다.

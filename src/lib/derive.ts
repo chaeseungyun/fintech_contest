@@ -18,6 +18,7 @@ import {
 import {
   earlyTermination,
   lossBreakdown,
+  perkLabel,
   savingItems,
   sumAnnual,
   type EarlyTermination,
@@ -278,6 +279,7 @@ const shortName = (p: Product) => p.shortName ?? p.name;
 function toPlanLink(item: ImpactItem): PlanLink {
   return {
     productName: shortName(item.product),
+    perk: perkLabel(item.condition),
     recoverAt: item.judgment.recoverAt?.value ?? null,
   };
 }
@@ -317,7 +319,7 @@ function buildVerdict(ctx: {
     return {
       kind: 'pending',
       lead: '확인된 조건만으로는',
-      highlight: '전체 손익을 판정할 수 없습니다.',
+      highlight: '전체 손익을 비교할 수 없습니다.',
       tail: '',
       body: `${known}${missing.join('·')}이 없어 ${trigger.verb} 후 얻는 쪽을 계산하지 못했습니다. 그 값이 확인되면 같은 기간으로 비교합니다. 아래는 확인된 항목의 변화 소계입니다.`,
     };
@@ -368,7 +370,7 @@ function buildChecklist(ctx: {
   for (const u of unrecoverable) {
     list.push({
       key: `perm-${u.condition.id}`,
-      text: `${shortName(u.product)} 우대는 가입 시 확정된 조건이라 만기 ${formatKoYMD(u.judgment.recoverAt!.value)}까지 되돌릴 수 없습니다.`,
+      text: `${shortName(u.product)}의 ${perkLabel(u.condition)}는 ${withJosa(name, '을/를')} 보유한 조건으로 가입 때 확정된 것이라, ${trigger.verb}하면 만기(${formatKoYMD(u.judgment.recoverAt!.value)})까지 이 우대 없이 이어지고 ${withJosa(name, '을/를')} 다시 만들어도 되돌아오지 않습니다.`,
       source: u.judgment.recoverAt!.source,
     });
   }
@@ -376,7 +378,7 @@ function buildChecklist(ctx: {
   if (!timing.alreadySafe) {
     list.push({
       key: 'safe',
-      text: `이번 달 판정은 ${formatKoMD(timing.safeAfter.value)}에 끝납니다. 그 이후에 실행하면 이번 달 혜택은 지킵니다.`,
+      text: `이번 달 우대 확인은 ${formatKoMD(timing.safeAfter.value)}에 끝나 이번 달 우대가 확정됩니다. 그 뒤에 실행하면 이번 달 혜택은 잃지 않습니다.`,
       source: timing.safeAfter.source,
     });
   }
@@ -435,8 +437,8 @@ function buildSteps(ctx: {
     },
     {
       key: 'judge',
-      label: '판정일·회복 가능 여부 계산',
-      detail: perm > 0 ? `판정일 ${dated}건 · 회복 불가 ${perm}건` : `판정일 ${dated}건 확정`,
+      label: '우대 확인일·회복 가능 여부 계산',
+      detail: perm > 0 ? `확인일 ${dated}건 · 회복 불가 ${perm}건` : `확인일 ${dated}건`,
     },
     {
       key: 'money',
