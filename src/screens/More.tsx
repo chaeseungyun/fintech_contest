@@ -2,13 +2,13 @@ import { AppShell } from '../components/AppShell';
 import { QuickMenu } from '../components/QuickMenu';
 import { SOURCE_LABEL } from '../components/SourceTag';
 import type { Source } from '../lib/types';
-import { useStore } from '../state/store';
+import { editCount, useStore } from '../state/store';
 
 const SOURCES: Source[] = ['doc', 'holding', 'user'];
 
 export function More() {
   const { state, scenario, dispatch } = useStore();
-  const editCount = Object.values(state.edits).reduce((n, e) => n + Object.keys(e).length, 0);
+  const edits = editCount(state);
 
   return (
     <AppShell title="전체">
@@ -53,7 +53,7 @@ export function More() {
           <div className="f">
             <span className="k">사용자 수정</span>
             <span className="v">
-              <span className="val">{editCount}건 · 삭제 {state.removed.length}건</span>
+              <span className="val">{edits}건</span>
             </span>
           </div>
         </div>

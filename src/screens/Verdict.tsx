@@ -1,4 +1,4 @@
-import { AddonCard } from '../components/AddonCard';
+import { Amount } from '../components/Amount';
 import { AppShell } from '../components/AppShell';
 import { BasisStrip } from '../components/BasisStrip';
 import { Glyph } from '../components/Glyph';
@@ -87,6 +87,11 @@ export function Verdict({ triggerId }: { triggerId: string }) {
           {v.tail && ` ${v.tail}`}
         </h2>
         <p>{v.body}</p>
+        {/* 결론 옆의 숫자 하나. 총액 카드를 다시 그리지 않는다 — 영향 분석에서 이미 봤다 */}
+        <span className="net">
+          <em className="k">{pending ? '확인된 항목 소계' : '연간 예상 손익'}</em>
+          <Amount value={d.netAnnual} signed short size="lg" />
+        </span>
       </div>
 
       <BasisStrip basis={d.basis} compact />
@@ -127,8 +132,6 @@ export function Verdict({ triggerId }: { triggerId: string }) {
       )}
 
       <RecommendCard triggerId={triggerId} />
-
-      <AddonCard proposal={d.addons} />
 
       <section className="card checklist">
         <h3 className="cardtitle">

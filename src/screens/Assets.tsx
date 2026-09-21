@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { AppShell } from '../components/AppShell';
 import { Amount } from '../components/Amount';
 import { Glyph, TYPE_ICON } from '../components/Glyph';
@@ -22,8 +23,12 @@ function subtitle(p: Product): string {
 }
 
 export function Assets() {
-  const { scenario } = useStore();
+  const { state, scenario } = useStore();
   const groups = assetGroups(scenario);
+  // 퀵메뉴(계좌·카드·대출…)에서 왔으면 그 섹션으로. 자산 탭 자체를 누르면 section 이 null 이라 맨 위
+  useEffect(() => {
+    if (state.section) document.getElementById(`asset-${state.section}`)?.scrollIntoView({ block: 'start' });
+  }, [state.section]);
   const assets = totalAssets(scenario);
   const debt = totalDebt(scenario);
 
@@ -40,7 +45,7 @@ export function Assets() {
       </div>
 
       {groups.map((g) => (
-        <section key={g.key} className="card">
+        <section key={g.key} id={`asset-${g.key}`} className="card assetsection">
           <h3 className="cardtitle">
             {g.label}
             {g.amount.value > 0 && <Amount value={g.amount} short />}

@@ -2,7 +2,8 @@ import { AppShell } from '../components/AppShell';
 import { ContactSheet } from '../components/ContactSheet';
 import { Glyph } from '../components/Glyph';
 import type { ActionStep } from '../lib/actionplan';
-import { useStore } from '../state/store';
+import { editCount, useStore } from '../state/store';
+import { EditBadge } from '../components/EditBadge';
 
 /**
  * 실행 안내. 판단 다음 화면이다 — 해지를 대신 실행하지 않는다.
@@ -40,7 +41,7 @@ function StepRow({ step, index }: { step: ActionStep; index: number }) {
 }
 
 export function ActionPlan({ triggerId }: { triggerId: string }) {
-  const { derived: d, dispatch } = useStore();
+  const { state, derived: d, dispatch } = useStore();
   const plan = d.actionPlan;
 
   return (
@@ -49,9 +50,14 @@ export function ActionPlan({ triggerId }: { triggerId: string }) {
       onBack={() => dispatch({ type: 'back' })}
       hideTabBar
       footer={
-        <button type="button" className="btn ghost" onClick={() => dispatch({ type: 'back' })}>
-          비교 결과로 돌아가기
-        </button>
+        <>
+          <button type="button" className="btn ghost" onClick={() => dispatch({ type: 'back' })}>
+            비교 결과로 돌아가기
+          </button>
+          <button type="button" className="btn text" onClick={() => dispatch({ type: 'selectTab', tab: 'home' })}>
+            홈으로
+          </button>
+        </>
       }
     >
       <div className={`planhead ${plan.kind}`}>
@@ -63,6 +69,7 @@ export function ActionPlan({ triggerId }: { triggerId: string }) {
         <div className="basisrow">
           <span className="k">기준 안</span>
           <b>{plan.basis}</b>
+          <EditBadge count={editCount(state)} />
           {d.recommendation.results.length > 0 && (
             <button type="button" className="link" onClick={() => dispatch({ type: 'back' })}>
               다른 안 고르기

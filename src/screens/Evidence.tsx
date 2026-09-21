@@ -5,8 +5,12 @@ import { Highlight } from '../components/Highlight';
 import { SourceTag } from '../components/SourceTag';
 import type { ImpactItem } from '../lib/derive';
 import { evidenceFields, toEditValue, type EditKind, type EvidenceField } from '../lib/evidence';
-import { unsupportedForDocs } from '../lib/graph';
-import { useStore } from '../state/store';
+import type { ConditionEdit } from '../lib/edits';
+import { productById, unsupportedForDocs } from '../lib/graph';
+import { BASE_SCENARIO, useStore } from '../state/store';
+
+/** 수정 종류 → store.edits 에 저장되는 키 */
+const EDIT_KEY: Record<EditKind, keyof ConditionEdit> = { effect: 'effectValue', cycle: 'dayOfMonth', threshold: 'threshold' };
 
 interface Editing {
   conditionId: string;
@@ -22,6 +26,7 @@ function FieldRow({
   onChange,
   onCommit,
   onCancel,
+  onRevert,
 }: {
   field: EvidenceField;
   item: ImpactItem;
@@ -30,6 +35,7 @@ function FieldRow({
   onChange: (draft: string) => void;
   onCommit: () => void;
   onCancel: () => void;
+  onRevert: () => void;
 }) {
   const isEditing =
     editing !== null && editing.conditionId === item.condition.id && editing.kind === field.edit?.kind;
@@ -67,10 +73,16 @@ function FieldRow({
         ) : (
           <>
             <span className="val">{field.display.value}</span>
-            {field.edit && (
-              <button type="button" className="edit" onClick={() => onStart(field.edit!.kind, field.edit!.raw)}>
-                수정
+            {field.edit && field.display.source === 'user' ? (
+              <button type="button" className="edit" onClick={onRevert}>
+                원래 값으로
               </button>
+            ) : (
+              field.edit && (
+                <button type="button" className="edit" onClick={() => onStart(field.edit!.kind, field.edit!.raw)}>
+                  수정
+                </button>
+              )
             )}
           </>
         )}
@@ -81,13 +93,18 @@ function FieldRow({
 }
 
 export function Evidence({ productId }: { triggerId: string; productId: string }) {
-  const { scenario, derived: d, dispatch } = useStore();
+  const { state, scenario, derived: d, dispatch } = useStore();
   const [editing, setEditing] = useState<Editing | null>(null);
   const [active, setActive] = useState(productId);
 
   const holders = d.graph.satellites.map((s) => s.product);
   const product = holders.find((p) => p.id === active) ?? holders[0];
   const items = product ? d.items.filter((i) => i.product.id === product.id) : [];
+  // 이 트리거에서 "해당 없음" 으로 뺀 조건. 기본 시나리오에서 찾는다 — 유효 시나리오엔 이미 없고,
+  // 마지막 조건을 빼면 그 상품 칩도 사라지므로 상품이 아니라 변경 대상 기준으로 모은다
+  const removedHere = BASE_SCENARIO.conditions.filter(
+    (c) => state.removed.includes(c.id) && c.binds?.target === d.center.id,
+  );
   const unsupported = unsupportedForDocs(
     scenario,
     items.map((i) => i.condition.sourceDoc),
@@ -152,6 +169,9 @@ export function Evidence({ productId }: { triggerId: string; productId: string }
                 onChange={(draft) => setEditing((e) => (e ? { ...e, draft } : e))}
                 onCommit={() => commit(item)}
                 onCancel={() => setEditing(null)}
+                onRevert={() =>
+                  dispatch({ type: 'revert', conditionId: item.condition.id, key: EDIT_KEY[field.edit!.kind] })
+                }
               />
             ))}
           </div>
@@ -167,6 +187,22 @@ export function Evidence({ productId }: { triggerId: string; productId: string }
       ))}
 
       {items.length === 0 && <p className="empty">이 상품에 걸린 조건이 없습니다.</p>}
+
+      {removedHere.map((c) => (
+        <div key={c.id} className="card offcard">
+          <p>
+            “해당 없음” 으로 뺀 조건입니다 · {c.sourceDoc}
+            {c.binds && ` · ${productById(BASE_SCENARIO, c.binds.holder).name}`}
+            <button
+              type="button"
+              className="link"
+              onClick={() => dispatch({ type: 'restoreCondition', conditionId: c.id })}
+            >
+              되돌리기
+            </button>
+          </p>
+        </div>
+      ))}
 
       {unsupported.length > 0 && (
         <div className="card unsup">

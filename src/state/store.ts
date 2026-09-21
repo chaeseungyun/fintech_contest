@@ -50,10 +50,12 @@ export interface AppState {
   chosen: Record<string, string | null>;
   /** 펼친 창구 정보(ContactSheet). 실행 안내 단계·추천/제안 후보 행이 같은 키 공간을 쓴다 */
   expandedStepKey: string | null;
+  /** 퀵메뉴에서 자산 탭으로 올 때 스크롤할 섹션(assetGroups 의 key) */
+  section: string | null;
 }
 
 export type Action =
-  | { type: 'selectTab'; tab: Tab }
+  | { type: 'selectTab'; tab: Tab; section?: string }
   | { type: 'push'; route: Route }
   | { type: 'replace'; route: Route }
   | { type: 'back' }
@@ -64,6 +66,8 @@ export type Action =
   | { type: 'chooseCandidate'; triggerId: string; candidateId: string | null }
   | { type: 'edit'; conditionId: string; edit: ConditionEdit }
   | { type: 'removeCondition'; conditionId: string }
+  | { type: 'revert'; conditionId: string; key: keyof ConditionEdit }
+  | { type: 'restoreCondition'; conditionId: string }
   | { type: 'toggleStep'; stepKey: string }
   | { type: 'reset' };
 
@@ -78,13 +82,14 @@ export function initialState(): AppState {
     expandedCandidateId: null,
     chosen: {},
     expandedStepKey: null,
+    section: null,
   };
 }
 
 export function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case 'selectTab':
-      return { ...state, tab: action.tab, stack: [], selectedConditionId: null };
+      return { ...state, tab: action.tab, stack: [], selectedConditionId: null, section: action.section ?? null };
     case 'push':
       return { ...state, stack: [...state.stack, action.route], expandedStepKey: null };
     case 'replace':
@@ -122,12 +127,23 @@ export function reducer(state: AppState, action: Action): AppState {
       return state.removed.includes(action.conditionId)
         ? state
         : { ...state, removed: [...state.removed, action.conditionId] };
+    case 'revert': {
+      const { [action.key]: _gone, ...rest } = state.edits[action.conditionId] ?? {};
+      const { [action.conditionId]: _entry, ...others } = state.edits;
+      return { ...state, edits: Object.keys(rest).length > 0 ? { ...others, [action.conditionId]: rest } : others };
+    }
+    case 'restoreCondition':
+      return { ...state, removed: state.removed.filter((id) => id !== action.conditionId) };
     case 'toggleStep':
       return { ...state, expandedStepKey: state.expandedStepKey === action.stepKey ? null : action.stepKey };
     case 'reset':
       return initialState();
   }
 }
+
+/** 사용자가 손댄 값의 수 (필드 수정 + 제외한 조건). 화면이 "수정본" 임을 드러내는 데 쓴다 */
+export const editCount = (state: AppState): number =>
+  Object.values(state.edits).reduce((n, e) => n + Object.keys(e).length, 0) + state.removed.length;
 
 export const currentRoute = (state: AppState): Route | null =>
   state.stack.length > 0 ? state.stack[state.stack.length - 1] : null;

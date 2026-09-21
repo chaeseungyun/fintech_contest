@@ -977,6 +977,21 @@ ol {
   line-height: 1.65;
   color: var(--ink-2);
 }
+/* 결론 옆의 숫자 하나 */
+.verdictcard .net {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 2px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.6);
+}
+.verdictcard .net .k {
+  font-size: var(--fs-xs);
+  color: var(--mute);
+  font-weight: 600;
+}
 .verdictcard.switch .mark {
   background: var(--save);
   box-shadow: 0 8px 20px rgba(15, 157, 140, 0.3);
@@ -1496,6 +1511,17 @@ ol {
   color: var(--brand);
   font-weight: 600;
 }
+.prow .body .dep.link {
+  gap: 1px;
+  text-align: left;
+  white-space: normal;
+}
+.offcard .link {
+  font-size: var(--fs-sm);
+  margin-left: 6px;
+}
+/* 퀵메뉴에서 온 섹션이 네비바 아래에 걸리지 않게 */
+.assetsection { scroll-margin-top: 12px; }
 .prow .tail { flex: none; }
 
 .legendlist {

@@ -54,9 +54,21 @@ export function Benefits() {
                 <span>
                   {benefitLabel(r.condition, r.holder)} · {r.judgment.cycleLabel.value}
                 </span>
-                <span className="dep">
-                  {r.target.shortName ?? r.target.name} 유지 조건 · {r.requirement}
-                </span>
+                {/* 조건이 걸린 상품에 분석 트리거가 있으면 그리로 간다. 트리거 목록의 복제가 아니라 이 조건에서 이어지는 맥락 링크다 */}
+                {r.triggerId ? (
+                  <button
+                    type="button"
+                    className="dep link"
+                    onClick={() => dispatch({ type: 'push', route: { name: 'analyzing', triggerId: r.triggerId! } })}
+                  >
+                    {r.target.shortName ?? r.target.name} 유지 조건 · {r.requirement} · 분석 보기
+                    <Glyph name="chevron" size={12} />
+                  </button>
+                ) : (
+                  <span className="dep">
+                    {r.target.shortName ?? r.target.name} 유지 조건 · {r.requirement}
+                  </span>
+                )}
               </span>
               <span className="tail">
                 <Amount value={r.annualBenefit} short />

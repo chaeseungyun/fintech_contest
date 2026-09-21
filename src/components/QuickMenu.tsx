@@ -18,7 +18,7 @@ export function QuickMenu({ exclude = [] }: { exclude?: Tab[] }) {
           className={q.key === 'ai' ? 'quick ai' : 'quick'}
           onClick={() =>
             q.tab
-              ? dispatch({ type: 'selectTab', tab: q.tab as Tab })
+              ? dispatch({ type: 'selectTab', tab: q.tab as Tab, section: q.key })
               : dispatch({ type: 'push', route: { name: 'hub' } })
           }
         >

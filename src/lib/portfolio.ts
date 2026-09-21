@@ -16,7 +16,7 @@ export function amountOf(product: Product): number {
 }
 
 const GROUPS: { key: string; label: string; types: Product['type'][] }[] = [
-  { key: 'deposit', label: '입출금·예적금', types: ['deposit_account', 'savings', 'term_deposit'] },
+  { key: 'account', label: '입출금·예적금', types: ['deposit_account', 'savings', 'term_deposit'] },
   { key: 'invest', label: '투자', types: ['investment'] },
   { key: 'card', label: '카드', types: ['credit_card'] },
   { key: 'loan', label: '대출', types: ['loan'] },
