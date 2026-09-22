@@ -1,3 +1,7 @@
 node_modules
 dist
 .vite
+
+# 개인 스킬 설치본 — 저장소에 올리지 않는다
+.claude/skills/
+skills/

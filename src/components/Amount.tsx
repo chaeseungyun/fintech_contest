@@ -6,7 +6,7 @@ type Size = 'sm' | 'md' | 'lg' | 'xl';
 
 interface Props {
   value: Tagged<number>;
-  /** 부호를 붙이고 색을 나눈다 (+ 파랑 / − 빨강) */
+  /** 부호를 붙이고 색을 나눈다 (+ 빨강 / − 파랑 — 국내 금융앱 관행) */
   signed?: boolean;
   /** 만원 단위로 줄인다 */
   short?: boolean;

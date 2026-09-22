@@ -2,24 +2,29 @@
    색·간격 토큰은 여기 한 군데서만 정한다. 화면은 클래스만 쓴다. */
 
 :root {
-  --brand: #2f63f5;
-  --brand-ink: #1d47c4;
-  --brand-deep: #16213f;
-  --brand-soft: #eaf0ff;
-  --bg: #f3f5fa;
+  /* 누리은행 — 짙은 초록 잉크. 은행 워드마크·주 버튼·활성 탭·비교 결과 패널이 이 색 하나를 쓴다. */
+  --brand: #0f4c45;
+  --brand-ink: #0a3a35;
+  --brand-deep: #0a3a35;
+  --brand-soft: #e3eeea;
+  --bg: #f1f4f1;
   --surface: #ffffff;
-  --surface-2: #f8f9fc;
-  --ink: #101828;
-  --ink-2: #4a5568;
-  --mute: #98a2b3;
-  --line: #e7eaf0;
-  --up: #2f63f5;
-  --down: #e5484d;
-  --save: #0f9d8c;
+  --surface-2: #f6f8f6;
+  --ink: #16211f;
+  --ink-2: #4a5753;
+  --mute: #8a9490;
+  --line: #e1e6e2;
+  /* 손익 색은 국내 금융앱 관행 — 이득(+) 빨강, 손실(−) 파랑. */
+  --up: #c93a2c;
+  --up-bg: #f9e7e4;
+  --down: #2457b5;
+  --down-bg: #e4ecf8;
+  --save: #c93a2c;
   --warn: #b45309;
   --warn-bg: #fdf6ec;
-  --danger: #d92d20;
-  --danger-bg: #fef3f2;
+  --danger: #9a3412;
+  --danger-bg: #fbede6;
+  --danger-line: #f1d5c8;
 
   /* 출처 태그 — CLAUDE.md 규정 색. 바꾸지 않는다. */
   --src-doc: #5b4bb8;
@@ -31,10 +36,11 @@
   --src-user: #b45309;
   --src-user-bg: #fbeedc;
 
-  --r-sm: 10px;
-  --r-md: 14px;
-  --r-lg: 18px;
-  --r-xl: 24px;
+  /* 라운드 위계 — 패널 16 / 행 12 / 칩 8 / 결과 패널 20. 전부 같은 값을 쓰지 않는다. */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
   --pad: 16px;
 
   /* 폰 프레임 배율. 데스크톱에서만 1 이 아니다.
@@ -49,12 +55,12 @@
   --fs-base: 14px;
   --fs-md: 15px;
   --fs-lg: 16px;
-  --fs-xl: 17px;
-  --fs-2xl: 19px;
-  --fs-3xl: 21px;
-  --fs-4xl: 22px;
-  --fs-5xl: 23px;
-  --fs-6xl: 27px;
+  --fs-xl: 18px;
+  --fs-2xl: 20px;
+  --fs-3xl: 22px;
+  --fs-4xl: 24px;
+  --fs-5xl: 26px;
+  --fs-6xl: 30px;
 
   /* SVG 안의 글자. viewBox 좌표에 묶여 있어 계단에서 제외한다 —
      키우면 원·프레임 밖으로 나간다. 대신 --ui-scale 이 같은 비율로 키워 준다. */
@@ -79,7 +85,7 @@ body,
 
 body {
   margin: 0;
-  background: #e9ecf3;
+  background: #e3e8e4;
   color: var(--ink);
   font-family: Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo',
     'Noto Sans KR', sans-serif;
@@ -104,6 +110,12 @@ h2,
 h3 {
   margin: 0;
   font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
 }
 
 p {
@@ -245,7 +257,7 @@ ol {
   gap: 2px;
   font-size: var(--fs-3xl);
   font-weight: 800;
-  letter-spacing: -0.4px;
+  letter-spacing: -0.03em;
   color: var(--brand);
 }
 .homehead-actions {
@@ -330,7 +342,7 @@ ol {
 .card {
   background: var(--surface);
   border-radius: var(--r-lg);
-  padding: 15px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 9px;
@@ -413,17 +425,17 @@ ol {
   background: var(--surface-2);
   color: var(--ink-2);
 }
-.tint-account { background: #eaf0ff; color: #2f63f5; }
-.tint-card { background: #e8ecfb; color: #4b5ddb; }
-.tint-loan { background: #fdeaea; color: #e05252; }
-.tint-invest { background: #e4f6f1; color: #0f9d8c; }
-.tint-insurance { background: #ece8fb; color: #6d5bd0; }
-.tint-deposit { background: #f1e9fb; color: #7c5bd0; }
-.tint-autopay { background: #e7f2ff; color: #2f80ed; }
-.tint-benefit { background: #fff2de; color: #d5871f; }
-.tint-save { background: #e4f4ec; color: #128a5a; }
-.tint-grid { background: #eef0f5; color: #5a6478; }
-.tint-ai { background: linear-gradient(135deg, #6d8bff, #a78bfa); color: #fff; }
+.tint-account { background: var(--brand-soft); color: var(--brand); }
+.tint-card { background: #e6e9f5; color: #3b4c9a; }
+.tint-loan { background: #f6e7e2; color: #b0442e; }
+.tint-invest { background: #e3eeea; color: #1e6e5a; }
+.tint-insurance { background: #ece8f5; color: #5b4bb8; }
+.tint-deposit { background: #f2ebdd; color: #8a6a2c; }
+.tint-autopay { background: #e4edf6; color: #2457b5; }
+.tint-benefit { background: #fbeedc; color: #b45309; }
+.tint-save { background: #e3eeea; color: #1e6e5a; }
+.tint-grid { background: #eef1ee; color: #4a5753; }
+.tint-ai { background: var(--brand); color: #fff; }
 
 /* 금액 */
 .amt {
@@ -443,8 +455,8 @@ ol {
 }
 .amt.s-sm { font-size: var(--fs-base); }
 .amt.s-md { font-size: var(--fs-lg); }
-.amt.s-lg { font-size: var(--fs-4xl); letter-spacing: -0.4px; }
-.amt.s-xl { font-size: var(--fs-6xl); letter-spacing: -0.8px; }
+.amt.s-lg { font-size: var(--fs-4xl); font-weight: 800; letter-spacing: -0.02em; }
+.amt.s-xl { font-size: var(--fs-6xl); font-weight: 800; letter-spacing: -0.03em; }
 .amt.up .num { color: var(--up); }
 .amt.down .num { color: var(--down); }
 .amt.flat .num { color: var(--mute); }
@@ -512,7 +524,7 @@ ol {
 .greeting {
   font-size: var(--fs-4xl);
   line-height: 1.38;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.02em;
   padding: 4px 2px 2px;
 }
 
@@ -549,9 +561,8 @@ ol {
   color: var(--ink-2);
 }
 .quick.ai .ico {
-  background: linear-gradient(135deg, #5b7cff, #a78bfa);
+  background: var(--brand);
   color: #fff;
-  box-shadow: 0 6px 14px rgba(109, 139, 255, 0.35);
 }
 .quick.ai .qlabel {
   color: var(--brand);
@@ -564,14 +575,15 @@ ol {
   line-height: 1.35;
 }
 
+/* 은행 안의 메뉴 배너 — 잉크 초록 한 면. 그라데이션·반짝이 없이 색 하나로 말한다. */
 .aibanner {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 16px;
   border-radius: var(--r-lg);
-  background: linear-gradient(120deg, #eef2ff 0%, #e9eaff 45%, #f4ecff 100%);
-  border: 1px solid #dfe4ff;
+  background: var(--brand);
+  color: #fff;
 }
 .aibanner .txt {
   display: flex;
@@ -581,12 +593,12 @@ ol {
 }
 .aibanner b {
   font-size: var(--fs-lg);
-  color: var(--brand-ink);
+  color: #fff;
 }
 .aibanner span {
   font-size: var(--fs-sm);
   line-height: 1.5;
-  color: var(--ink-2);
+  color: rgba(255, 255, 255, 0.72);
 }
 .aibanner .go {
   display: inline-flex;
@@ -595,8 +607,8 @@ ol {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: var(--brand);
-  color: #fff;
+  background: #fff;
+  color: var(--brand);
   flex: none;
 }
 
@@ -604,8 +616,8 @@ ol {
 
 .hero {
   font-size: var(--fs-5xl);
-  line-height: 1.38;
-  letter-spacing: -0.6px;
+  line-height: 1.34;
+  letter-spacing: -0.025em;
   padding: 2px 2px 0;
 }
 .herosub {
@@ -626,11 +638,7 @@ ol {
   gap: 11px;
   padding: 13px 14px;
   background: var(--surface);
-  border: 1.5px solid transparent;
   border-radius: var(--r-md);
-}
-.triggerrow:first-child {
-  border-color: #cfdcff;
 }
 .triggerrow .body {
   display: flex;
@@ -689,14 +697,13 @@ ol {
   display: grid;
   place-items: center;
   color: #fff;
-  background: linear-gradient(135deg, #5b7cff, #a78bfa);
-  box-shadow: 0 10px 26px rgba(109, 139, 255, 0.45);
+  background: var(--brand);
 }
 .orb .ring {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  border: 1.5px solid #b9c8ff;
+  border: 1.5px solid var(--brand);
   opacity: 0;
   animation: pulse 2.2s ease-out infinite;
 }
@@ -710,39 +717,47 @@ ol {
 
 .progress {
   width: 100%;
-  height: 5px;
-  border-radius: 3px;
-  background: #e2e7f3;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--line);
   overflow: hidden;
   margin: 6px 0 2px;
 }
 .progress span {
   display: block;
   height: 100%;
-  border-radius: 3px;
-  background: linear-gradient(90deg, #5b7cff, #a78bfa);
+  border-radius: 2px;
+  background: var(--brand);
   transition: width 0.45s ease;
 }
 
 .steps {
+  position: relative;
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 2px;
   background: var(--surface);
   border-radius: var(--r-lg);
   padding: 8px 14px;
 }
+/* 레일 — 단계 표식 뒤를 지나는 세로선. 표식이 배경으로 선을 가린다. */
+.steps::before {
+  content: '';
+  position: absolute;
+  left: calc(14px + 11px);
+  top: 26px;
+  bottom: 26px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--line);
+}
 .steps li {
+  position: relative;
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 9px 0;
+  padding: 10px 0;
   text-align: left;
-  border-bottom: 1px solid var(--line);
-}
-.steps li:last-child {
-  border-bottom: 0;
 }
 .steps .mark {
   display: inline-flex;
@@ -753,7 +768,8 @@ ol {
   border-radius: 50%;
   flex: none;
   margin-top: 1px;
-  background: #eceff6;
+  background: var(--surface);
+  border: 2px solid var(--line);
   color: var(--mute);
 }
 .steps .dot {
@@ -763,12 +779,13 @@ ol {
   background: currentColor;
 }
 .steps li.run .mark {
-  background: var(--brand-soft);
+  border-color: var(--brand);
   color: var(--brand);
   animation: blink 0.9s ease-in-out infinite;
 }
 .steps li.done .mark {
   background: var(--brand);
+  border-color: var(--brand);
   color: #fff;
 }
 @keyframes blink {
@@ -788,8 +805,8 @@ ol {
 }
 .steps .detail {
   font-size: var(--fs-sm);
-  color: var(--src-calc);
-  background: var(--src-calc-bg);
+  color: var(--brand);
+  background: var(--brand-soft);
   border-radius: 6px;
   padding: 1px 7px;
   align-self: flex-start;
@@ -817,15 +834,36 @@ ol {
 }
 
 .impactlist {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+}
+/* 레일 — 아이콘 뒤를 지나는 세로선. "연결" 을 카드 간격이 아니라 선으로 보여준다. */
+.impactlist::before {
+  content: '';
+  position: absolute;
+  left: calc(14px + 20px);
+  top: 24px;
+  bottom: 24px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--line);
 }
 
 .irow {
-  background: var(--surface);
-  border-radius: var(--r-md);
-  overflow: hidden;
+  position: relative;
+}
+.irow + .irow::before {
+  content: '';
+  position: absolute;
+  left: calc(14px + 40px + 11px);
+  right: 14px;
+  top: 0;
+  height: 1px;
+  background: var(--line);
 }
 .irow .head {
   display: flex;
@@ -918,18 +956,28 @@ ol {
   color: var(--warn);
 }
 
+/* 합계 근거 — 흰 면에 왼쪽 굵은 선 하나로 부호를 말한다 */
 .totalcard {
+  position: relative;
   border-radius: var(--r-lg);
-  padding: 16px;
+  padding: 16px 16px 16px 20px;
   display: flex;
   flex-direction: column;
   gap: 3px;
-  background: var(--danger-bg);
-  border: 1px solid #f7d9d6;
+  background: var(--surface);
 }
-.totalcard.good {
-  background: var(--brand-soft);
-  border-color: #d3e0ff;
+.totalcard::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 16px;
+  bottom: 16px;
+  width: 4px;
+  border-radius: 0 2px 2px 0;
+  background: var(--down);
+}
+.totalcard.good::before {
+  background: var(--up);
 }
 .totalcard .lbl {
   font-size: var(--fs-base);
@@ -948,62 +996,59 @@ ol {
 
 .verdictcard {
   border-radius: var(--r-xl);
-  padding: 22px 18px;
+  padding: 22px 20px 20px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 9px;
-  background: linear-gradient(150deg, #eef3ff, #e7edff 60%, #f1ecff);
-  border: 1px solid #dde5ff;
+  align-items: flex-start;
+  text-align: left;
+  gap: 10px;
+  background: var(--brand);
+  color: #fff;
 }
 .verdictcard .mark {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 54px;
-  height: 54px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: var(--brand);
-  color: #fff;
-  box-shadow: 0 8px 20px rgba(47, 99, 245, 0.3);
-  margin-bottom: 2px;
+  background: #fff;
+  color: var(--brand);
+  margin-bottom: 4px;
 }
 .verdictcard h2 {
   font-size: var(--fs-3xl);
-  line-height: 1.42;
-  letter-spacing: -0.5px;
+  line-height: 1.4;
+  letter-spacing: -0.025em;
 }
 .verdictcard em {
   font-style: normal;
-  color: var(--brand);
+  color: #b9e6d0;
 }
 .verdictcard p {
   font-size: var(--fs-base);
   line-height: 1.65;
-  color: var(--ink-2);
+  color: rgba(255, 255, 255, 0.78);
 }
-/* 결론 옆의 숫자 하나 */
+/* 결론 옆의 숫자 하나 — 흰 알약 위에 부호색으로 */
 .verdictcard .net {
   display: inline-flex;
   align-items: baseline;
-  gap: 8px;
-  margin-top: 2px;
-  padding: 6px 14px;
+  gap: 10px;
+  margin-top: 4px;
+  padding: 8px 16px 8px 14px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.6);
+  background: #fff;
+  color: var(--ink);
 }
 .verdictcard .net .k {
   font-size: var(--fs-xs);
-  color: var(--mute);
+  color: var(--ink-2);
   font-weight: 600;
 }
 .verdictcard.switch .mark {
-  background: var(--save);
-  box-shadow: 0 8px 20px rgba(15, 157, 140, 0.3);
-}
-.verdictcard.switch em {
-  color: var(--save);
+  background: #fff;
+  color: var(--up);
 }
 
 .chartnote {
@@ -1043,21 +1088,21 @@ ol {
   position: absolute;
   left: 14%;
   right: 14%;
-  border-radius: 5px;
-  background: #dbe3f5;
+  border-radius: 4px;
+  background: var(--up-bg);
   min-height: 3px;
 }
 .hchart .bar.down {
-  background: #fadbd9;
+  background: var(--down-bg);
 }
 .hchart .col.rec .bar.up {
-  background: var(--brand);
+  background: var(--up);
 }
 .hchart .col.rec .bar.down {
   background: var(--down);
 }
 .hchart .col:first-child .bar.down {
-  background: #f6b2ae;
+  background: #a9bee6;
 }
 .hchart .val {
   position: absolute;
@@ -1077,8 +1122,8 @@ ol {
 .hchart .val.down {
   color: var(--down);
 }
-.hchart .col.rec .val {
-  color: var(--brand);
+.hchart .col.rec .val.up {
+  color: var(--up);
 }
 .hchart .badge {
   font-size: var(--fs-2xs);
@@ -1154,7 +1199,7 @@ ol {
   top: 19px;
   height: 8px;
   border-radius: 4px;
-  background: rgba(47, 99, 245, 0.16);
+  background: var(--brand-soft);
 }
 /* 구간 이름을 막대 위에 얹는다 — 뭘 해도 되는 구간인지 색만으로 말하지 않는다 */
 .axis .safelabel {
@@ -1195,21 +1240,39 @@ ol {
 }
 
 .tlist {
+  position: relative;
   background: var(--surface);
   border-radius: var(--r-lg);
   padding: 4px 14px;
   display: flex;
   flex-direction: column;
 }
+/* 날짜 순서대로 레일에 매단다 */
+.tlist::before {
+  content: '';
+  position: absolute;
+  left: calc(14px + 17px);
+  top: 30px;
+  bottom: 30px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--line);
+}
 .trow {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 11px;
   padding: 12px 0;
-  border-bottom: 1px solid var(--line);
 }
-.trow:last-child {
-  border-bottom: 0;
+.trow + .trow::before {
+  content: '';
+  position: absolute;
+  left: calc(34px + 11px);
+  right: 0;
+  top: 0;
+  height: 1px;
+  background: var(--line);
 }
 .trow .ico {
   width: 34px;
@@ -1261,7 +1324,7 @@ ol {
 }
 
 .warncard {
-  border: 1px solid #f7d9d6;
+  border: 1px solid var(--danger-line);
 }
 .warncard .cardtitle { color: var(--danger); }
 .warncard p,
@@ -1297,15 +1360,15 @@ ol {
   cursor: pointer;
 }
 .edge .vis {
-  stroke: #ccd6ee;
-  stroke-width: 1.6;
+  stroke: #cfc8ea;
+  stroke-width: 1.8;
   stroke-dasharray: 4 4;
   pointer-events: none;
 }
 .edge.on .vis {
-  stroke: var(--brand);
+  stroke: var(--src-doc);
   stroke-dasharray: none;
-  stroke-width: 2.2;
+  stroke-width: 2.4;
 }
 .elabel {
   font-size: var(--fs-svg-sm);
@@ -1316,7 +1379,7 @@ ol {
   paint-order: stroke fill;
 }
 .elabel.on {
-  fill: var(--brand);
+  fill: var(--src-doc);
   font-weight: 700;
 }
 .centernode {
@@ -1332,13 +1395,14 @@ ol {
   fill: rgba(255, 255, 255, 0.8);
 }
 .sat circle {
-  fill: #fff;
-  stroke: #dfe5f1;
+  fill: var(--surface-2);
+  stroke: var(--line);
   stroke-width: 1.5;
   cursor: pointer;
 }
 .sat.on circle {
-  stroke: var(--brand);
+  fill: var(--src-doc-bg);
+  stroke: var(--src-doc);
   stroke-width: 2;
 }
 .stitle {
@@ -1568,7 +1632,7 @@ ol {
   background: var(--surface);
 }
 .crow.rec {
-  border-color: #c9d7ff;
+  border-color: #bfd6cd;
 }
 .crow .head {
   display: flex;
@@ -1604,7 +1668,7 @@ ol {
   font-weight: 700;
   font-style: normal;
   color: #fff;
-  background: var(--brand);
+  background: var(--up);
   border-radius: 999px;
   padding: 1px 7px;
 }
@@ -1650,17 +1714,17 @@ ol {
   font-size: var(--fs-xs);
   font-style: normal;
   font-weight: 600;
-  color: var(--brand-ink);
+  color: #fff;
 }
 .aibanner .live .dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--save);
+  background: #7fd1a8;
   flex: none;
-  animation: pulse 2.2s ease-in-out infinite;
+  animation: blinkdot 2.2s ease-in-out infinite;
 }
-@keyframes pulse {
+@keyframes blinkdot {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.25; }
 }
@@ -1714,11 +1778,9 @@ ol {
   padding: 12px 14px;
   border-radius: var(--r-md);
   background: var(--brand-soft);
-  border: 1px solid #d7e2ff;
 }
 .monitorbar.clear {
-  background: #e6f5f0;
-  border-color: #c8e8df;
+  background: var(--brand-soft);
 }
 .monitorbar .ico {
   width: auto;
@@ -1729,7 +1791,7 @@ ol {
   flex: none;
   margin-top: 1px;
 }
-.monitorbar.clear .ico { color: var(--save); }
+.monitorbar.clear .ico { color: var(--brand); }
 .monitorbar .tx {
   flex: 1;
   font-size: var(--fs-sm);
@@ -1766,7 +1828,7 @@ ol {
   flex-direction: column;
   gap: 3px;
   background: var(--warn-bg);
-  border: 1px solid #f0dfc2;
+  border: 1px solid #ecdcc0;
 }
 .onetime .lbl {
   display: inline-flex;
@@ -1812,12 +1874,7 @@ ol {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  background: var(--brand-soft);
-  border: 1px solid #d5e0ff;
-}
-.planhead.switch {
-  background: #e6f5f0;
-  border-color: #c8e8df;
+  background: var(--surface);
 }
 .planhead .mark {
   display: inline-flex;
@@ -1829,10 +1886,10 @@ ol {
   background: var(--brand);
   color: #fff;
 }
-.planhead.switch .mark { background: var(--save); }
+.planhead.switch .mark { background: var(--up); }
 .planhead h2 {
   font-size: var(--fs-3xl);
-  letter-spacing: -0.4px;
+  letter-spacing: -0.025em;
 }
 .planhead p {
   font-size: var(--fs-base);
@@ -1841,16 +1898,37 @@ ol {
 }
 
 .planlist {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  background: var(--surface);
+  border-radius: var(--r-lg);
+}
+/* 순서가 있는 단계 — 번호 표식 뒤로 레일이 지난다 */
+.planlist::before {
+  content: '';
+  position: absolute;
+  left: calc(14px + 13px);
+  top: 28px;
+  bottom: 28px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--line);
 }
 .pstep {
+  position: relative;
   display: flex;
   gap: 11px;
-  background: var(--surface);
-  border-radius: var(--r-md);
   padding: 14px;
+}
+.pstep + .pstep::before {
+  content: '';
+  position: absolute;
+  left: calc(14px + 26px + 11px);
+  right: 14px;
+  top: 0;
+  height: 1px;
+  background: var(--line);
 }
 .pstep .no {
   display: inline-flex;
@@ -2083,27 +2161,34 @@ ol {
 }
 
 /* 보류: 소계 카드·판정 카드·안내 머리글 */
-.totalcard.pending {
-  background: var(--warn-bg);
-  border-color: #f0dfc2;
+.totalcard.pending::before {
+  background: var(--warn);
 }
 .totalcard .note {
   margin-top: 6px;
 }
+/* 보류는 결론이 아니다 — 잉크 면 대신 종이색에 호박색 표식 */
 .verdictcard.pending {
-  background: linear-gradient(150deg, #fdf6ec, #fbeedc 60%, #fff6e8);
-  border-color: #f0dfc2;
+  background: var(--warn-bg);
+  color: var(--ink);
+  border: 1px solid #ecdcc0;
 }
 .verdictcard.pending .mark {
   background: var(--warn);
-  box-shadow: 0 8px 20px rgba(180, 83, 9, 0.28);
+  color: #fff;
 }
 .verdictcard.pending em {
   color: var(--warn);
 }
+.verdictcard.pending p {
+  color: var(--ink-2);
+}
+.verdictcard.pending .net {
+  background: #fff;
+}
 .planhead.pending {
   background: var(--warn-bg);
-  border-color: #f0dfc2;
+  border: 1px solid #ecdcc0;
 }
 .planhead.pending .mark {
   background: var(--warn);
@@ -2118,8 +2203,8 @@ ol {
 
 /* 유지 조건 목록 */
 .checklist.maintain .mk {
-  background: var(--src-calc-bg);
-  color: var(--src-calc);
+  background: var(--brand-soft);
+  color: var(--brand);
 }
 .checklist.maintain .note {
   margin-top: 4px;
