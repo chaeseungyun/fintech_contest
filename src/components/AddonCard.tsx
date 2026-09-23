@@ -25,7 +25,7 @@ function AddonRow({ result }: { result: AddonResult }) {
         aria-expanded={open}
         onClick={() => dispatch({ type: 'toggleCandidate', candidateId: c.id })}
       >
-        <span className={`ico tint-${TYPE_ICON[c.type] ?? 'card'}`}>
+        <span className="ico">
           <Glyph name={TYPE_ICON[c.type] ?? 'card'} size={21} />
         </span>
         <span className="body">
@@ -78,8 +78,10 @@ function AddonRow({ result }: { result: AddonResult }) {
             </span>
           </div>
 
-          <p className="clause">“{c.satisfies.sourceText}”</p>
-          <span className="src">{c.sourceDoc}</span>
+          <div className="clause">
+            <span className="doc">{c.sourceDoc}</span>
+            <p>“{c.satisfies.sourceText}”</p>
+          </div>
 
           {result.eligibility === 'unknown' && c.eligibility && (
             <p className="note warn">가입 자격은 확인이 필요합니다: “{c.eligibility.sourceText}”</p>

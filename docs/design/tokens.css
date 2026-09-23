@@ -1,0 +1,107 @@
+/* FinStay AI — 리디자인 토큰 (2026-09)
+   src/styles.css 맨 위의 :root 블록을 이것으로 통째로 갈아끼운다.
+   변수 이름은 기존과 같다 — 화면 코드는 그대로 둬도 깨지지 않는다.
+   바뀐 값의 의도는 docs/redesign/spec.md §2 참고. */
+
+:root {
+  /* 액센트. 파랑에서 네이비로 — 파랑이 "이득"으로 읽혀 손익 색과 섞였다.
+     네이비는 중립이라 액션(버튼·링크·강조 면)에만 쓴다. */
+  --brand: #18233c;
+  --brand-ink: #0b1224;
+  --brand-deep: #0f1729;
+  --brand-soft: #eef0f4;
+
+  /* 면이 아니라 선으로 나눈다. 회색 배경을 걷어내고 카드는 1px 선으로만 구분한다. */
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f6f5f2;
+  --line: #e6e4de;
+  --line-2: #f0eee9; /* 카드 안쪽 행 구분. --line 보다 옅다 */
+
+  --ink: #15171b;
+  --ink-2: #494d55;
+  --mute: #6e737b; /* #98a2b3 은 흰 배경에서 3.1:1 이라 AA 미달이었다 */
+
+  /* 손익 색은 단 두 개다. 이 둘 말고 금액에 색을 쓰지 않는다. */
+  --up: #0b6b52; /* 지켜지는 혜택 · 절감 */
+  --down: #a33328; /* 잃는 혜택 */
+  --save: #0b6b52; /* = --up */
+
+  --warn: #8a6420;
+  --warn-bg: #f6f0e3;
+  --danger: #a33328;
+  --danger-bg: #fcf7f6;
+  --danger-line: #f0dfdc;
+
+  /* 약관 원문에서 추출 구간(condition.spans)에 깔린다 */
+  --highlight: #f7efd8;
+
+  /* 출처 태그 — CLAUDE.md 규정 색.
+     --src-hold 만 대비 때문에 한 단계 어둡게 했다 (#6b7280 → 태그 배경 위 3.9:1).
+     --src-calc 은 쓰지 않는다: 태그 없음 = 계산 결과. */
+  --src-doc: #5b4bb8;
+  --src-doc-bg: #ede9fb;
+  --src-calc: #0f766e;
+  --src-calc-bg: #dcf2ef;
+  --src-hold: #5a616b;
+  --src-hold-bg: #edeff2;
+  --src-user: #b45309;
+  --src-user-bg: #fbeedc;
+
+  --r-xs: 8px;
+  --r-sm: 12px;
+  --r-md: 14px;
+  --r-lg: 16px;
+  --r-xl: 18px;
+  --r-sheet: 26px; /* 바텀시트 윗모서리 */
+  --pad: 16px;
+
+  /* 폰 프레임 배율. 데스크톱에서만 1 이 아니다. */
+  --ui-scale: 1;
+
+  --font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
+    sans-serif;
+  /* 날짜·약관 원문 전용. 본문과 구분되는 것이 목적이다. */
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* 글자 크기. 화면은 리터럴 px 를 쓰지 않는다. */
+  --fs-2xs: 11px;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-base: 14px;
+  --fs-md: 15px;
+  --fs-lg: 16px;
+  --fs-xl: 17px;
+  --fs-2xl: 19px;
+  --fs-3xl: 21px;
+  --fs-4xl: 22px;
+  --fs-5xl: 23px;
+  --fs-6xl: 27px;
+
+  /* 한글 제목 자간. Pretendard 는 기본 자간이 넓어 그대로 두면 금융앱 제목으로 보이지 않는다. */
+  --ls-title: -0.05em;
+  --ls-head: -0.03em;
+
+  /* SVG 안의 글자. viewBox 좌표에 묶여 있어 계단에서 제외한다. */
+  --fs-svg-2xs: 8.5px;
+  --fs-svg-xs: 9px;
+  --fs-svg-sm: 9.5px;
+  --fs-svg-md: 10px;
+  --fs-svg-lg: 11px;
+  --fs-svg-xl: 12px;
+}
+
+/* body 규칙에서 바꿀 것 — 기존 body 블록의 두 줄만 교체한다.
+
+body {
+  background: #e8e6e1;          (데스크톱 폰 프레임 뒤 배경)
+  font-family: var(--font-sans);
+}
+
+금액에는 예외 없이 tabular-nums 를 건다. 자릿수가 흔들리면 안 된다.
+
+.amount,
+.num {
+  font-variant-numeric: tabular-nums;
+}
+*/

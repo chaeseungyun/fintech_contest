@@ -61,6 +61,16 @@ export function formatMD(date: ISODate): string {
   return `${m}/${d}`;
 }
 
+/** 2026-09-30 → 09.30 · 날짜 표기(mono) 전용 */
+export function formatDotMD(date: ISODate): string {
+  return date.slice(5).replace('-', '.');
+}
+
+/** 2026-09-08 → 2026.09.08 · 날짜 표기(mono) 전용 */
+export function formatDotYMD(date: ISODate): string {
+  return date.split('-').join('.');
+}
+
 /** 2026-09-30 → 9월 30일 */
 export function formatKoMD(date: ISODate): string {
   const { m, d } = parseISO(date);

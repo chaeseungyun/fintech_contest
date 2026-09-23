@@ -53,7 +53,7 @@ export function Assets() {
           <div className="plist">
             {g.products.map((p) => (
               <div key={p.id} className="prow">
-                <span className={`ico tint-${TYPE_ICON[p.type] ?? 'deposit'}`}>
+                <span className="ico">
                   <Glyph name={TYPE_ICON[p.type] ?? 'deposit'} size={20} />
                 </span>
                 <span className="body">

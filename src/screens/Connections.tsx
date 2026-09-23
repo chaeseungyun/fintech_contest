@@ -1,7 +1,7 @@
 import { AppShell } from '../components/AppShell';
 import { Amount } from '../components/Amount';
 import { Glyph, TYPE_ICON } from '../components/Glyph';
-import { Highlight } from '../components/Highlight';
+import { Clause } from '../components/Clause';
 import { SourceTag } from '../components/SourceTag';
 import { formatRateDelta } from '../lib/money';
 import type { Effect } from '../lib/types';
@@ -114,15 +114,11 @@ export function Connections({ triggerId }: { triggerId: string }) {
 
       {selectedItem && (
         <div className="card sheet">
-          <span className="src">{selectedItem.condition.sourceDoc}</span>
-          <p className="clause">
-            <Highlight text={selectedItem.condition.sourceText} spans={selectedItem.condition.spans} />
-          </p>
+          <Clause condition={selectedItem.condition} />
           <div className="sheetrow">
             <span className="meta">
               <Glyph name={TYPE_ICON[selectedItem.product.type] ?? 'deposit'} size={15} />
-              {selectedItem.product.name} ← {graph.center.name} · 신뢰도{' '}
-              {Math.round(selectedItem.condition.confidence * 100)}%
+              {selectedItem.product.name} ← {graph.center.name}
             </span>
             <button
               type="button"

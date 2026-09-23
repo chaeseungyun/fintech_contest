@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>바꿔 볼 항목 고르기 — FinStay AI 리디자인 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+body { margin: 0; background: #FFFFFF; color: #15171B; font-family: 'Pretendard Variable', Pretendard, 'Apple SD Gothic Neo', sans-serif; -webkit-font-smoothing: antialiased; }
+a { color: #18233C; text-decoration: none; }
+a:hover { color: #0B1224; }
+button { font-family: inherit; color: inherit; }
+html, body { background: #E8E6E1; }
+    body { margin: 0; padding: 40px 0; display: flex; justify-content: center; align-items: flex-start; }
+    .frame { width: 390px; flex-shrink: 0; border-radius: 28px; overflow: hidden; background: #FFFFFF; box-shadow: 0 2px 24px rgba(20, 22, 26, 0.14); }
+</style>
+</head>
+<body>
+<!-- 2 · 바꿔 볼 항목 (바텀시트) · 시안 전용. 앱 코드가 읽지 않는다. 캔버스 아트보드 Switch.dc.html 에서 변환. -->
+<div class="frame">
+<div style="width: 390px; height: 900px; box-sizing: border-box; background: #CFCCC6; display: flex; flex-direction: column;">
+
+  <div style="height: 200px; flex-shrink: 0; padding: 74px 20px 0 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px;">
+    <span style="font-size: 19px; font-weight: 700; letter-spacing: -0.04em; color: rgba(24, 35, 60, 0.35);">누리은행</span>
+    <div style="height: 76px; border-radius: 16px; background: rgba(255, 255, 255, 0.45);"></div>
+  </div>
+
+  <div style="flex-grow: 1; background: #FFFFFF; border-radius: 26px 26px 0 0; padding: 10px 20px 24px 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px;">
+
+    <div style="display: flex; justify-content: center;">
+      <span style="width: 36px; height: 4px; border-radius: 999px; background: #DDDAD4;"></span>
+    </div>
+
+    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;">
+      <div style="display: flex; flex-direction: column; gap: 7px;">
+        <span style="font-size: 11.5px; font-weight: 600; letter-spacing: 0.02em; color: #18233C;">FinStay AI</span>
+        <h1 style="margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.045em; line-height: 1.38;">바꾸면 어떻게 될지<br>미리 볼 수 있습니다.</h1>
+      </div>
+      <button type="button" aria-label="닫기" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: none; border: 0; padding: 0; cursor: pointer; color: #6E737B; flex-shrink: 0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+
+    <p style="margin: 0; font-size: 12.5px; line-height: 1.65; color: #494D55;">상품 하나를 바꾸면 다른 상품의 우대 혜택도 달라질 수 있습니다. 상시 분석이 찾아 둔 연결 관계에 변경을 넣어, 유지·변경의 손익을 비교합니다.</p>
+
+    <h2 style="margin: 4px 0 0 0; font-size: 14px; font-weight: 600; letter-spacing: -0.03em;">바꿔 볼 항목을 고르세요</h2>
+
+    <a href="03-analyzing.html" style="display: flex; align-items: center; gap: 13px; padding: 15px 16px; border: 1px solid #18233C; border-radius: 16px; background: #F7F8FA; min-height: 44px; box-sizing: border-box;">
+      <span style="width: 40px; height: 40px; border-radius: 13px; background: #18233C; color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M3 10.2h18"/></svg>
+      </span>
+      <span style="display: flex; flex-direction: column; gap: 3px; flex-grow: 1; min-width: 0;">
+        <b style="font-size: 15px; font-weight: 700; letter-spacing: -0.035em;">카드 해지/변경</b>
+        <span style="font-size: 11.5px; color: #494D55;">누리카드 톡톡카드 · 연결 혜택 3건</span>
+        <span style="font-size: 11.5px; color: #6E737B;">주택담보대출 · 정기예금 · 건강보험</span>
+      </span>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#18233C" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="m9 6 6 6-6 6"/></svg>
+    </a>
+
+    <div style="display: flex; flex-direction: column;">
+      <button type="button" style="display: flex; align-items: center; gap: 13px; padding: 12px 2px; background: none; border: 0; border-top: 1px solid #F0EEE9; text-align: left; cursor: pointer; min-height: 44px;">
+        <span style="width: 38px; height: 38px; border-radius: 12px; background: #EEF0F4; color: #18233C; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6.8" rx="7.2" ry="2.9"/><path d="M4.8 6.8v10.4c0 1.6 3.2 2.9 7.2 2.9s7.2-1.3 7.2-2.9V6.8"/></svg>
+        </span>
+        <span style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
+          <b style="font-size: 14px; font-weight: 600; letter-spacing: -0.03em;">급여통장 변경</b>
+          <span style="font-size: 11.5px; color: #6E737B;">누리은행 주거래 급여통장 · 연결 혜택 4건 · 주담대·톡톡카드·자동이체·정기예금</span>
+          <span style="font-size: 11px; color: #B45309;">확인 필요 · 옮길 은행 급여통장의 우대 혜택</span>
+        </span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9BA0A8" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="m9 6 6 6-6 6"/></svg>
+      </button>
+
+      <button type="button" style="display: flex; align-items: center; gap: 13px; padding: 12px 2px; background: none; border: 0; border-top: 1px solid #F0EEE9; text-align: left; cursor: pointer; min-height: 44px;">
+        <span style="width: 38px; height: 38px; border-radius: 12px; background: #EEF0F4; color: #18233C; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4.2l8 6.3"/><path d="M6.6 9.6V19.8h10.8V9.6"/></svg>
+        </span>
+        <span style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
+          <b style="font-size: 14px; font-weight: 600; letter-spacing: -0.03em;">대출 변경</b>
+          <span style="font-size: 11.5px; color: #6E737B;">누리은행 주택담보대출 · 연결 혜택 2건 · 톡톡카드·정기예금</span>
+          <span style="font-size: 11px; color: #B45309;">확인 필요 · 새 대출의 적용금리·상환 조건</span>
+        </span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9BA0A8" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="m9 6 6 6-6 6"/></svg>
+      </button>
+
+      <button type="button" style="display: flex; align-items: center; gap: 13px; padding: 12px 2px; background: none; border: 0; border-top: 1px solid #F0EEE9; text-align: left; cursor: pointer; min-height: 44px;">
+        <span style="width: 38px; height: 38px; border-radius: 12px; background: #EEF0F4; color: #18233C; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18V9.5M9.7 18V7M14.3 18v-6M19 18V5"/></svg>
+        </span>
+        <span style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
+          <b style="font-size: 14px; font-weight: 600; letter-spacing: -0.03em;">예·적금 해지/변경</b>
+          <span style="font-size: 11.5px; color: #6E737B;">누리 정기예금 · 연결 혜택 1건 · 주담대</span>
+          <span style="font-size: 11px; color: #B45309;">확인 필요 · 해지 후 자금의 대체 수익</span>
+        </span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9BA0A8" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="m9 6 6 6-6 6"/></svg>
+      </button>
+
+      <button type="button" style="display: flex; align-items: center; gap: 13px; padding: 12px 2px; background: none; border: 0; border-top: 1px solid #F0EEE9; border-bottom: 1px solid #F0EEE9; text-align: left; cursor: pointer; min-height: 44px;">
+        <span style="width: 38px; height: 38px; border-radius: 12px; background: #EEF0F4; color: #18233C; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.6 5.2 6.6v4.9c0 4.1 2.8 7.3 6.8 8.8 4-1.5 6.8-4.7 6.8-8.8V6.6z"/></svg>
+        </span>
+        <span style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
+          <b style="font-size: 14px; font-weight: 600; letter-spacing: -0.03em;">보험 해지/변경</b>
+          <span style="font-size: 11.5px; color: #6E737B;">누리생명 건강보험 · 연결 혜택 1건 · 톡톡카드</span>
+        </span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9BA0A8" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="m9 6 6 6-6 6"/></svg>
+      </button>
+    </div>
+
+    <p style="margin: 8px 0 0 0; font-size: 11px; line-height: 1.65; color: #6E737B;">항목을 고르면 미리 찾아 둔 연결에 그 변경을 넣어 우대 변화와 손익을 계산합니다. 보유 상품 정보와 약관에서 추출해 둔 샘플 조건만으로 계산하며, 기준일은 2026년 9월 8일로 고정되어 있습니다.</p>
+  </div>
+</div>
+</div>
+</body>
+</html>

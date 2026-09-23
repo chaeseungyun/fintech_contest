@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>우대 확인일과 변경 가능 구간 — FinStay AI 리디자인 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+body { margin: 0; background: #FFFFFF; color: #15171B; font-family: 'Pretendard Variable', Pretendard, 'Apple SD Gothic Neo', sans-serif; -webkit-font-smoothing: antialiased; }
+a { color: #18233C; text-decoration: none; }
+a:hover { color: #0B1224; }
+button { font-family: inherit; color: inherit; }
+html, body { background: #E8E6E1; }
+    body { margin: 0; padding: 40px 0; display: flex; justify-content: center; align-items: flex-start; }
+    .frame { width: 390px; flex-shrink: 0; border-radius: 28px; overflow: hidden; background: #FFFFFF; box-shadow: 0 2px 24px rgba(20, 22, 26, 0.14); }
+</style>
+</head>
+<body>
+<!-- 6 · 우대 확인일 · 변경 가능 구간 · 시안 전용. 앱 코드가 읽지 않는다. 캔버스 아트보드 Timing.dc.html 에서 변환. -->
+<div class="frame">
+<div style="width: 390px; height: 1000px; box-sizing: border-box; background: #FFFFFF; display: flex; flex-direction: column;">
+
+  <div style="height: 54px; flex-shrink: 0;"></div>
+
+  <header style="display: flex; align-items: center; justify-content: space-between; padding: 0 12px; flex-shrink: 0;">
+    <a href="05-impact.html" aria-label="뒤로" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #15171B;">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6 9 12l6 6"/></svg>
+    </a>
+    <span style="font-size: 13px; font-weight: 500; color: #494D55;">우대 확인일과 변경 가능 구간</span>
+    <span style="width: 44px; height: 44px;"></span>
+  </header>
+
+  <div style="padding: 8px 20px 0 20px; display: flex; flex-direction: column; gap: 14px;">
+
+    <div style="display: flex; flex-direction: column; gap: 7px;">
+      <h1 style="margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.05em; line-height: 1.35;">9월 30일이 지나면<br>이번 달 우대가 확정됩니다</h1>
+      <p style="margin: 0; font-size: 12.5px; line-height: 1.65; color: #494D55;">우대 확인일은 은행이 실적을 채웠는지 보고 그 달 우대를 줄지 정하는 날입니다. 이 날이 지나면 그 달 우대는 확정되어, 그 뒤에 바꿔도 그 달 혜택은 잃지 않습니다.</p>
+    </div>
+
+    <section style="border: 1px solid #E6E4DE; border-radius: 18px; padding: 16px 14px 14px 14px; display: flex; flex-direction: column; gap: 10px;">
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #6E737B; padding-left: 2px;">오늘 2026.09.08 기준</span>
+
+      <svg viewBox="0 0 334 104" width="334" height="104" role="img" aria-label="시점 축. 오늘 9월 8일, 9월 15일 대출 재산정, 9월 20일, 9월 30일부터 변경 가능 구간, 2027년 3월 20일 정기예금 만기">
+        <rect x="196" y="34" width="126" height="28" rx="6" fill="#E7F1ED"/>
+        <text x="259" y="26" text-anchor="middle" font-family="'Pretendard Variable', sans-serif" font-size="10.5" font-weight="600" fill="#0B6B52">변경 가능 구간</text>
+        <path d="M16 48h306" stroke="#DDDAD4" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="20" cy="48" r="5" fill="#18233C"/>
+        <circle cx="86" cy="48" r="4" fill="#FFFFFF" stroke="#8A6420" stroke-width="1.8"/>
+        <circle cx="124" cy="48" r="4" fill="#FFFFFF" stroke="#8A6420" stroke-width="1.8"/>
+        <circle cx="196" cy="48" r="5" fill="#0B6B52"/>
+        <circle cx="300" cy="48" r="4.5" fill="#A33328"/>
+        <text x="20" y="72" text-anchor="start" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#15171B">오늘</text>
+        <text x="86" y="72" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#6E737B">09.15</text>
+        <text x="124" y="86" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#6E737B">09.20</text>
+        <text x="196" y="72" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#0B6B52">09.30</text>
+        <text x="326" y="72" text-anchor="end" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#A33328">2027.03.20</text>
+        <text x="326" y="86" text-anchor="end" font-family="'Pretendard Variable', sans-serif" font-size="9.5" fill="#6E737B">정기예금 만기</text>
+      </svg>
+
+      <p style="margin: 0; font-size: 12px; line-height: 1.7; color: #494D55; border-top: 1px solid #F0EEE9; padding-top: 11px;">9월 15일에 대출 우대 실적이, 9월 30일에 카드·보험 실적이 확인됩니다. 마지막 확인이 끝나는 <b style="font-weight: 600;">9월 30일</b>부터가 이번 달 혜택을 잃지 않고 바꿀 수 있는 구간입니다.</p>
+    </section>
+
+    <div style="display: flex; flex-direction: column;">
+      <h2 style="margin: 0 0 4px 0; font-size: 14.5px; font-weight: 600; letter-spacing: -0.03em;">조건별 확인일</h2>
+
+      <div style="display: flex; align-items: center; gap: 12px; padding: 13px 2px; border-top: 1px solid #F0EEE9;">
+        <span style="width: 34px; height: 34px; border-radius: 11px; background: #F6F5F2; color: #18233C; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10.5 12 4.2l8 6.3"/><path d="M6.6 9.6V19.8h10.8V9.6"/></svg>
+        </span>
+        <span style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
+          <b style="font-size: 13.5px; font-weight: 600; letter-spacing: -0.03em;">주택담보대출</b>
+          <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: #6E737B;">매월 15일 재산정 <span style="font-size: 10px; padding: 2px 6px; border-radius: 5px; background: #EDE9FB; color: #5B4BB8;">약관에서 추출</span></span>
+        </span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #15171B; flex-shrink: 0;">09.15</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 12px; padding: 13px 2px; border-top: 1px solid #F0EEE9;">
+        <span style="width: 34px; height: 34px; border-radius: 11px; background: #F6F5F2; color: #18233C; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 18V9.5M9.7 18V7M14.3 18v-6M19 18V5"/></svg>
+        </span>
+        <span style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
+          <b style="font-size: 13.5px; font-weight: 600; letter-spacing: -0.03em;">누리 정기예금</b>
+          <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: #6E737B;">가입일에 확정 · 매월 확인하지 않음 <span style="font-size: 10px; padding: 2px 6px; border-radius: 5px; background: #EDE9FB; color: #5B4BB8;">약관에서 추출</span></span>
+        </span>
+        <span style="font-size: 11.5px; font-weight: 600; color: #A33328; flex-shrink: 0;">회복 불가</span>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 12px; padding: 13px 2px; border-top: 1px solid #F0EEE9; border-bottom: 1px solid #F0EEE9;">
+        <span style="width: 34px; height: 34px; border-radius: 11px; background: #F6F5F2; color: #18233C; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.6 5.2 6.6v4.9c0 4.1 2.8 7.3 6.8 8.8 4-1.5 6.8-4.7 6.8-8.8V6.6z"/></svg>
+        </span>
+        <span style="display: flex; flex-direction: column; gap: 2px; flex-grow: 1; min-width: 0;">
+          <b style="font-size: 13.5px; font-weight: 600; letter-spacing: -0.03em;">건강보험</b>
+          <span style="display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: #6E737B;">매월 말일 확정 <span style="font-size: 10px; padding: 2px 6px; border-radius: 5px; background: #EDE9FB; color: #5B4BB8;">약관에서 추출</span></span>
+        </span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: #15171B; flex-shrink: 0;">09.30</span>
+      </div>
+    </div>
+
+    <section style="border: 1px solid #F0DFDC; border-radius: 16px; background: #FCF7F6; padding: 15px; display: flex; flex-direction: column; gap: 8px;">
+      <h2 style="margin: 0; display: flex; align-items: center; gap: 7px; font-size: 14px; font-weight: 600; letter-spacing: -0.03em; color: #A33328;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v5M12 16.5v.01"/><circle cx="12" cy="12" r="9"/></svg>
+        기다려도 돌아오지 않는 우대
+      </h2>
+      <p style="margin: 0; font-size: 12.5px; line-height: 1.7; color: #494D55;">누리 정기예금의 우대이율 0.25%p는 톡톡카드를 보유한 조건으로 <b style="font-weight: 600;">가입일에 확정</b>된 것입니다. 지금 해지하면 만기 2027년 3월 20일까지 이 우대 없이 이어지고, 카드를 다시 만들어도 되돌아오지 않습니다.</p>
+      <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #6E737B;">누리 정기예금 상품설명서 · 우대이율</span>
+    </section>
+
+    <p style="margin: 0 0 24px 0; font-size: 11px; line-height: 1.65; color: #6E737B;">생활요금 자동이체 우대는 10월 5일에 확인하는 조건이라 이번 달 변경 가능 구간 계산에서 뺐습니다. 옮긴 뒤 실적을 다시 채우면 유지됩니다.</p>
+  </div>
+</div>
+</div>
+</body>
+</html>

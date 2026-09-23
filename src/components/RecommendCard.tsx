@@ -32,7 +32,7 @@ function CandidateRow({ result, triggerId }: { result: CandidateResult; triggerI
         aria-expanded={open}
         onClick={() => dispatch({ type: 'toggleCandidate', candidateId: c.id })}
       >
-        <span className={`ico tint-${TYPE_ICON[c.type] ?? 'card'}`}>
+        <span className="ico">
           <Glyph name={TYPE_ICON[c.type] ?? 'card'} size={21} />
         </span>
         <span className="body">
@@ -108,8 +108,10 @@ function CandidateRow({ result, triggerId }: { result: CandidateResult; triggerI
             </span>
           </div>
 
-          <p className="clause">“{c.satisfies.sourceText}”</p>
-          <span className="src">{c.sourceDoc}</span>
+          <div className="clause">
+            <span className="doc">{c.sourceDoc}</span>
+            <p>“{c.satisfies.sourceText}”</p>
+          </div>
 
           {result.linkUnknown && (
             <p className="note warn">
@@ -176,7 +178,7 @@ export function RecommendCard({ triggerId }: { triggerId: string }) {
 
         <div className={`crow plain${noneChosen ? ' chosen' : ''}`}>
           <button type="button" className="head" onClick={chooseNone}>
-            <span className="ico tint-deposit">
+            <span className="ico">
               <Glyph name="arrow" size={19} />
             </span>
             <span className="body">

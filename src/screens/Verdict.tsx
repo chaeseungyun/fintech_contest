@@ -3,10 +3,9 @@ import { AppShell } from '../components/AppShell';
 import { BasisStrip } from '../components/BasisStrip';
 import { Glyph } from '../components/Glyph';
 import { HorizonChart } from '../components/HorizonChart';
-import { SourceTag } from '../components/SourceTag';
 import type { Derived } from '../lib/derive';
 import type { ImpactItem } from '../lib/derive';
-import { formatKoYMD, formatMonths, withJosa } from '../lib/format';
+import { formatDotYMD, formatKoMD, formatKoYMD, formatMonths, withJosa } from '../lib/format';
 import { perkLabel } from '../lib/money';
 import { useStore } from '../state/store';
 
@@ -48,23 +47,23 @@ function horizonNote(d: Derived): string {
   }
 }
 
-const MARK: Record<Derived['verdict']['kind'], 'check' | 'arrow' | 'info'> = {
-  keep: 'check',
-  switch: 'arrow',
-  pending: 'info',
-};
-
 /**
- * 분석이 끝나고 처음 보는 화면. 결론 한 줄·숫자 하나·기간별 차트까지만 — 스크롤 없이 결론이 끝나야 한다.
+ * 분석이 끝나고 처음 보는 화면. 결론 → 순손익 → 비교 기준 → 손익 막대 → 기간별 차트 → 시점 스트립.
  * 항목별 이유·유지 조건·갈아타기 후보·체크리스트는 "분석 과정 보기"(impact) 로 한 단계 들어간다.
+ * 절감·손실 금액은 결과 상세의 몫이라 여기서는 비율 막대로만 그린다 — 같은 값을 두 화면에 다시 쓰지 않는다.
  */
 export function Verdict({ triggerId }: { triggerId: string }) {
   const { derived: d, dispatch } = useStore();
   const v = d.verdict;
   const pending = v.kind === 'pending';
+  const { verb } = d.trigger;
+  const loss = d.total.value;
+  const saving = d.savingsTotal.value;
 
   const toImpact = () => dispatch({ type: 'push', route: { name: 'impact', triggerId } });
   const toHub = () => dispatch({ type: 'popTo', name: 'hub' });
+  // 우대 확인일 계산이 이 프로젝트의 차별점이라 결과 상세를 거치지 않고 한 단계 얕게 둔다
+  const toTimeline = () => dispatch({ type: 'push', route: { name: 'timeline', triggerId } });
 
   return (
     <AppShell
@@ -83,38 +82,74 @@ export function Verdict({ triggerId }: { triggerId: string }) {
         </>
       }
     >
-      <div className={`verdictcard ${v.kind}`}>
-        <span className="mark" aria-hidden="true">
-          <Glyph name={MARK[v.kind]} size={26} />
+      <section className={`verdictcard ${v.kind}`}>
+        <span className="meta">
+          {d.center.institution} {d.center.name}
+          {d.center.facts.last4 && ` (${d.center.facts.last4})`} · {verb}
         </span>
-        <h2>
+        <h1>
           {v.lead}
           <br />
           <em>{v.highlight}</em>
           {v.tail && ` ${v.tail}`}
-        </h2>
+        </h1>
         <p>{v.body}</p>
-        {/* 결론 옆의 숫자 하나. 절감·손실로 쪼갠 근거는 결과 상세(impact)에서 그린다 */}
-        <span className="net">
-          <em className="k">{pending ? '확인된 항목 소계' : '연간 예상 손익'}</em>
-          <Amount value={d.netAnnual} signed short size="lg" />
-        </span>
-      </div>
+        <div className="net">
+          <span className="k">{pending ? '확인된 항목 소계' : `${verb} 시 연간 예상 손익`}</span>
+          <Amount value={d.netAnnual} signed short size="hero" />
+        </div>
+        <BasisStrip basis={d.basis} />
+        {loss > 0 && saving > 0 && (
+          <div className="ratio" aria-label="잃는 혜택과 줄어드는 비용의 비율">
+            <div className="bars">
+              <span className="down" style={{ flexGrow: loss }} />
+              <span className="up" style={{ flexGrow: saving }} />
+            </div>
+            <div className="legend">
+              <span>
+                <i className="down" />
+                잃는 혜택
+              </span>
+              <span>
+                <i className="up" />
+                줄어드는 비용
+              </span>
+            </div>
+          </div>
+        )}
+      </section>
 
-      <BasisStrip basis={d.basis} compact />
-
-      <section className="card">
-        <h3 className="cardtitle">
-          유지 기간별 예상 손익
-          <SourceTag source={d.netAnnual.source} />
-        </h3>
-        <p className="chartsub">
-          지금 {d.trigger.verb} 대비{pending && ' · 확인된 항목만'}
-        </p>
+      <section className="card chartcard">
+        <div className="head">
+          <h2 className="cardtitle">
+            유지 기간별 예상 손익 · 지금 {verb} 대비
+          </h2>
+          <span className="sub">
+            연 단위 · 기준일 <span className="mono">{formatDotYMD(d.today)}</span>
+            {pending && ' · 확인된 항목만'}
+          </span>
+        </div>
         {/* 절감이 없으면 손익분기가 없다 — 첫 양수 구간을 강조하지 않는다 */}
         <HorizonChart horizon={d.horizon} quiet={d.horizon.reason === 'positive' && d.savings.length === 0} />
         <p className="chartnote">{horizonNote(d)}</p>
       </section>
+
+      {d.items.length > 0 && (
+        <button type="button" className="card linkrow" onClick={toTimeline}>
+          <span className="ico warn">
+            <Glyph name="clock" size={19} />
+          </span>
+          <span className="body">
+            <b>
+              {d.timing.alreadySafe
+                ? '이번 달 우대 확인은 모두 끝났습니다'
+                : `${formatKoMD(d.timing.safeAfter.value)}이 지나면 이번 달 우대가 확정`}
+            </b>
+            <span>우대 확인일과 변경 가능 구간 보기</span>
+          </span>
+          <Glyph name="chevron" size={16} />
+        </button>
+      )}
 
       <p className="footnote">
         이 결과는 보유 상품 정보와 약관에서 추출한 조건만으로 계산했습니다. 미래 금리 변동이나 상품

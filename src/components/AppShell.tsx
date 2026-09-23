@@ -30,20 +30,12 @@ export function AppShell({
 
   return (
     <div className="app">
-      <div className="statusbar">
-        <span className="time">9:41</span>
-        <span className="sig" aria-hidden="true">
-          <i className="bars" />
-          <i className="wifi" />
-          <i className="batt" />
-        </span>
-      </div>
-
+      {/* 가짜 상태바를 그리지 않는다 — 실기기에서는 진짜 상태바와 두 겹이 된다. .app 윗여백이 safe area 다 */}
       {header ?? (
         <div className="navbar">
           {onBack ? (
             <button type="button" className="navbtn" onClick={onBack} aria-label="뒤로">
-              <Glyph name="back" size={22} />
+              <Glyph name="back" size={21} />
             </button>
           ) : (
             <span className="navbtn ghost" aria-hidden="true" />
@@ -67,16 +59,12 @@ export function AppShell({
               aria-current={t.id === state.tab && state.stack.length === 0 ? 'page' : undefined}
               onClick={() => dispatch({ type: 'selectTab', tab: t.id as Tab })}
             >
-              <Glyph name={t.icon as never} size={22} />
+              <Glyph name={t.icon as never} size={21} />
               <span>{t.label}</span>
             </button>
           ))}
         </nav>
       )}
-
-      <div className="homebar" aria-hidden="true">
-        <i />
-      </div>
     </div>
   );
 }

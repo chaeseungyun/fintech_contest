@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { AppShell } from '../components/AppShell';
 import { Glyph } from '../components/Glyph';
-import { Highlight } from '../components/Highlight';
+import { Clause } from '../components/Clause';
 import { SourceTag } from '../components/SourceTag';
 import type { ImpactItem } from '../lib/derive';
 import { evidenceFields, toEditValue, type EditKind, type EvidenceField } from '../lib/evidence';
@@ -39,17 +39,19 @@ function FieldRow({
 }) {
   const isEditing =
     editing !== null && editing.conditionId === item.condition.id && editing.kind === field.edit?.kind;
+  const inputId = useId();
 
   return (
     <div className="f">
-      <span className="k">
+      <label className="k" htmlFor={inputId}>
         {field.label}
         {field.note && <span className="note">{field.note}</span>}
-      </span>
+      </label>
       <span className="v">
         {isEditing && field.edit ? (
           <span className="editbox">
             <input
+              id={inputId}
               type="number"
               autoFocus
               value={editing.draft}
@@ -148,13 +150,7 @@ export function Evidence({ productId }: { triggerId: string; productId: string }
 
       {items.map((item) => (
         <div key={item.condition.id} className="card">
-          <span className="src">{item.condition.sourceDoc}</span>
-          <p className="clause big">
-            <Highlight text={item.condition.sourceText} spans={item.condition.spans} />
-          </p>
-          {item.condition.exclude && item.condition.exclude.length > 0 && (
-            <p className="excl">제외: {item.condition.exclude.join(', ')}</p>
-          )}
+          <Clause condition={item.condition} />
 
           <div className="fields">
             {evidenceFields(item, d.center).map((field) => (

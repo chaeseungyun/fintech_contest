@@ -2,11 +2,11 @@ import { formatSignedWonShort, formatWon, formatWonShort } from '../lib/format';
 import type { Tagged } from '../lib/types';
 import { SourceTag } from './SourceTag';
 
-type Size = 'sm' | 'md' | 'lg' | 'xl';
+type Size = 'sm' | 'md' | 'lg' | 'xl' | 'hero';
 
 interface Props {
   value: Tagged<number>;
-  /** 부호를 붙이고 색을 나눈다 (+ 빨강 / − 파랑 — 국내 금융앱 관행) */
+  /** 부호를 붙이고 색을 나눈다 (+ --up 초록 / − --down 벽돌). 손익 색은 이 둘뿐이다 */
   signed?: boolean;
   /** 만원 단위로 줄인다 */
   short?: boolean;

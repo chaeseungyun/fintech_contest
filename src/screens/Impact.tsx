@@ -1,6 +1,7 @@
 import { AppShell } from '../components/AppShell';
 import { Amount } from '../components/Amount';
 import { BasisStrip } from '../components/BasisStrip';
+import { Clause } from '../components/Clause';
 import { Glyph, TYPE_ICON } from '../components/Glyph';
 import { RecommendCard } from '../components/RecommendCard';
 import { SourceTag } from '../components/SourceTag';
@@ -38,7 +39,7 @@ function ImpactRow({ item, triggerId }: { item: ImpactItem; triggerId: string })
         aria-expanded={open}
         onClick={() => dispatch({ type: 'toggleExpanded', conditionId: item.condition.id })}
       >
-        <span className={`ico tint-${TYPE_ICON[item.product.type] ?? 'deposit'}`}>
+        <span className="ico">
           <Glyph name={TYPE_ICON[item.product.type] ?? 'deposit'} size={21} />
         </span>
         <span className="body">
@@ -56,6 +57,7 @@ function ImpactRow({ item, triggerId }: { item: ImpactItem; triggerId: string })
           {j.active && (
             <p className="plain">{plainEffect(item, d.center.shortName ?? d.center.name, d.trigger.verb)}</p>
           )}
+          <div className="fields">
           <div className="f">
             <span className="k">확인 주기</span>
             <span className="v">
@@ -100,23 +102,21 @@ function ImpactRow({ item, triggerId }: { item: ImpactItem; triggerId: string })
               {formatWon(item.effectiveLoss.value)} <SourceTag source={item.effectiveLoss.source} />
             </span>
           </div>
-          <p className="clause">“{item.condition.sourceText}”</p>
-          <div className="links">
-            <span className="src">{item.condition.sourceDoc}</span>
-            <button
-              type="button"
-              className="link"
-              onClick={() =>
-                dispatch({
-                  type: 'push',
-                  route: { name: 'evidence', triggerId, productId: item.product.id },
-                })
-              }
-            >
-              근거 원문·값 수정
-              <Glyph name="chevron" size={14} />
-            </button>
           </div>
+          <Clause condition={item.condition} />
+          <button
+            type="button"
+            className="btn ghost"
+            onClick={() =>
+              dispatch({
+                type: 'push',
+                route: { name: 'evidence', triggerId, productId: item.product.id },
+              })
+            }
+          >
+            근거 원문 · 값 수정
+            <Glyph name="chevron" size={14} />
+          </button>
           {!j.active && <p className="note">지금도 받지 못하는 혜택이라 손실 0원으로 두었습니다.</p>}
           {j.metricStatus === 'assumed' && (
             <p className="note warn">
@@ -184,14 +184,17 @@ export function Impact({ triggerId }: { triggerId: string }) {
       }
     >
       <div className="card targetcard">
-        <span className={`ico tint-${TYPE_ICON[center.type] ?? 'card'}`}>
+        <span className="ico">
           <Glyph name={TYPE_ICON[center.type] ?? 'card'} size={24} />
         </span>
         <span className="body">
           <b>
             {center.institution} {center.name}
           </b>
-          <span>{center.facts.last4 ? `(${center.facts.last4})` : d.trigger.label}</span>
+          <span>
+            {center.facts.last4 && `(${center.facts.last4}) · `}
+            {d.trigger.label}
+          </span>
         </span>
       </div>
 
@@ -247,13 +250,16 @@ export function Impact({ triggerId }: { triggerId: string }) {
       </div>
 
       {/* 비교 결과에서 본 숫자의 근거 — 절감·손실로 쪼개 보여주는 자리라 크게 다시 그리지 않는다 */}
-      <div className={`totalcard ${pending ? 'pending' : d.netAnnual.value >= 0 ? 'good' : 'bad'}`}>
-        <span className="lbl">{pending ? '확인된 항목의 변화 소계' : '연간 예상 손익 · 합계 근거'}</span>
-        <Amount value={d.netAnnual} signed short size="lg" />
-        <span className="basis">
-          (절감 {formatWonShort(d.savingsTotal.value)} − 손실 {formatWonShort(d.total.value)})
-          <SourceTag source={d.netAnnual.source} />
-        </span>
+      <div className={`totalcard${pending ? ' pending' : ''}`}>
+        <div className="row">
+          <span className="txt">
+            <span className="lbl">{pending ? '확인된 항목의 변화 소계' : '연간 예상 손익 · 합계 근거'}</span>
+            <span className="basis">
+              절감 {formatWon(d.savingsTotal.value)} − 손실 {formatWon(d.total.value)}
+            </span>
+          </span>
+          <Amount value={d.netAnnual} signed short size="lg" />
+        </div>
         {pending && (
           <p className="note warn">전체 비교 보류 — {d.missing.join('·')} 확인 필요. 이 소계만으로 유불리를 결론짓지 않습니다.</p>
         )}
@@ -291,15 +297,13 @@ export function Impact({ triggerId }: { triggerId: string }) {
         className="btn ghost"
         onClick={() => dispatch({ type: 'push', route: { name: 'timeline', triggerId } })}
       >
-        우대 확인일·변경 가능 구간 자세히 보기
+        우대 확인일 · 변경 가능 구간 자세히 보기
+        <Glyph name="chevron" size={14} />
       </button>
 
       {d.maintain.length > 0 && (
         <section className="card checklist maintain">
-          <h3 className="cardtitle">
-            유지를 택한다면 지킬 조건
-            <Glyph name="check" size={16} />
-          </h3>
+          <h3 className="cardtitle">유지를 택한다면 지킬 조건</h3>
           <ul>
             {d.maintain.map((c) => (
               <li key={c.key}>
@@ -319,16 +323,11 @@ export function Impact({ triggerId }: { triggerId: string }) {
       <RecommendCard triggerId={triggerId} />
 
       <section className="card checklist">
-        <h3 className="cardtitle">
-          꼭 확인하세요
-          <Glyph name="info" size={16} />
-        </h3>
+        <h3 className="cardtitle">꼭 확인하세요</h3>
         <ul>
           {d.checklist.map((c) => (
             <li key={c.key}>
-              <span className="mk" aria-hidden="true">
-                <Glyph name="check" size={14} />
-              </span>
+              <span className="mk" aria-hidden="true" />
               <span className="tx">
                 {c.text} <SourceTag source={c.source} />
               </span>

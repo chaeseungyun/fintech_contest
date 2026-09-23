@@ -22,7 +22,7 @@ export function QuickMenu({ exclude = [] }: { exclude?: Tab[] }) {
               : dispatch({ type: 'push', route: { name: 'hub' } })
           }
         >
-          <span className={`ico tint-${q.key}`}>
+          <span className="ico">
             <Glyph name={q.key} size={23} />
           </span>
           <span className="qlabel">{q.label ?? scenario.brand.service}</span>

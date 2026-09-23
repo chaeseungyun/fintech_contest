@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>비교 결과 — FinStay AI 리디자인 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+body { margin: 0; background: #FFFFFF; color: #15171B; font-family: 'Pretendard Variable', Pretendard, 'Apple SD Gothic Neo', sans-serif; -webkit-font-smoothing: antialiased; }
+a { color: #18233C; text-decoration: none; }
+a:hover { color: #0B1224; }
+button { font-family: inherit; color: inherit; }
+html, body { background: #E8E6E1; }
+    body { margin: 0; padding: 40px 0; display: flex; justify-content: center; align-items: flex-start; }
+    .frame { width: 390px; flex-shrink: 0; border-radius: 28px; overflow: hidden; background: #FFFFFF; box-shadow: 0 2px 24px rgba(20, 22, 26, 0.14); }
+</style>
+</head>
+<body>
+<!-- 4 · 비교 결과 · 시안 전용. 앱 코드가 읽지 않는다. 캔버스 아트보드 Verdict.dc.html 에서 변환. -->
+<div class="frame">
+<div style="width: 390px; height: 1120px; box-sizing: border-box; background: #FFFFFF; display: flex; flex-direction: column;">
+
+  <div style="height: 54px; flex-shrink: 0;"></div>
+
+  <header style="display: flex; align-items: center; justify-content: space-between; padding: 0 12px; flex-shrink: 0;">
+    <a href="02-switch.html" aria-label="뒤로" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #15171B;">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6 9 12l6 6"/></svg>
+    </a>
+    <span style="font-size: 13px; font-weight: 500; color: #494D55;">비교 결과</span>
+    <span style="width: 44px; height: 44px;"></span>
+  </header>
+
+  <div style="padding: 8px 20px 0 20px; display: flex; flex-direction: column; gap: 14px;">
+
+    <section style="display: flex; flex-direction: column; gap: 14px; padding: 4px 0 18px 0; border-bottom: 1px solid #E6E4DE;">
+      <span style="font-size: 12px; color: #6E737B;">누리카드 톡톡카드 (1234) · 해지</span>
+      <h1 style="margin: 0; font-size: 27px; font-weight: 700; letter-spacing: -0.05em; line-height: 1.34; text-wrap: pretty;">확인된 조건에서는<br><em style="font-style: normal; color: #0B6B52;">유지</em>가 낫습니다</h1>
+      <p style="margin: 0; font-size: 13.5px; line-height: 1.65; color: #494D55;">해지하면 다른 상품 3곳의 우대가 함께 빠집니다. 줄어드는 연회비보다 잃는 혜택이 큽니다.</p>
+
+      <div style="display: flex; flex-direction: column; gap: 8px; padding-top: 4px;">
+        <span style="font-size: 12px; color: #6E737B;">해지 시 연간 예상 손익</span>
+        <span style="font-size: 38px; font-weight: 600; letter-spacing: -0.05em; font-variant-numeric: tabular-nums; line-height: 1.1; color: #A33328;">−164,000원</span>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 6px 10px; padding: 10px 12px; border-radius: 10px; background: #F6F5F2;">
+        <span style="font-size: 11px; color: #494D55;">톡톡카드 유지 vs 해지</span>
+        <span style="font-size: 11px; color: #C9C6C0;">|</span>
+        <span style="font-size: 11px; color: #494D55;">연 단위</span>
+        <span style="font-size: 11px; color: #C9C6C0;">|</span>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #494D55;">기준일 2026.09.08</span>
+        <span style="font-size: 11px; color: #C9C6C0;">|</span>
+        <span style="font-size: 11px; color: #494D55;">실적 3건 모두 확인됨</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 9px; padding-top: 2px;">
+        <div style="display: flex; gap: 3px; height: 10px;">
+          <span style="flex-grow: 194; background: #A33328; border-radius: 999px;"></span>
+          <span style="flex-grow: 30; background: #0B6B52; border-radius: 999px;"></span>
+        </div>
+        <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px; font-variant-numeric: tabular-nums;">
+          <span style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #494D55;">
+            <span style="width: 7px; height: 7px; border-radius: 2px; background: #A33328;"></span>
+            잃는 혜택 194,000원
+          </span>
+          <span style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #494D55;">
+            <span style="width: 7px; height: 7px; border-radius: 2px; background: #0B6B52;"></span>
+            줄어드는 비용 30,000원
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <section style="border: 1px solid #E6E4DE; border-radius: 18px; padding: 16px 16px 14px 16px; display: flex; flex-direction: column; gap: 12px;">
+      <div style="display: flex; flex-direction: column; gap: 3px;">
+        <h2 style="margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -0.03em;">유지 기간별 예상 손익 · 지금 해지 대비</h2>
+        <span style="font-size: 11.5px; color: #6E737B;">연 단위 · 기준일 2026.09.08</span>
+      </div>
+
+      <svg viewBox="0 0 334 166" width="334" height="166" role="img" aria-label="유지 기간별 예상 손익. 지금 해지하면 마이너스 164,000원, 3개월 18,500원, 6개월 67,000원, 9개월 115,500원, 12개월 164,000원">
+        <text x="300" y="11" text-anchor="middle" font-family="'Pretendard Variable', sans-serif" font-size="10.5" fill="#494D55">+164,000</text>
+        <text x="236" y="28" text-anchor="middle" font-family="'Pretendard Variable', sans-serif" font-size="10" fill="#6E737B">만기 뒤</text>
+        <rect x="26" y="76" width="36" height="60" rx="3" fill="#A33328"/>
+        <rect x="90" y="69" width="36" height="7" rx="3" fill="#0B6B52"/>
+        <rect x="154" y="51.5" width="36" height="24.5" rx="3" fill="#0B6B52"/>
+        <rect x="218" y="33.7" width="36" height="42.3" rx="3" fill="#0B6B52"/>
+        <rect x="282" y="16" width="36" height="60" rx="3" fill="#0B6B52"/>
+        <path d="M14 76.5h306" stroke="#C9C6C0" stroke-width="1"/>
+        <text x="44" y="150" text-anchor="middle" font-family="'Pretendard Variable', sans-serif" font-size="10.5" fill="#A33328">−164,000</text>
+        <text x="44" y="164" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#6E737B">지금</text>
+        <text x="108" y="164" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#6E737B">3개월</text>
+        <text x="172" y="164" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#6E737B">6개월</text>
+        <text x="236" y="164" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#15171B">9개월</text>
+        <text x="300" y="164" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10" fill="#6E737B">12개월</text>
+      </svg>
+
+      <p style="margin: 0; font-size: 12px; line-height: 1.7; color: #494D55; border-top: 1px solid #F0EEE9; padding-top: 12px;">누리 정기예금의 우대이율 0.25%p는 톡톡카드를 보유한 조건으로 <b style="font-weight: 600;">가입 때 확정</b>된 것이라, 지금 해지하면 만기(2027년 3월 20일)까지 이 우대 없이 이어지고 카드를 다시 만들어도 되돌아오지 않습니다. 이 우대를 지키려면 만기 뒤에 해지하세요 — 차트에서는 9개월 구간부터입니다.</p>
+    </section>
+
+    <a href="06-timing.html" style="display: flex; align-items: center; gap: 13px; border: 1px solid #E6E4DE; border-radius: 18px; padding: 15px 16px; min-height: 44px; box-sizing: border-box;">
+      <span style="width: 38px; height: 38px; border-radius: 12px; background: #F6F0E3; color: #8A6420; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.4V12l3 2"/></svg>
+      </span>
+      <span style="display: flex; flex-direction: column; gap: 3px; flex-grow: 1; min-width: 0;">
+        <b style="font-size: 13.5px; font-weight: 600; letter-spacing: -0.03em;">9월 30일이 지나면 이번 달 우대가 확정</b>
+        <span style="font-size: 11.5px; color: #6E737B;">우대 확인일과 변경 가능 구간 보기</span>
+      </span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9BA0A8" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="m9 6 6 6-6 6"/></svg>
+    </a>
+
+    <div style="display: flex; flex-direction: column; gap: 8px; padding-top: 4px;">
+      <a href="05-impact.html" style="display: flex; align-items: center; justify-content: center; height: 52px; border-radius: 14px; background: #18233C; color: #FFFFFF; font-size: 15px; font-weight: 600; letter-spacing: -0.03em;">분석 과정 보기</a>
+      <a href="02-switch.html" style="display: flex; align-items: center; justify-content: center; gap: 4px; height: 44px; font-size: 13.5px; font-weight: 500; color: #494D55;">
+        다른 항목도 분석해보기
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+      </a>
+    </div>
+
+    <p style="margin: 0 0 24px 0; font-size: 11px; line-height: 1.65; color: #6E737B;">이 결과는 보유 상품 정보와 약관에서 추출한 조건만으로 계산했습니다. 미래 금리 변동이나 상품 존속은 예측하지 않으며, 실제 적용은 각 금융사 약관을 따릅니다.</p>
+  </div>
+</div>
+</div>
+</body>
+</html>

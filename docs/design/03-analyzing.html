@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>분석 중 — FinStay AI 리디자인 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+body { margin: 0; background: #FFFFFF; color: #15171B; font-family: 'Pretendard Variable', Pretendard, 'Apple SD Gothic Neo', sans-serif; -webkit-font-smoothing: antialiased; }
+a { color: #18233C; text-decoration: none; }
+a:hover { color: #0B1224; }
+button { font-family: inherit; color: inherit; }
+html, body { background: #E8E6E1; }
+    body { margin: 0; padding: 40px 0; display: flex; justify-content: center; align-items: flex-start; }
+    .frame { width: 390px; flex-shrink: 0; border-radius: 28px; overflow: hidden; background: #FFFFFF; box-shadow: 0 2px 24px rgba(20, 22, 26, 0.14); }
+</style>
+</head>
+<body>
+<!-- 3 · 분석 중 · 시안 전용. 앱 코드가 읽지 않는다. 캔버스 아트보드 Analyzing.dc.html 에서 변환. -->
+<div class="frame">
+<div style="width: 390px; height: 900px; box-sizing: border-box; background: #FFFFFF; display: flex; flex-direction: column;">
+
+  <div style="height: 54px; flex-shrink: 0;"></div>
+
+  <header style="display: flex; align-items: center; justify-content: space-between; padding: 0 12px; flex-shrink: 0;">
+    <a href="02-switch.html" aria-label="뒤로" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #15171B;">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6 9 12l6 6"/></svg>
+    </a>
+    <span style="font-size: 13px; font-weight: 500; color: #494D55;">분석 중</span>
+    <span style="width: 44px; height: 44px;"></span>
+  </header>
+
+  <div style="padding: 24px 24px 0 24px; display: flex; flex-direction: column; align-items: center; gap: 22px;">
+
+    <span style="display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px; border: 1px solid #E6E4DE; border-radius: 999px; font-size: 12px; color: #494D55;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#18233C" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M3 10.2h18"/></svg>
+      누리카드 톡톡카드 · 카드 해지/변경
+    </span>
+
+    <svg width="140" height="140" viewBox="0 0 140 140" role="img" aria-label="분석 진행률 75퍼센트">
+      <circle cx="70" cy="70" r="56" fill="none" stroke="#EFEDE8" stroke-width="3"/>
+      <circle cx="70" cy="70" r="56" fill="none" stroke="#18233C" stroke-width="3" stroke-linecap="round" stroke-dasharray="263.9 351.9" transform="rotate(-90 70 70)"/>
+      <text x="70" y="66" text-anchor="middle" font-family="'Pretendard Variable', sans-serif" font-size="30" font-weight="600" fill="#15171B" letter-spacing="-1.4">75%</text>
+      <text x="70" y="86" text-anchor="middle" font-family="'IBM Plex Mono', monospace" font-size="10.5" fill="#6E737B" letter-spacing="0.5">3 / 4 단계</text>
+    </svg>
+
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+      <h1 style="margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.04em; line-height: 1.45; text-align: center; text-wrap: pretty;">FinStay AI가 미리 찾아 둔 연결로<br>손익을 계산하고 있습니다</h1>
+      <p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: #6E737B; text-align: center;">시연용 샘플 조건 · 실시간 약관 추출·AI 호출 없음</p>
+    </div>
+  </div>
+
+  <ol style="margin: 28px 0 0 0; padding: 0 24px; list-style: none; display: flex; flex-direction: column;">
+    <li style="display: flex; align-items: flex-start; gap: 12px; padding: 14px 0; border-top: 1px solid #F0EEE9;">
+      <span style="width: 20px; height: 20px; border-radius: 999px; background: #E7F1ED; color: #0B6B52; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg>
+      </span>
+      <span style="display: flex; flex-direction: column; gap: 3px;">
+        <b style="font-size: 13.5px; font-weight: 600; letter-spacing: -0.03em;">추출해 둔 조건 불러오기</b>
+        <span style="font-size: 12px; color: #6E737B;">상품 6개에 걸린 우대 조건 11건</span>
+      </span>
+    </li>
+    <li style="display: flex; align-items: flex-start; gap: 12px; padding: 14px 0; border-top: 1px solid #F0EEE9;">
+      <span style="width: 20px; height: 20px; border-radius: 999px; background: #E7F1ED; color: #0B6B52; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg>
+      </span>
+      <span style="display: flex; flex-direction: column; gap: 3px;">
+        <b style="font-size: 13.5px; font-weight: 600; letter-spacing: -0.03em;">톡톡카드에 걸린 연결 추리기</b>
+        <span style="font-size: 12px; color: #6E737B;">주택담보대출 · 누리 정기예금 · 건강보험</span>
+      </span>
+    </li>
+    <li style="display: flex; align-items: flex-start; gap: 12px; padding: 14px 0; border-top: 1px solid #F0EEE9;">
+      <span style="width: 20px; height: 20px; border-radius: 999px; background: #E7F1ED; color: #0B6B52; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12.5 4.5 4.5L19 7"/></svg>
+      </span>
+      <span style="display: flex; flex-direction: column; gap: 3px;">
+        <b style="font-size: 13.5px; font-weight: 600; letter-spacing: -0.03em;">우대 확인일 계산</b>
+        <span style="font-size: 12px; color: #6E737B;">9월 15일 · 9월 30일 · 되돌릴 수 없는 우대 1건</span>
+      </span>
+    </li>
+    <li style="display: flex; align-items: flex-start; gap: 12px; padding: 14px 0; border-top: 1px solid #F0EEE9; border-bottom: 1px solid #F0EEE9;">
+      <span style="width: 20px; height: 20px; border-radius: 999px; border: 1.5px solid #18233C; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;">
+        <span style="width: 6px; height: 6px; border-radius: 999px; background: #18233C;"></span>
+      </span>
+      <span style="display: flex; flex-direction: column; gap: 3px;">
+        <b style="font-size: 13.5px; font-weight: 600; letter-spacing: -0.03em;">연간 손익 합산</b>
+        <span style="font-size: 12px; color: #6E737B;">지켜지는 혜택과 줄어드는 비용을 같은 축에 올리는 중</span>
+      </span>
+    </li>
+  </ol>
+
+  <div style="margin-top: auto; padding: 16px 24px 28px 24px; display: flex; justify-content: center;">
+    <a href="04-verdict.html" style="display: inline-flex; align-items: center; gap: 5px; min-height: 44px; padding: 0 14px; font-size: 13.5px; font-weight: 500; color: #494D55;">
+      결과 바로 보기
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+    </a>
+  </div>
+</div>
+</div>
+</body>
+</html>

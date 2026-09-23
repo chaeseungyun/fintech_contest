@@ -24,7 +24,7 @@ export function Benefits() {
         <span className="lbl">
           지금 받고 있는 우대 혜택
         </span>
-        <Amount value={watch.activeTotal} short size="xl" prefix="연" />
+        <Amount value={watch.activeTotal} short size="hero" prefix="연" />
         <span className="sub">
           약관에서 추출한 조건 {watch.linkCount}건 · 상품 {watch.productCount}개
         </span>
@@ -46,7 +46,7 @@ export function Benefits() {
           const date = r.judgment.nextJudgmentDate.value;
           return (
             <div key={r.condition.id} className={`prow${r.judgment.active ? '' : ' off'}`}>
-              <span className={`ico tint-${TYPE_ICON[r.holder.type] ?? 'deposit'}`}>
+              <span className="ico">
                 <Glyph name={TYPE_ICON[r.holder.type] ?? 'deposit'} size={20} />
               </span>
               <span className="body">

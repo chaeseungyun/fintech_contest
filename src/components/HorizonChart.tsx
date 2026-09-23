@@ -2,67 +2,73 @@ import { formatSignedWonShort } from '../lib/format';
 import type { Horizon, HorizonReason } from '../lib/horizon';
 
 /**
- * 강조 막대에 붙는 배지. 이유에 따라 다르다 — 첫 양수 구간(positive)은 "추천 시점" 이 아니라
+ * 강조 막대 위의 작은 글자. 이유에 따라 다르다 — 첫 양수 구간(positive)은 "추천 시점" 이 아니라
  * 손익분기라서 그렇게 적는다. 변경 시점은 판정일·만기 같은 확인된 사건으로 정한다.
  */
-const BADGE: Record<HorizonReason, string> = {
-  now: '추천',
-  recover: '만기 이후',
+const MARK: Record<HorizonReason, string> = {
+  now: '지금도 이득',
+  recover: '만기 뒤',
   'recover-beyond': '최소 유지',
   positive: '손익분기',
 };
 
+/* viewBox 좌표. 막대 폭 36, 위쪽은 강조 글자·끝 값 두 줄, 아래쪽은 음수 값 한 줄과 x축 */
+const W = 334;
+const H = 166;
+const PAD_X = 14;
+const TOP = 34;
+const BOTTOM = 136;
+const BAR = 36;
+
 /**
- * 유지 기간별 예상 손익. 0 을 기준선으로 위/아래로 자란다.
- * 막대 높이·위치는 horizon.points 의 값에서만 나온다 — 화면에 숫자를 쓰지 않는다.
- * quiet 면 강조 막대·배지를 그리지 않는다 — 절감이 없어 손익분기 자체가 없을 때.
+ * 유지 기간별 예상 손익. 0 선 기준 발산 막대 — 음수 --down, 양수 --up.
+ * 막대 높이·위치는 horizon.points 의 값에서만 나온다. 값 라벨은 양 끝에만 — 모든 막대에 숫자를 박지 않는다.
+ * quiet 면 강조를 그리지 않는다 — 절감이 없어 손익분기 자체가 없을 때.
  */
 export function HorizonChart({ horizon, quiet = false }: { horizon: Horizon; quiet?: boolean }) {
-  const values = horizon.points.map((p) => p.value.value);
+  const pts = horizon.points;
+  const values = pts.map((p) => p.value.value);
   const posMax = Math.max(0, ...values);
   const negMax = Math.max(0, ...values.map((v) => -v));
   const span = Math.max(1, posMax + negMax);
-  /** 0 선의 위치 (위에서부터 %) */
-  const base = (posMax / span) * 100;
+  const zero = TOP + (posMax / span) * (BOTTOM - TOP);
+  const step = (W - PAD_X * 2) / pts.length;
+  const cx = (i: number) => PAD_X + step * (i + 0.5);
+  const last = pts.length - 1;
+
+  const summary = pts.map((p) => `${p.label} ${formatSignedWonShort(p.value.value)}`).join(', ');
 
   return (
-    <div className="hchart">
-      <div className="plot">
-        <div className="grid">
-          <span className="zero" style={{ top: `${base}%` }} />
-            {horizon.points.map((p) => {
-            const v = p.value.value;
-            const h = (Math.abs(v) / span) * 100;
-            const up = v >= 0;
-            const barStyle = up
-              ? { bottom: `${100 - base}%`, height: `${h}%` }
-              : { top: `${base}%`, height: `${h}%` };
-            const labelStyle = up
-              ? { bottom: `calc(${100 - base}% + ${h}% + 3px)` }
-              : { top: `calc(${base}% + ${h}% + 3px)` };
-            return (
-              <div key={p.months} className={`col${p.recommended && !quiet ? ' rec' : ''}`}>
-                <span
-                  className={`bar ${up ? 'up' : 'down'}`}
-                  style={barStyle}
-                  title={`${p.label} ${formatSignedWonShort(v)}`}
-                />
-                <span className={`val ${up ? 'up' : 'down'}`} style={labelStyle}>
-                  {p.recommended && !quiet && <b className="badge">{BADGE[horizon.reason]}</b>}
-                  {formatSignedWonShort(v)}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-      <div className="xaxis">
-        {horizon.points.map((p) => (
-          <span key={p.months} className={p.recommended && !quiet ? 'on' : undefined}>
-            {p.label}
-          </span>
-        ))}
-      </div>
-    </div>
+    <svg className="hchart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`유지 기간별 예상 손익. ${summary}`}>
+      {pts.map((p, i) => {
+        const v = p.value.value;
+        const h = Math.max(2, (Math.abs(v) / span) * (BOTTOM - TOP));
+        const up = v >= 0;
+        const y = up ? zero - h : zero;
+        const on = p.recommended && !quiet;
+        const isEnd = i === 0 || i === last;
+        const top = up ? y : zero;
+        return (
+          <g key={p.months}>
+            <rect className={up ? 'bar up' : 'bar down'} x={cx(i) - BAR / 2} y={y} width={BAR} height={h} rx={3} />
+            {isEnd && (
+              <text className={`val ${up ? 'up' : 'down'}`} x={cx(i)} y={up ? y - 5 : zero + h + 13}>
+                {formatSignedWonShort(v)}
+              </text>
+            )}
+            {on && (
+              <text className="mark" x={cx(i)} y={top - (isEnd && up ? 19 : 6)}>
+                {MARK[horizon.reason]}
+              </text>
+            )}
+            {/* 막대 폭에 맞춰 짧게. 전체 문구("3개월 유지")는 aria-label 에 있다 */}
+            <text className={`x${on ? ' on' : ''}`} x={cx(i)} y={H - 2}>
+              {p.months === 0 ? '지금' : `${p.months}개월`}
+            </text>
+          </g>
+        );
+      })}
+      <path className="zero" d={`M${PAD_X} ${zero}h${W - PAD_X * 2}`} />
+    </svg>
   );
 }

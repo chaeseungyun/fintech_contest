@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FinStay AI — 리디자인 시안</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css">
+<style>
+  :root { color-scheme: light; }
+  body {
+    margin: 0;
+    padding: 48px 24px 64px;
+    background: #e8e6e1;
+    color: #15171b;
+    font-family: 'Pretendard Variable', Pretendard, 'Apple SD Gothic Neo', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+  h1 { margin: 0; font-size: 27px; font-weight: 700; letter-spacing: -0.05em; }
+  p { margin: 0; font-size: 13.5px; line-height: 1.7; color: #494d55; }
+  ol { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; }
+  a.screen {
+    display: flex; align-items: center; gap: 14px;
+    padding: 15px 16px; min-height: 44px; box-sizing: border-box;
+    background: #ffffff; border: 1px solid #e6e4de; border-radius: 16px;
+    color: #15171b; text-decoration: none;
+  }
+  a.screen:hover { border-color: #18233c; }
+  ol li + li { margin-top: 8px; }
+  .no {
+    width: 26px; height: 26px; flex-shrink: 0; border-radius: 999px;
+    background: #18233c; color: #ffffff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600;
+  }
+  .body { display: flex; flex-direction: column; gap: 3px; flex-grow: 1; min-width: 0; }
+  .body b { font-size: 14.5px; font-weight: 600; letter-spacing: -0.03em; }
+  .body span { font-size: 11.5px; color: #6e737b; }
+  .note {
+    border: 1px solid #e6e4de; border-radius: 16px; background: #ffffff;
+    padding: 16px 18px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .note h2 { margin: 0; font-size: 14.5px; font-weight: 600; letter-spacing: -0.03em; }
+  .note p { font-size: 12.5px; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
+</style>
+</head>
+<body>
+<main>
+  <div style="display: flex; flex-direction: column; gap: 10px;">
+    <h1>FinStay AI — UI·플로우 리디자인 시안</h1>
+    <p>카드 해지 시나리오(톡톡카드) 하나를 끝까지 따라가는 7개 화면입니다. 화면 안의 버튼을 누르면 다음 화면으로 넘어갑니다. 숫자는 <code>src/fixtures/scenario.json</code>의 <code>expected</code> 값입니다.</p>
+  </div>
+
+  <ol>
+    <li><a class="screen" href="01-home.html"><span class="no">1</span><span class="body"><b>홈 (은행 홈)</b><span>tab: home · 총자산 · 퀵메뉴 · FinStay AI 배너 · 이번 달 점검</span></span></a></li>
+    <li><a class="screen" href="02-switch.html"><span class="no">2</span><span class="body"><b>바꿔 볼 항목 (바텀시트)</b><span>hub · 트리거 5개 · 금액 없음</span></span></a></li>
+    <li><a class="screen" href="03-analyzing.html"><span class="no">3</span><span class="body"><b>분석 중</b><span>analyzing · 진행률 링 · 단계 4개</span></span></a></li>
+    <li><a class="screen" href="04-verdict.html"><span class="no">4</span><span class="body"><b>비교 결과</b><span>verdict · 결론 · 순손익 · 비교 기준 · 기간별 차트</span></span></a></li>
+    <li><a class="screen" href="05-impact.html"><span class="no">5</span><span class="body"><b>결과 상세</b><span>impact · 항목별 영향 · 약관 원문 · 후보 · 체크리스트</span></span></a></li>
+    <li><a class="screen" href="06-timing.html"><span class="no">6</span><span class="body"><b>우대 확인일 · 변경 가능 구간</b><span>timeline · 시점 축 · 회복 불가</span></span></a></li>
+    <li><a class="screen" href="07-plan.html"><span class="no">7</span><span class="body"><b>실행 안내</b><span>actionplan · 5단계 · 창구 정보</span></span></a></li>
+  </ol>
+
+  <div class="note">
+    <h2>읽는 순서</h2>
+    <p><code>spec.md</code>가 의도를 적은 문서이고, 이 HTML들은 그 결과물입니다. 구현은 <code>CLAUDE.md</code>를 따릅니다 — 시안과 충돌하면 CLAUDE.md가 이깁니다.</p>
+    <p>이 파일들은 <strong>앱 코드가 읽지 않습니다.</strong> 마크업과 px 값을 눈으로 확인하는 용도이고, <code>docs/archive/design_v2.html</code>과 같은 성격입니다.</p>
+  </div>
+</main>
+</body>
+</html>

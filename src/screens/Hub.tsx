@@ -1,4 +1,4 @@
-import { AppShell } from '../components/AppShell';
+import { useEffect } from 'react';
 import { Glyph } from '../components/Glyph';
 import { derive } from '../lib/derive';
 import { formatKoYMD } from '../lib/format';
@@ -15,59 +15,77 @@ function affectedNames(products: { shortName?: string; name: string }[]): string
     const n = p.shortName ?? p.name;
     if (!seen.includes(n)) seen.push(n);
   }
-  return seen.join('·');
+  return seen.join(' · ');
 }
 
 export function Hub() {
   const { scenario, dispatch } = useStore();
+  const close = () => dispatch({ type: 'back' });
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close();
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
-    <AppShell title={scenario.brand.service} onBack={() => dispatch({ type: 'back' })}>
-      <h2 className="hero">
-        {scenario.home.bannerTitle.split('\n').map((line, i) => (
-          <span key={line}>
-            {i > 0 && <br />}
-            {line}
-          </span>
-        ))}
-      </h2>
-      <p className="herosub">{scenario.home.bannerBody}</p>
-
-      <h3 className="sectiontitle">바꿔 볼 항목을 고르세요</h3>
-
-      <div className="triggerlist">
-        {scenario.triggers.map((t) => {
-          const d = derive(scenario, t.id);
-          return (
-            <button
-              key={t.id}
-              type="button"
-              className="triggerrow"
-              onClick={() => dispatch({ type: 'push', route: { name: 'analyzing', triggerId: t.id } })}
-            >
-              <span className={`ico tint-${t.icon}`}>
-                <Glyph name={t.icon} size={22} />
-              </span>
-              <span className="body">
-                <b>{t.label}</b>
-                <span>
-                  {d.center.institution} {d.center.name} · 연결 혜택 {d.graph.edges.length}건
-                  {d.items.length > 0 && ` · ${affectedNames(d.items.map((i) => i.product))}`}
+    <div className="sheetlayer">
+      <button type="button" className="scrim" aria-label="닫기" tabIndex={-1} onClick={close} />
+      <section className="bottomsheet" role="dialog" aria-modal="true" aria-labelledby="hub-title">
+        <span className="grab" aria-hidden="true" />
+        <div className="sheethead">
+          <div>
+            <span className="eyebrow">{scenario.brand.service}</span>
+            <h1 id="hub-title">
+              {scenario.home.bannerTitle.split('\n').map((line, i) => (
+                <span key={line}>
+                  {i > 0 && <br />}
+                  {line}
                 </span>
-                {d.missing.length > 0 && <em className="need">확인 필요 · {d.missing.join('·')}</em>}
-              </span>
-              <span className="tail">
-                <Glyph name="chevron" size={18} />
-              </span>
-            </button>
-          );
-        })}
-      </div>
+              ))}
+            </h1>
+          </div>
+          <button type="button" className="navbtn" aria-label="닫기" onClick={close}>
+            <Glyph name="close" size={20} />
+          </button>
+        </div>
+        <p className="herosub">{scenario.home.bannerBody}</p>
 
-      <p className="footnote">
-        항목을 고르면 미리 찾아 둔 연결에 그 변경을 넣어 우대 변화와 손익을 계산합니다. 보유 상품 정보와
-        약관에서 추출해 둔 샘플 조건만으로 계산하며, 기준일은 {formatKoYMD(scenario.meta.today)}로 고정되어 있습니다.
-      </p>
-    </AppShell>
+        <h2 className="sectiontitle">바꿔 볼 항목을 고르세요</h2>
+
+        <div className="triggerlist">
+          {scenario.triggers.map((t) => {
+            const d = derive(scenario, t.id);
+            return (
+              <button
+                key={t.id}
+                type="button"
+                className={t.id === scenario.defaultTriggerId ? 'triggerrow lead' : 'triggerrow'}
+                onClick={() => dispatch({ type: 'push', route: { name: 'analyzing', triggerId: t.id } })}
+              >
+                <span className="ico">
+                  <Glyph name={t.icon} size={20} />
+                </span>
+                <span className="body">
+                  <b>{t.label}</b>
+                  <span>
+                    {d.center.institution} {d.center.name} · 연결 혜택 {d.graph.edges.length}건
+                  </span>
+                  {d.items.length > 0 && <span>{affectedNames(d.items.map((i) => i.product))}</span>}
+                  {d.missing.length > 0 && <em className="need">확인 필요 · {d.missing.join('·')}</em>}
+                </span>
+                <Glyph name="chevron" size={17} />
+              </button>
+            );
+          })}
+        </div>
+
+        <p className="footnote">
+          항목을 고르면 미리 찾아 둔 연결에 그 변경을 넣어 우대 변화와 손익을 계산합니다. 보유 상품 정보와
+          약관에서 추출해 둔 샘플 조건만으로 계산하며, 기준일은 {formatKoYMD(scenario.meta.today)}로 고정되어 있습니다.
+        </p>
+      </section>
+    </div>
   );
 }
