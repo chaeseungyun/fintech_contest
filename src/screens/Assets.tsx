@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { AppShell } from '../components/AppShell';
 import { Amount } from '../components/Amount';
-import { Glyph, TYPE_ICON } from '../components/Glyph';
+import { TileIcon, TYPE_ICON } from '../components/Glyph';
 import { SourceTag } from '../components/SourceTag';
 import { formatRate, formatWon } from '../lib/format';
 import { amountOf, assetGroups, totalAssets, totalDebt } from '../lib/portfolio';
@@ -53,9 +53,7 @@ export function Assets() {
           <div className="plist">
             {g.products.map((p) => (
               <div key={p.id} className="prow">
-                <span className="ico">
-                  <Glyph name={TYPE_ICON[p.type] ?? 'deposit'} size={20} />
-                </span>
+                <TileIcon name={TYPE_ICON[p.type] ?? 'deposit'} size={20} />
                 <span className="body">
                   <b>{p.name}</b>
                   <span>{subtitle(p)}</span>

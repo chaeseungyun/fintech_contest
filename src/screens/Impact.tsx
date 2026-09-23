@@ -2,7 +2,7 @@ import { AppShell } from '../components/AppShell';
 import { Amount } from '../components/Amount';
 import { BasisStrip } from '../components/BasisStrip';
 import { Clause } from '../components/Clause';
-import { Glyph, TYPE_ICON } from '../components/Glyph';
+import { Glyph, TileIcon, TYPE_ICON } from '../components/Glyph';
 import { RecommendCard } from '../components/RecommendCard';
 import { SourceTag } from '../components/SourceTag';
 import { formatKoMD, formatKoYMD, formatWon, formatWonShort, withJosa } from '../lib/format';
@@ -39,9 +39,7 @@ function ImpactRow({ item, triggerId }: { item: ImpactItem; triggerId: string })
         aria-expanded={open}
         onClick={() => dispatch({ type: 'toggleExpanded', conditionId: item.condition.id })}
       >
-        <span className="ico">
-          <Glyph name={TYPE_ICON[item.product.type] ?? 'deposit'} size={21} />
-        </span>
+        <TileIcon name={TYPE_ICON[item.product.type] ?? 'deposit'} size={21} />
         <span className="body">
           <b>{item.product.name}</b>
           <span>{j.active ? item.loss.basisLabel : j.inactiveReason}</span>
@@ -184,9 +182,7 @@ export function Impact({ triggerId }: { triggerId: string }) {
       }
     >
       <div className="card targetcard">
-        <span className="ico">
-          <Glyph name={TYPE_ICON[center.type] ?? 'card'} size={24} />
-        </span>
+        <TileIcon name={TYPE_ICON[center.type] ?? 'card'} size={24} />
         <span className="body">
           <b>
             {center.institution} {center.name}

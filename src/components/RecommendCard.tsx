@@ -1,6 +1,6 @@
 import { Amount } from './Amount';
 import { ContactSheet } from './ContactSheet';
-import { Glyph, TYPE_ICON } from './Glyph';
+import { Glyph, TileIcon, TYPE_ICON } from './Glyph';
 import { SourceTag } from './SourceTag';
 import { planBasisLabel, toContact } from '../lib/actionplan';
 import { formatWonShort } from '../lib/format';
@@ -32,9 +32,7 @@ function CandidateRow({ result, triggerId }: { result: CandidateResult; triggerI
         aria-expanded={open}
         onClick={() => dispatch({ type: 'toggleCandidate', candidateId: c.id })}
       >
-        <span className="ico">
-          <Glyph name={TYPE_ICON[c.type] ?? 'card'} size={21} />
-        </span>
+        <TileIcon name={TYPE_ICON[c.type] ?? 'card'} size={21} />
         <span className="body">
           <b>
             {c.institution} {c.name}

@@ -1,7 +1,7 @@
 import { AddonCard } from '../components/AddonCard';
 import { AppShell } from '../components/AppShell';
 import { Amount } from '../components/Amount';
-import { Glyph, TYPE_ICON } from '../components/Glyph';
+import { Glyph, TileIcon, TYPE_ICON } from '../components/Glyph';
 import { addonProposals } from '../lib/addon';
 import { formatKoMD, formatMD } from '../lib/format';
 import { benefitLabel } from '../lib/money';
@@ -46,9 +46,7 @@ export function Benefits() {
           const date = r.judgment.nextJudgmentDate.value;
           return (
             <div key={r.condition.id} className={`prow${r.judgment.active ? '' : ' off'}`}>
-              <span className="ico">
-                <Glyph name={TYPE_ICON[r.holder.type] ?? 'deposit'} size={20} />
-              </span>
+              <TileIcon name={TYPE_ICON[r.holder.type] ?? 'deposit'} size={20} />
               <span className="body">
                 <b>{r.holder.name}</b>
                 <span>

@@ -66,7 +66,8 @@
   --font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
     sans-serif;
   /* 날짜·약관 원문 전용. 본문과 구분되는 것이 목적이다. */
-  /* 한글은 mono 글꼴에 없다 — 시스템 고정폭 한글 글꼴로 새지 않게 Pretendard 로 받는다 */
+  /* 숫자·날짜 전용(IBM Plex Mono, latin 만 로드). 한글이 섞인 줄에는 쓰지 않는다 —
+     고정폭 공백이 넓어 한글 문장 사이가 벌어진다. 혹시 섞여도 한글은 Pretendard 로 받는다 */
   --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'Pretendard Variable', monospace;
 
   /* 글자 크기. 화면은 리터럴 px 를 쓰지 않는다. */
@@ -193,13 +194,19 @@ ol {
 
 /* ── 앱 셸 ───────────────────────────────────────────────── */
 
-/* 맨 위 54px 는 비워 둔다(safe area). 가짜 상태바를 그리지 않는다 — 실기기에서 두 겹이 된다 */
+/* 가짜 상태바를 그리지 않는다 — 실기기에서 두 겹이 된다. 윗여백은 기기의 safe area 만큼만,
+   데스크톱 폰 프레임에서는 상태바 자리 54px 를 비워 둔다(아래 미디어 쿼리) */
 .app {
   display: flex;
   flex-direction: column;
   height: 100%;
-  padding-top: max(54px, env(safe-area-inset-top));
+  padding-top: env(safe-area-inset-top);
   background: var(--bg);
+}
+@media (min-width: 520px) and (min-height: 640px) {
+  .app {
+    padding-top: 54px;
+  }
 }
 
 .navbar {
@@ -257,7 +264,6 @@ ol {
   padding: 3px 7px;
   border: 1px solid var(--line);
   border-radius: 999px;
-  font-family: var(--font-mono);
   font-size: var(--fs-svg-md);
   color: var(--mute);
   white-space: nowrap;
@@ -426,6 +432,14 @@ ol {
   color: var(--brand);
 }
 .tint-save { background: var(--up-bg); color: var(--up); }
+/* 종류별 아이콘 색 — 저채도라 손익 색(초록·벽돌)·출처 태그 색과 섞이지 않는다 */
+.k-account,
+.k-autopay { color: var(--brand); }
+.k-card { color: #40619e; }
+.k-loan { color: #7a6248; }
+.k-deposit,
+.k-invest { color: #2e6f86; }
+.k-insurance { color: #7a4f74; }
 .tint-ai { background: var(--brand); color: #fff; }
 
 /* 금액 — 예외 없이 tabular-nums. 자릿수가 흔들리면 안 된다 */
@@ -510,7 +524,7 @@ ol {
   display: inline-block;
   padding: 2px 6px;
   border-radius: 5px;
-  font-size: var(--fs-svg-md);
+  font-size: var(--fs-2xs);
   font-weight: 500;
   line-height: 1.4;
   white-space: nowrap;
@@ -748,7 +762,7 @@ ol {
   color: var(--ink-2);
 }
 
-/* 첫 행(기본 트리거)만 테두리 강조. 나머지는 hairline 목록 */
+/* 모든 행이 같은 무게 — 한 행만 강조하면 앱이 그걸 권하는 것처럼 읽힌다 */
 .triggerlist {
   display: flex;
   flex-direction: column;
@@ -793,27 +807,6 @@ ol {
   font-size: var(--fs-2xs);
   color: var(--src-user);
 }
-.triggerrow.lead {
-  order: -1;
-  margin-bottom: 10px;
-  padding: 15px 16px;
-  border: 1px solid var(--brand);
-  border-radius: var(--r-lg);
-  background: var(--surface-sel);
-  color: var(--brand);
-}
-.triggerrow.lead .ico {
-  width: 40px;
-  height: 40px;
-  border-radius: 13px;
-  background: var(--brand);
-  color: #fff;
-}
-.triggerrow.lead .body b {
-  font-size: var(--fs-md);
-  font-weight: 700;
-}
-
 /* ── 분석 중 ─────────────────────────────────────────────── */
 
 .analyzing {
@@ -851,7 +844,6 @@ ol {
   text-wrap: pretty;
 }
 .analyzing .samplenote {
-  font-family: var(--font-mono);
   font-size: var(--fs-svg-md);
   color: var(--mute);
 }
@@ -878,7 +870,6 @@ ol {
   fill: var(--ink);
 }
 .ring .stepno {
-  font-family: var(--font-mono);
   font-size: var(--fs-svg-md);
   fill: var(--mute);
 }
@@ -988,9 +979,19 @@ ol {
   gap: 10px;
 }
 .irow {
+  position: relative;
   border: 1px solid var(--line);
   border-radius: var(--r-lg);
-  overflow: hidden;
+}
+/* 카드 사이를 아이콘 중심에서 잇는 짧은 선 — 따로 떨어진 목록이 아니라 한 줄로 걸린 연결임을 보여준다 */
+.impactlist .irow + .irow::before {
+  content: '';
+  position: absolute;
+  left: 32px;
+  top: -11px;
+  width: 2px;
+  height: 10px;
+  background: var(--line-3);
 }
 .irow.open {
   border-color: var(--brand);
@@ -1003,7 +1004,11 @@ ol {
   min-height: 44px;
   padding: 14px 15px;
 }
+.irow .head {
+  border-radius: calc(var(--r-lg) - 1px);
+}
 .irow.open .head {
+  border-radius: calc(var(--r-lg) - 1px) calc(var(--r-lg) - 1px) 0 0;
   background: var(--surface-sel);
 }
 .irow.open .head .ico {
@@ -1093,12 +1098,10 @@ ol {
   border: 1px solid var(--track);
 }
 .clause .doc {
-  font-family: var(--font-mono);
   font-size: var(--fs-svg-md);
   color: var(--mute);
 }
 .clause p {
-  font-family: var(--font-mono);
   font-size: var(--fs-xs);
   line-height: 1.8;
   color: var(--ink);
@@ -1173,6 +1176,22 @@ ol {
 }
 .verdictcard.switch em { color: var(--brand); }
 .verdictcard.pending em { color: var(--warn); }
+/* 보류는 결론이 아니다 — 유지·변경과 한눈에 갈리도록 호박색 면과 배지 */
+.verdictcard.pending {
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+  background: var(--warn-bg);
+}
+.verdictcard .statechip {
+  align-self: flex-start;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--warn);
+  color: #fff;
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+}
 .verdictcard p {
   font-size: var(--fs-sm);
   line-height: 1.65;
@@ -1254,6 +1273,13 @@ ol {
   height: auto;
   display: block;
 }
+.hchart .col {
+  cursor: pointer;
+  outline: none;
+}
+.hchart .hit { fill: transparent; }
+.hchart .col.picked .hit,
+.hchart .col:focus-visible .hit { fill: var(--surface-2); }
 .hchart .bar.up { fill: var(--up); }
 .hchart .bar.down { fill: var(--down); }
 .hchart .zero {
@@ -1274,7 +1300,6 @@ ol {
   fill: var(--mute);
 }
 .hchart .x {
-  font-family: var(--font-mono);
   font-size: var(--fs-svg-md);
   fill: var(--mute);
 }
@@ -1368,7 +1393,6 @@ ol {
 }
 .axiscard .asof {
   padding-left: 2px;
-  font-family: var(--font-mono);
   font-size: var(--fs-svg-md);
   color: var(--mute);
 }
@@ -1513,7 +1537,6 @@ ol {
 }
 .warncard b { font-weight: 600; }
 .warncard .doc {
-  font-family: var(--font-mono);
   font-size: var(--fs-svg-md);
   color: var(--mute);
 }
@@ -2221,7 +2244,7 @@ ol {
   color: var(--sep);
 }
 .basisstrip .mono {
-  font-size: var(--fs-svg-md);
+  font-size: var(--fs-svg-lg);
 }
 
 /* 날짜·약관 원문 전용 글꼴 */

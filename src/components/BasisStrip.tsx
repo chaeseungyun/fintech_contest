@@ -15,7 +15,9 @@ export function BasisStrip({ basis }: { basis: ComparisonBasis }) {
         {basis.change} vs {basis.versus}
       </span>
       <span>{basis.period}</span>
-      <span className="mono">기준일 {formatDotYMD(basis.asOf)}</span>
+      <span>
+        기준일 <span className="mono">{formatDotYMD(basis.asOf)}</span>
+      </span>
       <span>{basis.assumption}</span>
       <EditBadge count={editCount(state)} />
     </p>

@@ -65,8 +65,8 @@ Vite + React + TypeScript 정적 웹 앱. 서버·API·LLM 호출 없음. 상태
 
 값·의도는 `docs/design/spec.md`(시안 `docs/design/*.html`), 토큰은 `src/styles.css`의 `:root` 하나.
 - 액센트는 네이비 `--brand` — 액션에만. **손익 색은 `--up`(지켜지는 혜택·절감)과 `--down`(잃는 혜택) 둘뿐**이고 금액에 다른 색을 쓰지 않는다.
-- 면이 아니라 선으로 나눈다. 카드는 그림자 없이 `1px solid var(--line)`. 금액은 전부 `tabular-nums`, 날짜·약관 원문은 `--font-mono`.
-- 가짜 상태바를 그리지 않는다 — 화면 위 54px는 safe area로 비워 둔다. 아이콘은 inline stroke SVG(`Glyph`)만.
+- 면이 아니라 선으로 나눈다. 카드는 그림자 없이 `1px solid var(--line)`. 금액은 전부 `tabular-nums`. `--font-mono`(IBM Plex Mono)는 **숫자·날짜 문자열에만** 쓴다 — 한글이 섞인 줄에 쓰면 고정폭 공백 때문에 글자 사이가 벌어진다.
+- 가짜 상태바를 그리지 않는다 — 윗여백은 기기 safe area만, 데스크톱 폰 프레임에서만 54px. 아이콘은 inline stroke SVG(`Glyph`)만.
 
 ## 계산 규칙 — 여기가 이 프로젝트의 본체다
 

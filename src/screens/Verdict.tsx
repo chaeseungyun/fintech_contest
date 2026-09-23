@@ -83,6 +83,7 @@ export function Verdict({ triggerId }: { triggerId: string }) {
       }
     >
       <section className={`verdictcard ${v.kind}`}>
+        {pending && <span className="statechip">전체 비교 보류 · 확인 필요 {d.missing.length}건</span>}
         <span className="meta">
           {d.center.institution} {d.center.name}
           {d.center.facts.last4 && ` (${d.center.facts.last4})`} · {verb}
@@ -126,7 +127,7 @@ export function Verdict({ triggerId }: { triggerId: string }) {
           </h2>
           <span className="sub">
             연 단위 · 기준일 <span className="mono">{formatDotYMD(d.today)}</span>
-            {pending && ' · 확인된 항목만'}
+            {pending && ' · 확인된 항목만'} · 막대를 누르면 그 구간 값이 보입니다
           </span>
         </div>
         {/* 절감이 없으면 손익분기가 없다 — 첫 양수 구간을 강조하지 않는다 */}

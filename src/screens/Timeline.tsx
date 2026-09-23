@@ -1,5 +1,5 @@
 import { AppShell } from '../components/AppShell';
-import { Glyph, TYPE_ICON } from '../components/Glyph';
+import { Glyph, TileIcon, TYPE_ICON } from '../components/Glyph';
 import { SourceTag } from '../components/SourceTag';
 import type { Axis, AxisPoint, Derived } from '../lib/derive';
 import { formatDotMD, formatDotYMD, formatKoMD, formatKoYMD, withJosa } from '../lib/format';
@@ -129,7 +129,9 @@ export function Timeline() {
       </div>
 
       <section className="card axiscard">
-        <span className="asof">오늘 {formatDotYMD(d.today)} 기준</span>
+        <span className="asof">
+          오늘 <span className="mono">{formatDotYMD(d.today)}</span> 기준
+        </span>
         <AxisChart axis={d.axis} d={d} />
         <p className="axisnote">
           {timing.alreadySafe ? (
@@ -150,9 +152,7 @@ export function Timeline() {
           const date = j.nextJudgmentDate.value;
           return (
             <div key={item.condition.id} className="trow">
-              <span className="ico">
-                <Glyph name={TYPE_ICON[item.product.type] ?? 'deposit'} size={18} />
-              </span>
+              <TileIcon name={TYPE_ICON[item.product.type] ?? 'deposit'} size={18} />
               <span className="body">
                 <b>{item.product.name}</b>
                 <span>

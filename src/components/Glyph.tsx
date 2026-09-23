@@ -183,3 +183,15 @@ export const TYPE_ICON: Record<string, IconKey> = {
   insurance: 'insurance',
   autopay: 'autopay',
 };
+
+/**
+ * 상품 아이콘 타일. 면은 중립, 아이콘 색만 종류별로 조금씩 달라 훑어볼 때 대출·카드·보험이 갈린다.
+ * 손익 색(--up/--down)·출처 태그 색과 겹치지 않는 저채도 색만 쓴다(styles.css 의 .k-*).
+ */
+export function TileIcon({ name, size = 20 }: { name: GlyphName; size?: number }) {
+  return (
+    <span className={`ico k-${name}`}>
+      <Glyph name={name} size={size} />
+    </span>
+  );
+}

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { formatSignedWonShort } from '../lib/format';
 import type { Horizon, HorizonReason } from '../lib/horizon';
 
@@ -24,8 +25,10 @@ const BAR = 36;
  * 유지 기간별 예상 손익. 0 선 기준 발산 막대 — 음수 --down, 양수 --up.
  * 막대 높이·위치는 horizon.points 의 값에서만 나온다. 값 라벨은 양 끝에만 — 모든 막대에 숫자를 박지 않는다.
  * quiet 면 강조를 그리지 않는다 — 절감이 없어 손익분기 자체가 없을 때.
+ * 가운데 막대 값은 눌러야 보인다(모바일엔 hover 가 없다). 고른 막대는 화면 안에서만 쓰는 표시 상태다.
  */
 export function HorizonChart({ horizon, quiet = false }: { horizon: Horizon; quiet?: boolean }) {
+  const [picked, setPicked] = useState<number | null>(null);
   const pts = horizon.points;
   const values = pts.map((p) => p.value.value);
   const posMax = Math.max(0, ...values);
@@ -39,7 +42,7 @@ export function HorizonChart({ horizon, quiet = false }: { horizon: Horizon; qui
   const summary = pts.map((p) => `${p.label} ${formatSignedWonShort(p.value.value)}`).join(', ');
 
   return (
-    <svg className="hchart" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`유지 기간별 예상 손익. ${summary}`}>
+    <svg className="hchart" viewBox={`0 0 ${W} ${H}`} aria-label={`유지 기간별 예상 손익. ${summary}`}>
       {pts.map((p, i) => {
         const v = p.value.value;
         const h = Math.max(2, (Math.abs(v) / span) * (BOTTOM - TOP));
@@ -47,22 +50,35 @@ export function HorizonChart({ horizon, quiet = false }: { horizon: Horizon; qui
         const y = up ? zero - h : zero;
         const on = p.recommended && !quiet;
         const isEnd = i === 0 || i === last;
+        const showValue = isEnd || picked === i;
         const top = up ? y : zero;
+        const pick = () => setPicked(picked === i ? null : i);
         return (
-          <g key={p.months}>
+          <g
+            key={p.months}
+            className={`col${picked === i ? ' picked' : ''}`}
+            role="button"
+            tabIndex={0}
+            aria-label={`${p.label} ${formatSignedWonShort(v)}`}
+            aria-pressed={picked === i}
+            onClick={pick}
+            onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), pick())}
+          >
+            {/* 막대가 짧아도 누르기 쉽게 기둥 전체를 받는다 */}
+            <rect className="hit" x={cx(i) - step / 2} y={0} width={step} height={H} />
             <rect className={up ? 'bar up' : 'bar down'} x={cx(i) - BAR / 2} y={y} width={BAR} height={h} rx={3} />
-            {isEnd && (
+            {showValue && (
               <text className={`val ${up ? 'up' : 'down'}`} x={cx(i)} y={up ? y - 5 : zero + h + 13}>
                 {formatSignedWonShort(v)}
               </text>
             )}
             {on && (
-              <text className="mark" x={cx(i)} y={top - (isEnd && up ? 19 : 6)}>
+              <text className="mark" x={cx(i)} y={top - (showValue && up ? 19 : 6)}>
                 {MARK[horizon.reason]}
               </text>
             )}
             {/* 막대 폭에 맞춰 짧게. 전체 문구("3개월 유지")는 aria-label 에 있다 */}
-            <text className={`x${on ? ' on' : ''}`} x={cx(i)} y={H - 2}>
+            <text className={`x${on || picked === i ? ' on' : ''}`} x={cx(i)} y={H - 2}>
               {p.months === 0 ? '지금' : `${p.months}개월`}
             </text>
           </g>

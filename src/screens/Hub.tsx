@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Glyph } from '../components/Glyph';
+import { Glyph, TileIcon } from '../components/Glyph';
 import { derive } from '../lib/derive';
 import { formatKoYMD } from '../lib/format';
 import { useStore } from '../state/store';
@@ -61,12 +61,10 @@ export function Hub() {
               <button
                 key={t.id}
                 type="button"
-                className={t.id === scenario.defaultTriggerId ? 'triggerrow lead' : 'triggerrow'}
+                className="triggerrow"
                 onClick={() => dispatch({ type: 'push', route: { name: 'analyzing', triggerId: t.id } })}
               >
-                <span className="ico">
-                  <Glyph name={t.icon} size={20} />
-                </span>
+                <TileIcon name={t.icon} size={20} />
                 <span className="body">
                   <b>{t.label}</b>
                   <span>

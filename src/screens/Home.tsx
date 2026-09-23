@@ -23,7 +23,9 @@ export function Home() {
         <div className="homehead">
           {/* 홈 상단은 은행이다. 이 기능(brand.service)은 그 안의 메뉴·배너로만 나온다 */}
           <span className="logo">{brand.bank}</span>
-          <span className="samplechip">샘플 데이터 · 기준일 {formatDotYMD(scenario.meta.today)}</span>
+          <span className="samplechip">
+            샘플 데이터 · 기준일 <span className="mono">{formatDotYMD(scenario.meta.today)}</span>
+          </span>
           <div className="homehead-actions">
             <button type="button" aria-label="전체메뉴" onClick={() => dispatch({ type: 'selectTab', tab: 'more' })}>
               <Glyph name="menu" size={22} />
