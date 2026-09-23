@@ -67,7 +67,18 @@ export function Analyzing({ triggerId }: { triggerId: string }) {
   const C = 2 * Math.PI * RING_R;
 
   return (
-    <AppShell title="분석 중" onBack={() => dispatch({ type: 'back' })} hideTabBar>
+    <AppShell
+      title="분석 중"
+      onBack={() => dispatch({ type: 'back' })}
+      hideTabBar
+      footer={
+        // 하단 고정 — 카드가 쌓여도 버튼이 밀려 내려가지 않는다
+        <button type="button" className="btn text" onClick={goResult}>
+          결과 바로 보기
+          <Glyph name="chevron" size={15} />
+        </button>
+      }
+    >
       <div className="analyzing">
         <span className="targetchip">
           <Glyph name={d.trigger.icon} size={15} />
@@ -113,9 +124,10 @@ export function Analyzing({ triggerId }: { triggerId: string }) {
         </div>
       </div>
 
+      {/* 시작한 단계만 카드로 하나씩 쌓는다. 카드는 처음부터 설명 줄 자리를 잡고 있어 완료돼도 높이가 변하지 않는다 */}
       <ol className="steps">
-        {d.steps.map((s, i) => {
-          const state = i < done ? 'done' : i === done ? 'run' : 'wait';
+        {d.steps.slice(0, done + 1).map((s, i) => {
+          const state = i < done ? 'done' : 'run';
           return (
             <li key={s.key} className={state}>
               <span className="mark" aria-hidden="true">
@@ -123,17 +135,14 @@ export function Analyzing({ triggerId }: { triggerId: string }) {
               </span>
               <span className="txt">
                 <b>{s.label}</b>
-                {state === 'done' && <span className="detail">{s.detail}</span>}
+                <span className="detail" aria-hidden={state !== 'done'}>
+                  {s.detail}
+                </span>
               </span>
             </li>
           );
         })}
       </ol>
-
-      <button type="button" className="btn text" onClick={goResult}>
-        결과 바로 보기
-        <Glyph name="chevron" size={15} />
-      </button>
     </AppShell>
   );
 }
