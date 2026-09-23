@@ -57,7 +57,9 @@ export function Analyzing({ triggerId }: { triggerId: string }) {
             cx="70"
             cy="70"
             r={RING_R}
-            strokeDasharray={`${(C * pct) / 100} ${C}`}
+            strokeDasharray={C}
+            // 속성이 아니라 style 로 준다 — CSS transition 이 걸려 링이 부드럽게 찬다
+            style={{ strokeDashoffset: C * (1 - pct / 100) }}
             transform="rotate(-90 70 70)"
           />
           <text className="pct" x="70" y="66">
