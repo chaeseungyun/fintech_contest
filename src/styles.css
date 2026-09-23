@@ -868,8 +868,6 @@ ol {
 .ring .fill {
   stroke: var(--brand);
   stroke-linecap: round;
-  /* 한 단계(STEP_MS 500ms) 안에 다 차도록 — 다음 단계 전에 멈춰 있지 않게 */
-  transition: stroke-dashoffset 0.45s cubic-bezier(0.33, 1, 0.68, 1);
 }
 .ring text { text-anchor: middle; }
 .ring .pct {

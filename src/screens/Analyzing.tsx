@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AppShell } from '../components/AppShell';
 import { Glyph } from '../components/Glyph';
 import { useStore } from '../state/store';
@@ -8,6 +8,37 @@ const STEP_MS = 500;
 const FINISH_MS = 400;
 /** 진행률 링 반지름 (viewBox 140 기준) */
 const RING_R = 56;
+/** 링과 숫자가 다음 값까지 차오르는 시간. 한 단계(STEP_MS) 안에 끝나야 멈춰 있는 틈이 없다 */
+const FILL_MS = 450;
+
+/**
+ * 목표값까지 ease-out 으로 따라가는 값. 링과 퍼센트 숫자가 같은 값을 읽어 어긋나지 않는다.
+ * 움직임 줄이기 설정이면 바로 목표값으로 간다.
+ */
+function useEased(target: number): number {
+  const [value, setValue] = useState(target);
+  const from = useRef(target);
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      from.current = target;
+      setValue(target);
+      return;
+    }
+    const start = performance.now();
+    const a = from.current;
+    let id = 0;
+    const tick = (now: number) => {
+      const k = Math.min(1, (now - start) / FILL_MS);
+      const v = a + (target - a) * (1 - (1 - k) ** 3);
+      from.current = v;
+      setValue(v);
+      if (k < 1) id = requestAnimationFrame(tick);
+    };
+    id = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(id);
+  }, [target]);
+  return value;
+}
 
 /**
  * 분석 중 화면. 단계 문구와 숫자는 derive() 가 이미 계산해 둔 결과(d.steps)를 읽는다 —
@@ -32,6 +63,7 @@ export function Analyzing({ triggerId }: { triggerId: string }) {
   }, [done, total]);
 
   const pct = Math.round((done / total) * 100);
+  const shown = useEased(pct);
   const C = 2 * Math.PI * RING_R;
 
   return (
@@ -58,12 +90,11 @@ export function Analyzing({ triggerId }: { triggerId: string }) {
             cy="70"
             r={RING_R}
             strokeDasharray={C}
-            // 속성이 아니라 style 로 준다 — CSS transition 이 걸려 링이 부드럽게 찬다
-            style={{ strokeDashoffset: C * (1 - pct / 100) }}
+            strokeDashoffset={C * (1 - shown / 100)}
             transform="rotate(-90 70 70)"
           />
           <text className="pct" x="70" y="66">
-            {pct}%
+            {Math.round(shown)}%
           </text>
           <text className="stepno" x="70" y="86">
             {Math.min(done + 1, total)} / {total} 단계
