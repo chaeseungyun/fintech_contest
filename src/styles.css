@@ -606,14 +606,37 @@ ol {
 /* 은행 안의 메뉴 배너 — 네이비 한 면. 그라데이션·반짝이 없이 색 하나로 말한다 */
 .aibanner {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  min-height: 44px;
-  padding: 15px 17px;
+  flex-direction: column;
   border-radius: var(--r-xl);
   background: linear-gradient(135deg, var(--brand) 0%, #2f5fd0 100%);
   color: #fff;
+  overflow: hidden;
 }
+.aimain {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 15px 17px 13px;
+  color: inherit;
+  text-align: left;
+}
+/* 이번 달 점검 한 줄 — 배너 안에 얹는다. 목록은 혜택 탭에 있다 */
+.aicheck {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  min-height: 40px;
+  padding: 9px 17px;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(8, 20, 60, 0.18);
+  color: #d9e3fb;
+  font-size: var(--fs-xs);
+  text-align: left;
+}
+.aicheck span { flex: 1; }
 .aibanner .txt {
   display: flex;
   flex-direction: column;
@@ -653,60 +676,6 @@ ol {
   50% { opacity: 0.25; }
 }
 
-.watchcard {
-  padding: 16px 18px 10px;
-}
-.watchcard .watchlist {
-  display: flex;
-  flex-direction: column;
-}
-.watchcard > .btn.text {
-  border-top: 1px solid var(--line-2);
-}
-.wrow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  min-height: 44px;
-  padding: 10px 0;
-  border-top: 1px solid var(--line-2);
-}
-.wrow .d {
-  flex: none;
-  width: 40px;
-  font-family: var(--font-mono);
-  font-size: var(--fs-xs);
-  color: var(--brand);
-}
-.wrow .body {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-  min-width: 0;
-}
-.wrow .body b {
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  letter-spacing: var(--ls-head);
-}
-.wrow .body span {
-  font-size: var(--fs-2xs);
-  color: var(--mute);
-}
-.wrow .tail {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  flex: none;
-  color: var(--mute);
-}
-.wrow .tail .amt {
-  font-weight: 400;
-  font-size: var(--fs-sm);
-}
-.wrow:disabled { cursor: default; }
 
 /* ── 바꿔 볼 항목 (바텀시트) ─────────────────────────────── */
 
@@ -2470,3 +2439,20 @@ ol {
 
 .splitcard .chips { flex-wrap: wrap; overflow: visible; }
 .triggerlist.featured .ico { background: #fff; }
+
+/* 홈 카드·대출 요약 — 은행 홈에 늘 있는 블록. 행을 누르면 자산 탭의 그 섹션 */
+.homesum { padding: 0; overflow: hidden; }
+.sumrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 13px 16px;
+  text-align: left;
+  color: var(--mute);
+}
+.sumrow + .sumrow { border-top: 1px solid var(--line-2); }
+.sumrow .body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.sumrow .body b { font-size: var(--fs-base); font-weight: 600; color: var(--ink); }
+.sumrow .body span { font-size: var(--fs-xs); color: var(--mute); }

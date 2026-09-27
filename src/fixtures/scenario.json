@@ -17,6 +17,7 @@
     "userName": "최연수",
     "bannerTitle": "바꾸면 어떻게 될지\n미리 볼 수 있습니다.",
     "bannerQuestion": "카드 하나 바꾸면, 대출 이자도 달라질 수 있어요",
+    "mainAccountId": "acct_nuri_salary",
     "quickMenu": [
       { "key": "account", "label": "계좌", "tab": "assets" },
       { "key": "card", "label": "카드", "tab": "assets" },

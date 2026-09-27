@@ -299,6 +299,8 @@ export interface HomeData {
   bannerTitle: string;
   /** 홈 배너 둘째 줄 — 기능 설명이 아니라 사용자의 질문. 없으면 brand.serviceTagline */
   bannerQuestion?: string;
+  /** 홈 맨 위에 크게 보여줄 대표 계좌(products[].id). 없으면 총자산을 크게 쓴다 */
+  mainAccountId?: string;
 }
 
 export interface Brand {

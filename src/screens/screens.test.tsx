@@ -51,7 +51,12 @@ describe('화면 스모크', () => {
     expect(html).toContain('FinStay AI');
     expect(html).toContain('샘플 데이터 · 기준일');
     expect(html).toContain('상시 분석 중');
-    expect(html).toContain('이번 달 점검');
+    // 은행 홈 문법: 대표 계좌 → 퀵메뉴 → 카드·대출 요약 → 배너(점검은 배너 속 한 줄)
+    expect(html).toContain('주거래 급여통장');
+    expect(html).toContain('이번 달 카드 이용');
+    expect(html).toContain('대출 <!-- -->2<!-- -->건');
+    expect(html).toContain('우대 확인 · 이번 달');
+    expect(html).not.toContain('watchcard');
     expect(html).not.toContain('SwitchPoint');
   });
 
@@ -126,7 +131,6 @@ describe('화면 스모크', () => {
     const glossary = BASE_SCENARIO.glossary!;
     for (const k of ['우대금리', '실적', '우대 확인일', '변경 가능 구간', '손익분기']) expect(glossary[k]).toBeTruthy();
     // 진입 화면에 버튼으로 붙는다
-    expect(draw(<Home />)).toContain('aria-haspopup="dialog">우대 확인일</button>');
     const tl = draw(<Timeline />, [{ type: 'push', route: { name: 'timeline', triggerId: 'card_cancel' } }]);
     expect(tl).toContain('aria-haspopup="dialog">우대 확인일</button>');
     expect(tl).toContain('aria-haspopup="dialog">변경 가능 구간</button>');
