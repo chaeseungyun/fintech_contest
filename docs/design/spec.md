@@ -140,7 +140,7 @@ CLAUDE.md가 "상시 분석 중은 홈이 말한다"고 지정한 자리다. 값
 **전체 화면에서 바텀시트로.** 홈이 뒤에 비치고 시트가 70%를 덮는다.
 
 - 홈 배너 → 허브 → 항목 선택(3탭)이 홈 → 시트 → 분석(2탭)이 된다.
-- 제목은 `home.bannerTitle`, 본문은 `home.bannerBody` 그대로.
+- 제목은 `home.bannerTitle` 그대로, 설명 문단 없이 바로 질문 목록.
 - 행에는 **금액이 없다**(CLAUDE.md). 연결 건수 · 영향 상품 · `trigger.missing`만.
   `missing`은 `--warn` 색 한 줄로 따로 뺀다.
 - 행 제목은 `trigger.question`(사용자의 질문), `label`은 보조 줄.

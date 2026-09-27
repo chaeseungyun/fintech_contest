@@ -5,7 +5,7 @@ import { Glyph } from '../components/Glyph';
 import { HorizonChart } from '../components/HorizonChart';
 import type { Derived } from '../lib/derive';
 import type { ImpactItem } from '../lib/derive';
-import { formatDotYMD, formatKoMD, formatKoYMD, formatMonths, withJosa } from '../lib/format';
+import { formatKoMD, formatKoYMD, formatMonths, withJosa } from '../lib/format';
 import { perkLabel } from '../lib/money';
 import { tag } from '../lib/types';
 import { useStore } from '../state/store';
@@ -95,8 +95,8 @@ export function Verdict({ triggerId }: { triggerId: string }) {
       <section className={`verdictcard ${v.kind}`}>
         {pending && <span className="statechip">전체 비교 보류 · 확인 필요 {d.missing.length}건</span>}
         <span className="meta">
-          {d.center.institution} {d.center.name}
-          {d.center.facts.last4 && ` (${d.center.facts.last4})`} · {verb}
+          {d.center.name}
+          {d.center.facts.last4 && ` (${d.center.facts.last4})`}
         </span>
         <h1>
           {v.lead}
@@ -104,7 +104,8 @@ export function Verdict({ triggerId }: { triggerId: string }) {
           <em>{v.highlight}</em>
           {v.tail && ` ${v.tail}`}
         </h1>
-        <p>{v.body}</p>
+        {/* 유지·변경은 헤드라인과 두 줄이 이미 말한다. 보류일 때만 무엇이 빠졌는지 적는다 */}
+        {pending && <p>{v.body}</p>}
         <div className="net">
           <span className="k">{pending ? '확인된 항목 소계' : `${verb} 시 연간 예상 손익`}</span>
           <Amount value={d.netAnnual} signed short size="hero" />
@@ -138,13 +139,12 @@ export function Verdict({ triggerId }: { triggerId: string }) {
             유지 기간별 예상 손익 · 지금 {verb} 대비
           </h2>
           <span className="sub">
-            연 단위 · 기준일 <span className="mono">{formatDotYMD(d.today)}</span>
-            {pending && ' · 확인된 항목만'} · 막대를 누르면 그 구간 값이 보입니다
+            {pending && '확인된 항목만 · '}막대를 누르면 값이 보여요
           </span>
         </div>
         {/* 절감이 없으면 손익분기가 없다 — 첫 양수 구간을 강조하지 않는다 */}
         <HorizonChart horizon={d.horizon} quiet={d.horizon.reason === 'positive' && d.savings.length === 0} />
-        <p className="chartnote">{horizonNote(d)}</p>
+        {d.horizon.reason !== 'now' && <p className="chartnote">{horizonNote(d)}</p>}
       </section>
 
       {d.split && d.split.dest === null && (
@@ -177,10 +177,7 @@ export function Verdict({ triggerId }: { triggerId: string }) {
         </button>
       )}
 
-      <p className="footnote">
-        이 결과는 보유 상품 정보와 약관에서 추출한 조건만으로 계산했습니다. 미래 금리 변동이나 상품
-        존속은 예측하지 않으며, 실제 적용은 각 금융사 약관을 따릅니다.
-      </p>
+      <p className="footnote">미래 금리 변동은 예측하지 않았어요. 실제 적용은 각 금융사 약관을 따릅니다.</p>
     </AppShell>
   );
 }

@@ -80,11 +80,10 @@ describe('유지 조건 목록 — 절차가 아니라 조건이다', () => {
 });
 
 describe('분석 진행 단계 — 연출과 구현을 구분한다', () => {
-  it('첫 단계는 "불러오기" 이고 실시간 추출이 없다고 적는다', () => {
+  it('첫 단계는 "추출해 둔" 조건을 불러오는 것 — 방금 읽는 것처럼 쓰지 않는다', () => {
     const d = derive(scenario, CARD);
     expect(d.steps[0].label).toContain('추출해 둔');
-    expect(d.steps[0].detail).toContain('실시간 추출 없음');
-    expect(d.steps[0].detail).toContain('샘플');
+    expect(d.steps.map((s) => s.label).join(' ')).not.toMatch(/실시간|AI가 읽/);
   });
 });
 

@@ -68,10 +68,6 @@ export function Assets() {
           </div>
         </section>
       ))}
-
-      <p className="footnote">
-        보유 상품 정보는 마이데이터 연동 샘플입니다.
-      </p>
     </AppShell>
   );
 }

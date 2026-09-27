@@ -31,8 +31,7 @@ export function SplitCard({ triggerId }: { triggerId: string }) {
     <section className="card splitcard">
       <h3 className="cardtitle">나눠 쓰는 방법</h3>
       <p className="note">
-        지금 {cardName} 월 {formatWonShort(split.before.value)} <SourceTag source={split.before.source} /> · 연결된 실적 조건을
-        지키려면 월 {formatWonShort(split.needed.value)}이 필요합니다.
+        지금 월 {formatWonShort(split.before.value)} · 우대를 지키려면 월 {formatWonShort(split.needed.value)}
       </p>
 
       <span className="lbl">{cardName}에 남길 금액</span>
@@ -86,9 +85,7 @@ export function SplitCard({ triggerId }: { triggerId: string }) {
           </button>
         </span>
       )}
-      <p className="note">
-        월 {formatWonShort(split.moved.value)}을 옮기고 {formatWonShort(split.kept.value)}을 남깁니다.
-      </p>
+      <p className="note">월 {formatWonShort(split.moved.value)} 옮기기</p>
 
       <span className="lbl">옮겨 갈 카드</span>
       <div className="destlist" role="radiogroup" aria-label="옮겨 갈 카드">
@@ -115,7 +112,7 @@ export function SplitCard({ triggerId }: { triggerId: string }) {
           );
         })}
       </div>
-      {split.dest === null && <p className="note warn">옮겨 갈 카드를 고르면 비교가 끝납니다.</p>}
+      {split.dest === null && <p className="note warn">옮겨 갈 카드를 골라 주세요.</p>}
 
       {adding ? (
         <CustomCardForm
@@ -139,10 +136,7 @@ export function SplitCard({ triggerId }: { triggerId: string }) {
           )}
         </div>
       )}
-      <p className="note">
-        직접 입력한 카드는 {d.center.institution} 상품의 우대 실적으로 인정되지 않는 것으로 계산합니다. 옮긴 금액은{' '}
-        {cardName}의 실적에서 빠집니다.
-      </p>
+      <p className="note">직접 입력한 카드는 {d.center.institution} 우대 실적에 들어가지 않아요.</p>
     </section>
   );
 }

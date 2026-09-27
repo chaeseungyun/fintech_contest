@@ -191,10 +191,9 @@ export function RecommendCard({ triggerId }: { triggerId: string }) {
         </div>
       </div>
 
-      <p className="note">
-        지금 실적을 새 상품으로 그대로 옮긴다고 가정한 계산입니다.
-        {r.linkCount > r.preservableCount && ' 가입 시점에 확정된 우대는 어떤 상품으로도 살리지 못합니다.'}
-      </p>
+      {r.linkCount > r.preservableCount && (
+        <p className="note">가입할 때 정해진 우대는 어떤 상품으로도 되살릴 수 없어요.</p>
+      )}
     </section>
   );
 }

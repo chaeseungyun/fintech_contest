@@ -349,7 +349,7 @@ export function derive(scenario: Scenario, triggerId?: string, options: DeriveOp
       chosen,
     }),
     maintain: buildMaintain(active),
-    steps: buildSteps({ conditions, unsupported, items, total, savingsTotal }),
+    steps: buildSteps({ conditions, items }),
     timing,
     recoverBy,
     recoverable,
@@ -683,36 +683,31 @@ function buildMaintain(active: ImpactItem[]): ChecklistItem[] {
   }));
 }
 
-function buildSteps(ctx: {
-  conditions: MappedCondition[];
-  unsupported: Condition[];
-  items: ImpactItem[];
-  total: Tagged<number>;
-  savingsTotal: Tagged<number>;
-}): AnalysisStep[] {
-  const { conditions, unsupported, items, total, savingsTotal } = ctx;
+function buildSteps(ctx: { conditions: MappedCondition[]; items: ImpactItem[] }): AnalysisStep[] {
+  const { conditions, items } = ctx;
   const dated = items.filter((i) => i.judgment.nextJudgmentDate.value !== null).length;
   const perm = items.length - dated;
   return [
     {
       key: 'extract',
-      label: '약관에서 추출해 둔 조건 불러오기',
-      detail: `샘플 문장 ${conditions.length + unsupported.length}개 중 ${conditions.length}건 매핑 · 실시간 추출 없음`,
+      // 방금 읽는 것처럼 쓰지 않는다 — "추출해 둔" 조건을 불러온다
+      label: '추출해 둔 우대 조건 불러오기',
+      detail: `조건 ${conditions.length}건`,
     },
     {
       key: 'link',
-      label: '연결된 금융상품 확인',
-      detail: `${new Set(items.map((i) => i.product.id)).size}개 상품이 이 변경에 걸려 있음`,
+      label: '함께 달라지는 상품 찾기',
+      detail: `${new Set(items.map((i) => i.product.id)).size}개 상품`,
     },
     {
       key: 'judge',
-      label: '우대 확인일·회복 가능 여부 계산',
-      detail: perm > 0 ? `확인일 ${dated}건 · 회복 불가 ${perm}건` : `확인일 ${dated}건`,
+      label: '우대 확인일 계산',
+      detail: perm > 0 ? `확인일 ${dated}건 · 되돌릴 수 없는 우대 ${perm}건` : `확인일 ${dated}건`,
     },
     {
       key: 'money',
-      label: '시점별 예상 손익 산출',
-      detail: `연 기준 손실 ${formatWonShort(total.value)} · 절감 ${formatWonShort(savingsTotal.value)}`,
+      label: '유지 기간별 손익 계산',
+      detail: '연 기준으로 비교',
     },
   ];
 }

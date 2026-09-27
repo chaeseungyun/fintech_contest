@@ -202,7 +202,7 @@ describe('연락처는 데이터에서만 온다', () => {
         if (step.contact) expect(step.contact.tel).toBeNull();
       }
       expect(plan.telMissing).toBe(true);
-      expect(plan.notes.some((n) => n.includes('대표번호'))).toBe(true);
+      expect(plan.notes.some((n) => n.includes('전화번호는 각 금융사 공식'))).toBe(true);
     }
   });
 

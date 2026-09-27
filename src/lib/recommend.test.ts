@@ -169,7 +169,6 @@ describe('문장', () => {
   it('추천이 있고 문턱이 있으면 "그래도 갈아탄다면"', () => {
     const r = derive(scenario, CARD).recommendation;
     expect(r.headline.title).toBe('그래도 갈아탄다면');
-    expect(r.headline.body).toContain('14만원');
     expect(r.headline.body).toContain('스마트카드로');
     expect(r.headline.body).toContain('연결 4/5');
     expect(r.headline.body).toContain('2.5만원');
@@ -211,11 +210,10 @@ describe('체크리스트 연동', () => {
     expect(item.text.startsWith('선택한 스마트카드를')).toBe(true);
   });
 
-  it('추천 문구는 "추천합니다" 대신 이득 표시와 직접 고름을 말한다', () => {
+  it('후보 문구는 "추천" 이라 부르지 않는다', () => {
     const r = derive(scenario, CARD).recommendation;
-    expect(r.headline.body).toContain("'이득'");
-    expect(r.headline.body).toContain('직접 고릅니다');
-    expect(r.headline.body).not.toContain('추천합니다');
+    expect(r.headline.body).toContain('이득');
+    expect(r.headline.body).not.toContain('추천');
   });
 
   it('유지되는 연결이 없으면 순서 항목이 없다', () => {

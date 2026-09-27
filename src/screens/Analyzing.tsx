@@ -82,7 +82,7 @@ export function Analyzing({ triggerId }: { triggerId: string }) {
       <div className="analyzing">
         <span className="targetchip">
           <Glyph name={d.trigger.icon} size={15} />
-          {d.center.institution} {d.center.name} · {d.trigger.label}
+          {d.center.shortName ?? d.center.name}
         </span>
 
         <svg
@@ -119,8 +119,6 @@ export function Analyzing({ triggerId }: { triggerId: string }) {
             <br />
             손익을 계산하고 있습니다
           </h1>
-          {/* 연출과 구현을 구분한다 — 약관을 방금 읽은 것처럼 보이지 않게 */}
-          <p className="samplenote">시연용 샘플 조건 · 실시간 약관 추출·AI 호출 없음</p>
         </div>
       </div>
 

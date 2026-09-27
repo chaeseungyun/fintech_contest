@@ -68,11 +68,10 @@ export function Home() {
         <p className="chartnote">
           {watch.nextDate ? (
             <>
-              가장 가까운 <Term term="우대 확인일" />은 {formatKoMD(watch.nextDate)}입니다. 은행이 이날{' '}
-              <Term term="실적" />을 채웠는지 보고, 확인이 끝나면 그 달 우대가 확정됩니다.
+              다음 <Term term="우대 확인일" /> {formatKoMD(watch.nextDate)}
             </>
           ) : (
-            '이번 달 우대 확인은 모두 끝났습니다.'
+            '이번 달 우대 확인은 모두 끝났어요.'
           )}
         </p>
 
@@ -94,7 +93,7 @@ export function Home() {
         </div>
 
         {watch.inactive.length > 0 && (
-          <p className="note warn">실적 미달로 지금 받지 못하는 우대가 {watch.inactive.length}건 있습니다.</p>
+          <p className="note warn">지금 못 받고 있는 우대 {watch.inactive.length}건</p>
         )}
 
         <button type="button" className="btn text" onClick={toBenefits}>

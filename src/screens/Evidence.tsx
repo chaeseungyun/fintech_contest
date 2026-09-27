@@ -203,12 +203,10 @@ export function Evidence({ productId }: { triggerId: string; productId: string }
       {unsupported.length > 0 && (
         <div className="card unsup">
           <h3 className="cardtitle">
-            <Glyph name="info" size={16} />이 약관에서 {unsupported.length}건을 조건으로 옮기지 못했습니다
+            <Glyph name="info" size={16} />계산에 넣지 못한 문장 {unsupported.length}건
           </h3>
           {unsupported.map((u) => (
             <div key={u.id} className="unsupitem">
-              <span className="tg">{u.unsupportedReason}</span>
-              <span className="conf">신뢰도 {Math.round(u.confidence * 100)}%</span>
               <p>{u.sourceText}</p>
             </div>
           ))}
@@ -216,7 +214,7 @@ export function Evidence({ productId }: { triggerId: string; productId: string }
       )}
 
       <p className="footnote">
-        값을 수정하면 화면 전체가 다시 계산됩니다. 수정한 값에는 &lsquo;사용자 확인&rsquo; 태그가 붙습니다.
+        값을 고치면 모든 화면이 다시 계산돼요.
       </p>
     </AppShell>
   );

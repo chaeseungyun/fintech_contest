@@ -16,7 +16,6 @@
   "home": {
     "userName": "최연수",
     "bannerTitle": "바꾸면 어떻게 될지\n미리 볼 수 있습니다.",
-    "bannerBody": "상품 하나를 바꾸면 다른 상품의 우대 혜택도 달라질 수 있습니다. 상시 분석이 찾아 둔 연결 관계에 변경을 넣어, 유지·변경의 손익을 비교합니다.",
     "bannerQuestion": "카드 하나 바꾸면, 대출 이자도 달라질 수 있어요",
     "quickMenu": [
       { "key": "account", "label": "계좌", "tab": "assets" },
@@ -256,8 +255,8 @@
     },
     {
       "id": "autopay_mgmt_fee",
-      "institution": "아파트 관리사무소",
-      "name": "아파트 관리비 (카드 납부)",
+      "institution": "관리사무소",
+      "name": "아파트 관리비",
       "shortName": "관리비",
       "type": "autopay",
       "facts": { "monthlyAmount": 162103, "paidBy": "card_nuri_tok" },

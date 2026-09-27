@@ -297,7 +297,6 @@ export interface HomeData {
   /** label 이 없으면 brand.service 를 쓴다 (`ai` 항목) */
   quickMenu: { key: IconKey; label?: string; tab?: string }[];
   bannerTitle: string;
-  bannerBody: string;
   /** 홈 배너 둘째 줄 — 기능 설명이 아니라 사용자의 질문. 없으면 brand.serviceTagline */
   bannerQuestion?: string;
 }

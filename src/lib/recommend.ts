@@ -209,7 +209,7 @@ function buildHeadline(ctx: {
       linkCount > 0 && !best.linkUnknown ? ` 연결 ${best.preserved.length}/${linkCount}이 유지돼` : '';
     return {
       title: '그래도 갈아탄다면',
-      body: `연 ${formatWonShort(hurdle)}의 손실을 넘는 후보에 '이득' 을 붙였습니다. ${withJosa(name, '으로/로')} 옮기면${links} 연 ${gain} 이득입니다. 어느 안으로 갈지는 직접 고릅니다.`,
+      body: `${withJosa(name, '으로/로')} 옮기면${links} 연 ${gain} 이득이에요.`,
     };
   }
   return {

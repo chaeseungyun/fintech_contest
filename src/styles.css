@@ -4,38 +4,59 @@
 :root {
   /* 액센트. 파랑에서 네이비로 — 파랑이 "이득"으로 읽혀 손익 색과 섞였다.
      네이비는 중립이라 액션(버튼·링크·강조 면)에만 쓴다. */
-  --brand: #18233c;
-  --brand-ink: #0b1224;
-  --brand-deep: #0f1729;
-  --brand-soft: #eef0f4;
+  /* 탁하다는 피드백(2026-09-27)으로 검정에 가깝던 네이비를 맑은 네이비로 올렸다 */
+  --brand: #1d3f9a;
+  --brand-ink: #0d2360;
+  --brand-deep: #163282;
+  --brand-soft: #edf2fd;
+  --brand-line: #d6e1fa;
 
   /* 면이 아니라 선으로 나눈다. 회색 배경을 걷어내고 카드는 1px 선으로만 구분한다. */
   --bg: #ffffff;
   --surface: #ffffff;
-  --surface-2: #f6f5f2;
-  --line: #e6e4de;
-  --line-2: #f0eee9; /* 카드 안쪽 행 구분. --line 보다 옅다 */
-  --line-3: #dddad4; /* 시트 손잡이·시점 축. --line 보다 짙다 */
-  --track: #efede8; /* 진행 링 바탕·약관 원문 테두리 */
-  --surface-sel: #f7f8fa; /* 펼치거나 고른 행의 머리 */
-  --sep: #c9c6c0; /* 비교 기준 스트립의 세로 구분 */
+  /* 누런 회색을 차가운 회색으로 — 흰 화면이 누렇게 가라앉아 보이던 원인 */
+  --surface-2: #f4f6f9;
+  --line: #e4e7ec;
+  --line-2: #eef0f4; /* 카드 안쪽 행 구분. --line 보다 옅다 */
+  --line-3: #d7dbe2; /* 시트 손잡이·시점 축. --line 보다 짙다 */
+  --track: #eceff4; /* 진행 링 바탕·약관 원문 테두리 */
+  --surface-sel: #f5f8fe; /* 펼치거나 고른 행의 머리 */
+  --sep: #c6cbd4; /* 비교 기준 스트립의 세로 구분 */
 
   --ink: #15171b;
   --ink-2: #494d55;
   --mute: #6e737b; /* #98a2b3 은 흰 배경에서 3.1:1 이라 AA 미달이었다 */
 
   /* 손익 색은 단 두 개다. 이 둘 말고 금액에 색을 쓰지 않는다. */
-  --up: #0b6b52; /* 지켜지는 혜택 · 절감 */
-  --down: #a33328; /* 잃는 혜택 */
-  --save: #0b6b52; /* = --up */
-  --up-bg: #e7f1ed;
-  --down-bg: #f7ebe9;
+  --up: #0a7f55; /* 지켜지는 혜택 · 절감 */
+  --down: #c8372d; /* 잃는 혜택 */
+  --save: #0a7f55; /* = --up */
+  --up-bg: #e5f5ed;
+  --down-bg: #fdecea;
 
-  --warn: #8a6420;
-  --warn-bg: #f6f0e3;
-  --danger: #a33328;
-  --danger-bg: #fcf7f6;
-  --danger-line: #f0dfdc;
+  --warn: #a4670b;
+  --warn-bg: #fdf4e3;
+  --danger: #c8372d;
+  --danger-bg: #fef6f5;
+  --danger-line: #f6d9d5;
+
+  /* 상품 종류 색 — 아이콘 타일에만. 금액에는 쓰지 않는다(금액 색은 --up/--down 뿐) */
+  --k-account: #2563eb;
+  --k-account-bg: #e8f0fe;
+  --k-card: #7048e8;
+  --k-card-bg: #f0ebfe;
+  --k-loan: #0d8f80;
+  --k-loan-bg: #e2f5f2;
+  --k-deposit: #d97706;
+  --k-deposit-bg: #fef3e2;
+  --k-invest: #0891b2;
+  --k-invest-bg: #e0f4f9;
+  --k-insurance: #db2777;
+  --k-insurance-bg: #fde8f1;
+  --k-autopay: #ea580c;
+  --k-autopay-bg: #ffeee3;
+  --k-benefit: #ca8a04;
+  --k-benefit-bg: #fdf6d8;
 
   /* 약관 원문에서 추출 구간(condition.spans)에 깔린다 */
   --highlight: #f7efd8;
@@ -111,7 +132,7 @@ body,
 
 body {
   margin: 0;
-  background: #e8e6e1;
+  background: #e9edf3;
   color: var(--ink);
   font-family: var(--font-sans);
   font-size: var(--fs-lg);
@@ -326,6 +347,7 @@ ol {
   color: var(--brand);
   font-weight: 700;
 }
+.tabbar button.on svg { stroke-width: 2; }
 
 /* ── 공통 요소 ────────────────────────────────────────────── */
 
@@ -419,7 +441,7 @@ ol {
   color: var(--mute);
 }
 
-/* 아이콘 타일 — 중립 면 하나. 색은 손익(--up/--down)과 액션(--brand)에만 쓴다 */
+/* 아이콘 타일 — 상품 종류마다 옅은 면 + 진한 아이콘. 훑어볼 때 대출·카드·보험이 색으로 갈린다 */
 .ico {
   display: inline-flex;
   align-items: center;
@@ -432,14 +454,16 @@ ol {
   color: var(--brand);
 }
 .tint-save { background: var(--up-bg); color: var(--up); }
-/* 종류별 아이콘 색 — 저채도라 손익 색(초록·벽돌)·출처 태그 색과 섞이지 않는다 */
-.k-account,
-.k-autopay { color: var(--brand); }
-.k-card { color: #40619e; }
-.k-loan { color: #7a6248; }
-.k-deposit,
-.k-invest { color: #2e6f86; }
-.k-insurance { color: #7a4f74; }
+/* 종류별 타일 색 — 금액 색(--up/--down)과 겹치지 않는 색상만 */
+.k-account { background: var(--k-account-bg); color: var(--k-account); }
+.k-card { background: var(--k-card-bg); color: var(--k-card); }
+.k-loan { background: var(--k-loan-bg); color: var(--k-loan); }
+.k-deposit { background: var(--k-deposit-bg); color: var(--k-deposit); }
+.k-invest { background: var(--k-invest-bg); color: var(--k-invest); }
+.k-insurance { background: var(--k-insurance-bg); color: var(--k-insurance); }
+.k-autopay { background: var(--k-autopay-bg); color: var(--k-autopay); }
+.k-benefit { background: var(--k-benefit-bg); color: var(--k-benefit); }
+.k-grid { background: var(--surface-2); color: var(--ink-2); }
 .tint-ai { background: var(--brand); color: #fff; }
 
 /* 금액 — 예외 없이 tabular-nums. 자릿수가 흔들리면 안 된다 */
@@ -544,6 +568,8 @@ ol {
   gap: 12px;
   padding: 16px 18px;
   color: var(--mute);
+  background: var(--brand-soft);
+  border-color: var(--brand-line);
 }
 .assetcard .body {
   display: flex;
@@ -565,11 +591,11 @@ ol {
   padding: 10px 0;
 }
 .quick .ico {
-  width: auto;
-  height: auto;
-  background: none;
-  color: var(--brand);
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
 }
+.quick.ai .ico { background: var(--brand); color: #fff; }
 .qlabel {
   font-size: var(--fs-2xs);
   color: var(--ink-2);
@@ -585,7 +611,7 @@ ol {
   min-height: 44px;
   padding: 15px 17px;
   border-radius: var(--r-xl);
-  background: var(--brand);
+  background: linear-gradient(135deg, var(--brand) 0%, #2f5fd0 100%);
   color: #fff;
 }
 .aibanner .txt {
@@ -603,7 +629,7 @@ ol {
 .aibanner span {
   font-size: var(--fs-xs);
   line-height: 1.5;
-  color: #c3cad8;
+  color: #d9e3fb;
 }
 .aibanner .live {
   display: inline-flex;
@@ -756,13 +782,8 @@ ol {
   flex: none;
   color: var(--mute);
 }
-.herosub {
-  font-size: var(--fs-xs);
-  line-height: 1.65;
-  color: var(--ink-2);
-}
 
-/* 모든 행이 같은 무게 — 한 행만 강조하면 앱이 그걸 권하는 것처럼 읽힌다. 예외는 featured(실제 규정 사례) 묶음뿐 */
+/* 모든 행이 같은 무게 — 한 행만 강조하면 앱이 그걸 권하는 것처럼 읽힌다. 예외는 featured(대표 사례) 묶음뿐 */
 .triggerlist {
   display: flex;
   flex-direction: column;
@@ -807,11 +828,12 @@ ol {
   font-size: var(--fs-2xs);
   color: var(--src-user);
 }
-/* 실제 규정 사례(trigger.featured) — 권하는 행이 아니라 입구라 테두리 한 줄과 칩으로만 구분한다 */
+/* 대표 사례(trigger.featured) — 옅은 브랜드 면으로 먼저 보이게. 배지는 달지 않는다 */
 .triggerlist.featured .triggerrow {
   padding: 15px 14px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--brand-line);
   border-radius: var(--r-xl);
+  background: var(--brand-soft);
 }
 .triggerlist.featured .triggerrow + .triggerrow {
   margin-top: 8px;
@@ -1210,6 +1232,14 @@ ol {
   color: var(--up);
 }
 .verdictcard.switch em { color: var(--brand); }
+/* 유지·변경 결론도 옅은 면 하나 — 흰 화면에서 결론이 먼저 보이게 */
+.verdictcard.switch,
+.verdictcard.keep {
+  padding: 16px;
+  border: 1px solid var(--brand-line);
+  border-radius: var(--r-xl);
+  background: var(--brand-soft);
+}
 .verdictcard.pending em { color: var(--warn); }
 /* 보류는 결론이 아니다 — 유지·변경과 한눈에 갈리도록 호박색 면과 배지 */
 .verdictcard.pending {
@@ -2439,3 +2469,4 @@ ol {
 .why .k { min-width: 0; }
 
 .splitcard .chips { flex-wrap: wrap; overflow: visible; }
+.triggerlist.featured .ico { background: #fff; }

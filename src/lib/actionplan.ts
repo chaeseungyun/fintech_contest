@@ -111,15 +111,13 @@ export function buildActionPlan(input: ActionPlanInput): ActionPlan {
   const name = shortOf(input.center);
   const verb = input.trigger.verb;
 
-  const notes = [
-    '이 안내는 약관에서 추출한 조건과 보유 상품 정보로 만든 순서입니다. 실제 처리 기준과 소요 기간은 각 금융사 약관을 따릅니다.',
-  ];
+  const notes: string[] = [];
   if (input.trigger.caveat) notes.push(input.trigger.caveat);
 
   const telMissing = steps.some((s) => s.contact !== null && s.contact.tel === null);
   if (telMissing) {
     notes.push(
-      '대표번호는 데모 데이터에 넣지 않았습니다. 각 금융사 공식 앱·홈페이지에 안내된 번호를 확인하세요.',
+      '전화번호는 각 금융사 공식 앱·홈페이지에서 확인하세요.',
     );
   }
 
@@ -144,9 +142,9 @@ function summaryOf(input: ActionPlanInput): string {
     case 'switch': {
       const preserved = input.chosen?.preserved.length ?? 0;
       if (preserved > 0) {
-        return `순서를 지키면 연결 ${preserved}건을 살린 채 ${verb}할 수 있습니다. 위에서부터 차례로 진행하세요.`;
+        return `이 순서대로 하면 연결 ${preserved}건을 살린 채 ${verb}할 수 있어요.`;
       }
-      return `${verb} 전에 확인할 것과 신청 절차입니다. 위에서부터 차례로 진행하세요.`;
+      return `${verb} 전에 확인할 것과 신청 순서예요.`;
     }
   }
 }
@@ -257,7 +255,7 @@ function switchSteps(input: ActionPlanInput): ActionStep[] {
   steps.push({
     key: 'execute',
     title: `${withJosa(name, '을/를')} ${trigger.verb} 신청합니다`,
-    detail: `${center.institution}에 직접 신청해야 합니다. 이 앱은 신청을 대신 처리하지 않습니다.`,
+    detail: `${center.institution}에 직접 신청해요. 이 앱에서 신청되지는 않아요.`,
     bullets: [],
     whenLabel: timing.alreadySafe ? '지금 가능' : `${formatKoMD(timing.safeFrom.value)} 이후 · 우대 확인 완료 후`,
     when: timing.alreadySafe ? null : timing.safeFrom,

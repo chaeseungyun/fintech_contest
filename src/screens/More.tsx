@@ -16,7 +16,7 @@ export function More() {
       <QuickMenu exclude={['more']} />
 
       <section className="card">
-        <h3 className="cardtitle">화면에 붙는 출처 태그</h3>
+        <h3 className="cardtitle">숫자 옆 표시</h3>
         <ul className="legendlist">
           {SOURCES.map((s) => (
             <li key={s}>
@@ -25,7 +25,7 @@ export function More() {
           ))}
         </ul>
         <p className="note">
-          모든 수치는 값과 출처를 같은 객체로 들고 다닙니다. 태그가 없는 값은 이 앱의 계산 결과입니다.
+          표시가 없는 숫자는 앱이 계산한 값이에요.
         </p>
       </section>
 
@@ -33,21 +33,9 @@ export function More() {
         <h3 className="cardtitle">데모 정보</h3>
         <div className="fields">
           <div className="f">
-            <span className="k">시나리오</span>
-            <span className="v">
-              <span className="val">{scenario.meta.scenarioId}</span>
-            </span>
-          </div>
-          <div className="f">
             <span className="k">기준일</span>
             <span className="v">
               <span className="val">{scenario.meta.today}</span>
-            </span>
-          </div>
-          <div className="f">
-            <span className="k">타임존</span>
-            <span className="v">
-              <span className="val">{scenario.meta.timezone}</span>
             </span>
           </div>
           <div className="f">
@@ -57,7 +45,6 @@ export function More() {
             </span>
           </div>
         </div>
-        <p className="note">{scenario.meta.note}</p>
         <button type="button" className="btn danger-text" onClick={() => dispatch({ type: 'reset' })}>
           데모 초기화
         </button>

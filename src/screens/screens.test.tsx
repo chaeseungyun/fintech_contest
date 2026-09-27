@@ -69,26 +69,25 @@ describe('화면 스모크', () => {
     const html = draw(<Hub />);
     // "상시 분석 중" 은 홈이 말한다 — 허브는 되풀이하지 않고 입력으로만 언급한다
     expect(html).toContain('미리 볼 수 있습니다');
-    expect(html).toContain('상시 분석이 찾아 둔');
     expect(html).not.toContain('상시 분석 중');
     expect(html).not.toContain('계속 보고 있습니다');
     expect(html).toContain('다른 경우도 미리 보기');
     expect((html.match(/triggerrow/g) ?? []).length).toBe(BASE_SCENARIO.triggers.length);
     // 내부 용어 대신 쉬운 말 — 영향받는 상품 수는 holder 를 센 값
     expect(html).not.toContain('연결 혜택');
-    expect(html.split('<!-- -->').join('')).toContain('영향받는 상품 4개'); // card_cancel: 주담대·신용대출·정기예금·건강보험
+    expect(html.split('<!-- -->').join('')).toContain('영향받는 상품 · 주담대 · 신용대출 · 정기예금 · 건강보험'); // card_cancel
     // 사전 계산된 순손익(−16.4만원 등)을 허브에 적지 않는다
     expect(html).not.toContain('class="amt');
     expect(html).toContain('확인 필요');
   });
 
-  it('허브 — 행 제목은 사용자의 질문, 기능 이름은 보조 줄', () => {
+  it('허브 — 행 제목은 사용자의 질문, 보조 줄은 영향받는 상품 이름만', () => {
     const html = draw(<Hub />);
     for (const t of BASE_SCENARIO.triggers) {
       expect(t.question).toBeTruthy();
       expect(html).toContain(`<b>${t.question}</b>`);
-      expect(html.split('<!-- -->').join('')).toContain(`${t.label} · 영향받는 상품`);
     }
+    expect((html.match(/영향받는 상품 · /g) ?? []).length).toBe(BASE_SCENARIO.triggers.length);
     // 관리비 사례가 featured 라 섹션 제목이 있다. 배지는 두지 않는다
     expect(html).toContain('다른 경우도 미리 보기');
     expect(html).not.toContain('class="badge"');
@@ -127,7 +126,6 @@ describe('화면 스모크', () => {
     const glossary = BASE_SCENARIO.glossary!;
     for (const k of ['우대금리', '실적', '우대 확인일', '변경 가능 구간', '손익분기']) expect(glossary[k]).toBeTruthy();
     // 진입 화면에 버튼으로 붙는다
-    expect(draw(<Hub />)).toContain('aria-haspopup="dialog">우대금리</button>');
     expect(draw(<Home />)).toContain('aria-haspopup="dialog">우대 확인일</button>');
     const tl = draw(<Timeline />, [{ type: 'push', route: { name: 'timeline', triggerId: 'card_cancel' } }]);
     expect(tl).toContain('aria-haspopup="dialog">우대 확인일</button>');
@@ -143,12 +141,12 @@ describe('화면 스모크', () => {
     expect(draw(<TermSheet />, [{ type: 'openTerm', term: '우대금리' }, { type: 'closeTerm' }])).toBe('');
   });
 
-  it('분석 중 — 샘플 조건으로 계산한다고 적는다', () => {
+  it('분석 중 — 추출해 둔 조건을 불러온다고 적는다(실시간 추출처럼 쓰지 않는다)', () => {
     const html = draw(<Analyzing triggerId="card_cancel" />, [
       { type: 'push', route: { name: 'analyzing', triggerId: 'card_cancel' } },
     ]);
-    expect(html).toContain('실시간 약관 추출·AI 호출 없음');
-    expect(html).toContain('추출해 둔 조건');
+    expect(html).toContain('추출해 둔 우대 조건');
+    expect(html).not.toContain('실시간으로');
   });
 
   for (const triggerId of TRIGGERS) {
@@ -188,7 +186,7 @@ describe('화면 스모크', () => {
     const impact = draw(<Impact triggerId="loan_change" />, open);
     const verdict = draw(<Verdict triggerId="loan_change" />, open);
     expect(impact).toContain('확인된 항목의 변화 소계');
-    expect(impact).toContain('전체 비교 보류');
+    expect(impact).toContain('결론은 보류예요');
     expect(impact).not.toContain('연간 예상 손익');
     expect(verdict).toContain('verdictcard pending');
     expect(verdict).toContain('전체 손익을 비교할 수 없습니다');
@@ -240,7 +238,8 @@ describe('화면 스모크', () => {
     expect(at('loan_change')).not.toContain('>손익분기<');
     expect(at('loan_change')).not.toContain('col rec');
     expect(at('loan_change')).not.toContain('이익으로 돌아섭니다');
-    expect(at('insurance_cancel')).toContain('지금 해지해도 연 기준으로 손해가 아닙니다');
+    // 지금 바꿔도 이득이면 헤드라인과 두 줄이 이미 말한다 — 차트 아래 문장을 되풀이하지 않는다
+    expect(at('insurance_cancel')).not.toContain('지금 해지해도 연 기준으로 손해가 아닙니다');
     expect(at('card_cancel')).not.toContain('한 바퀴');
   });
 

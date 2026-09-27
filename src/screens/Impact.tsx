@@ -160,28 +160,12 @@ function ImpactRow({ item, triggerId }: { item: ImpactItem; triggerId: string })
             근거 원문 · 값 수정
             <Glyph name="chevron" size={14} />
           </button>
-          {!j.active && <p className="note">지금도 받지 못하는 혜택이라 손실 0원으로 두었습니다.</p>}
+          {!j.active && <p className="note">지금도 못 받는 혜택이라 0원이에요.</p>}
           {d.capAdjustments.some((c) => c.productId === item.product.id) && (
-            <p className="note">
-              이 대출은 우대금리 합계에 상한이 있어, 위 금액은 명목 기준입니다. 실제로 바뀌는 몫은 아래 "우대 상한
-              조정" 줄에 반영했습니다.
-            </p>
+            <p className="note">우대금리 상한이 있어 실제 변화는 아래 “우대 상한 조정”에 반영했어요.</p>
           )}
           {j.metricStatus === 'assumed' && (
-            <p className="note warn">
-              실적 값이 없어 충족으로 가정했습니다. 근거 화면에서 기준을 바꾸거나 해당 없음으로 뺄 수 있습니다.
-            </p>
-          )}
-          {j.recoverable && !j.countsForSafeAfter && j.active && (
-            <p className="note">
-              우대 확인일이 다음 달({formatKoMD(j.nextJudgmentDate.value!)})이라 이번 달 변경 가능 구간 계산에서
-              뺐습니다.
-            </p>
-          )}
-          {d.unsupported.some((u) => u.sourceDoc === item.condition.sourceDoc) && (
-            <p className="note warn">
-              이 약관에서 옮기지 못한 문장이 있습니다 · 근거 화면에서 확인하세요.
-            </p>
+            <p className="note warn">실적 정보가 없어 채운 것으로 계산했어요.</p>
           )}
         </div>
       )}
@@ -274,8 +258,8 @@ export function Impact({ triggerId }: { triggerId: string }) {
         {d.savings.length === 0 && (
           <p className="empty small">
             {d.missing.length > 0
-              ? `${withJosa(d.missing.join('·'), '이/가')} 확인되지 않아 ${d.trigger.verb} 후 얻는 쪽은 계산에서 비워 두었습니다.`
-              : `${d.trigger.verb}로 줄어드는 비용이 보유 상품 정보에 없습니다.`}
+              ? `${withJosa(d.missing.join('·'), '을/를')} 알면 얻는 쪽을 계산할 수 있어요.`
+              : '줄어드는 비용이 없어요.'}
           </p>
         )}
       </div>
@@ -315,7 +299,7 @@ export function Impact({ triggerId }: { triggerId: string }) {
           <Amount value={d.netAnnual} signed short size="lg" />
         </div>
         {pending && (
-          <p className="note warn">전체 비교 보류 — {d.missing.join('·')} 확인 필요. 이 소계만으로 유불리를 결론짓지 않습니다.</p>
+          <p className="note warn">{withJosa(d.missing.join('·'), '을/를')} 확인하기 전이라 결론은 보류예요.</p>
         )}
       </div>
 
@@ -338,10 +322,7 @@ export function Impact({ triggerId }: { triggerId: string }) {
             <span className="basis">
               {d.earlyTermination.basisLabel} <SourceTag source={d.earlyTermination.loss.source} />
             </span>
-            <p className="note">
-              해지할 때 한 번 확정되는 금액이라 위 연 단위 합계에 더하지 않았습니다. 상품마다 만기가
-              달라 같은 축에 올릴 수 없습니다.
-            </p>
+            <p className="note">해지할 때 한 번 나가는 돈이라 위 1년 합계에는 넣지 않았어요.</p>
           </div>
         </>
       )}
@@ -370,7 +351,6 @@ export function Impact({ triggerId }: { triggerId: string }) {
               </li>
             ))}
           </ul>
-          <p className="note">유지에는 절차가 없습니다. 위 실적만 우대 확인일까지 유지되면 우대가 이어집니다.</p>
         </section>
       )}
 
@@ -390,11 +370,7 @@ export function Impact({ triggerId }: { triggerId: string }) {
         </ul>
       </section>
 
-      <p className="footnote">
-        모든 금액은 연 단위입니다. 상품마다 만기가 달라 총액으로는 더할 수 없습니다.
-        {d.items.some((i) => i.product.type === 'loan' && i.judgment.active) &&
-          ' 대출은 첫해 기준이며 잔액이 줄면 차액도 줄어듭니다.'}
-      </p>
+      <p className="footnote">모든 금액은 1년 기준이에요.</p>
     </AppShell>
   );
 }

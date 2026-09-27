@@ -26,7 +26,7 @@ export function Benefits() {
         </span>
         <Amount value={watch.activeTotal} short size="hero" prefix="연" />
         <span className="sub">
-          약관에서 추출한 조건 {watch.linkCount}건 · 상품 {watch.productCount}개
+          상품 {watch.productCount}개 · 조건 {watch.linkCount}건
         </span>
       </div>
 
@@ -36,8 +36,8 @@ export function Benefits() {
         </span>
         <span className="tx">
           {watch.nextDate
-            ? `가장 이른 우대 확인일은 ${formatKoMD(watch.nextDate)}입니다. 이번 달에 ${watch.dueSoon.length}건이 남았습니다.`
-            : '이번 달 우대 확인은 모두 끝나 이번 달 우대가 확정됐습니다. 지금 바꿔도 이번 달 혜택은 잃지 않습니다.'}
+            ? `다음 우대 확인일 ${formatKoMD(watch.nextDate)} · 이번 달 ${watch.dueSoon.length}건 남음`
+            : '이번 달 우대가 모두 확정됐어요.'}
         </span>
       </div>
 
@@ -92,11 +92,6 @@ export function Benefits() {
       >
         유지·변경 손익 분석하기
       </button>
-
-      <p className="footnote">
-        혜택 하나가 다른 상품의 유지 조건에 걸려 있습니다. 그 상품을 바꾸면 이 혜택도 함께 움직입니다.
-        우대 확인일은 은행이 실적을 채웠는지 보고 그 달 우대를 줄지 정하는 날입니다. 이 날이 지나면 그 달 우대는 확정되어, 그 뒤에 바꿔도 그 달 혜택은 잃지 않습니다.
-      </p>
     </AppShell>
   );
 }

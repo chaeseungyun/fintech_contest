@@ -125,8 +125,7 @@ export function Connections({ triggerId }: { triggerId: string }) {
         </svg>
 
         <p className="legend">
-          조건 {graph.edges.length}건은 모두 약관 문장에서 추출했습니다
-          {graph.edges.length > 0 && <span className="hint"> · 선을 누르면 원문이 보입니다</span>}
+          {graph.edges.length > 0 && '선을 누르면 약관 원문이 보여요'}
         </p>
       </div>
 

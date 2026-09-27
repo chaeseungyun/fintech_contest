@@ -117,8 +117,8 @@ export function AddonCard({ proposal, title }: { proposal: AddonProposal; title?
       </h3>
       <p className="chartnote">
         {best
-          ? `보유 상품은 그대로 두고 더했을 때의 연 순이득입니다. 유지 비용을 빼고 이득이 남는 후보만 제안합니다.`
-          : '지금 더해서 이득이 남는 후보가 없습니다.'}
+          ? '지금 상품은 그대로 두고 더했을 때, 비용을 빼고 남는 연 이득이에요.'
+          : '지금 더해서 이득이 남는 상품이 없어요.'}
       </p>
 
       <div className="candlist">
@@ -127,11 +127,6 @@ export function AddonCard({ proposal, title }: { proposal: AddonProposal; title?
         ))}
       </div>
 
-      {proposal.inactiveCount > 0 && (
-        <p className="note">
-          실적 미달로 꺼져 있는 조건 {proposal.inactiveCount}건을 후보가 대신 채울 수 있는지까지 함께 계산했습니다.
-        </p>
-      )}
     </section>
   );
 }

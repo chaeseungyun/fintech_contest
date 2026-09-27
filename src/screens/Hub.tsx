@@ -1,8 +1,6 @@
 import { useEffect } from 'react';
 import { Glyph, TileIcon } from '../components/Glyph';
-import { Term } from '../components/Term';
 import { derive } from '../lib/derive';
-import { formatKoYMD } from '../lib/format';
 import type { Trigger } from '../lib/types';
 import { useStore } from '../state/store';
 
@@ -32,13 +30,12 @@ export function Hub() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 실제 규정 사례는 맨 위에 따로 — 권하는 항목이 아니라 "이런 일이 실제로 있다"는 입구다
+  // 대표 사례(관리비)는 맨 위에 따로
   const featured = scenario.triggers.filter((t) => t.featured);
   const rest = scenario.triggers.filter((t) => !t.featured);
 
   const row = (t: Trigger) => {
     const d = derive(scenario, t.id);
-    const affected = new Set(d.graph.edges.map((e) => e.holderId)).size;
     return (
       <button
         key={t.id}
@@ -48,12 +45,11 @@ export function Hub() {
       >
         <TileIcon name={t.icon} size={20} />
         <span className="body">
-          {/* 제목은 사용자가 스스로 할 질문. 기능 이름(label)은 보조 줄로 내린다 */}
+          {/* 제목은 사용자가 스스로 할 질문. 보조 줄은 함께 달라지는 상품 이름만 — 금액은 적지 않는다 */}
           <b>{t.question ?? t.label}</b>
-          <span>
-            {t.question ? t.label : `${d.center.institution} ${d.center.name}`} · 영향받는 상품 {affected}개
-          </span>
-          {d.graph.satellites.length > 0 && <span>{affectedNames(d.graph.satellites.map((s) => s.product))}</span>}
+          {d.graph.satellites.length > 0 && (
+            <span>영향받는 상품 · {affectedNames(d.graph.satellites.map((s) => s.product))}</span>
+          )}
           {d.missing.length > 0 && <em className="need">확인 필요 · {d.missing.join('·')}</em>}
         </span>
         <Glyph name="chevron" size={17} />
@@ -82,19 +78,11 @@ export function Hub() {
             <Glyph name="close" size={20} />
           </button>
         </div>
-        <p className="herosub">{scenario.home.bannerBody}</p>
-
         {featured.length > 0 && <div className="triggerlist featured">{featured.map(row)}</div>}
 
         <h2 className="sectiontitle">{featured.length > 0 ? '다른 경우도 미리 보기' : '바꿔 볼 항목을 고르세요'}</h2>
 
         <div className="triggerlist">{rest.map(row)}</div>
-
-        <p className="footnote">
-          항목을 고르면 미리 찾아 둔 연결에 그 변경을 넣어 <Term term="우대금리" />와 혜택이 어떻게 달라지는지,
-          손익이 얼마인지 계산합니다. 보유 상품 정보와
-          약관에서 추출해 둔 샘플 조건만으로 계산하며, 기준일은 {formatKoYMD(scenario.meta.today)}로 고정되어 있습니다.
-        </p>
       </section>
     </div>
   );

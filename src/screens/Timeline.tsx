@@ -124,9 +124,8 @@ export function Timeline() {
           )}
         </h1>
         <p>
-          <Term term="우대 확인일" />은 은행이 <Term term="실적" />을 채웠는지 보고 그 달 우대를 줄지 정하는
-          날입니다. 이 날이 지나면 그 달 우대는 확정되어, 그 뒤에 바꿔도 그 달 혜택은 잃지 않습니다. 이번 달
-          확인이 모두 끝난 뒤가 <Term term="변경 가능 구간" />입니다.
+          마지막 <Term term="우대 확인일" />이 지나면 <Term term="변경 가능 구간" />이에요. 그 뒤에 바꿔도 이번 달
+          혜택은 잃지 않아요.
         </p>
       </div>
 
@@ -199,19 +198,9 @@ export function Timeline() {
       {d.inactive.map((item) => (
         <div key={item.condition.id} className="card offcard">
           <h3 className="cardtitle">{item.product.name} · 이미 미적용</h3>
-          <p>{item.judgment.inactiveReason}. 지금도 받지 못하는 혜택이라 시점 계산에서 뺐습니다.</p>
+          <p>{item.judgment.inactiveReason}</p>
         </div>
       ))}
-
-      {d.deferredNextMonth.length > 0 && (
-        <p className="footnote">
-          {d.deferredNextMonth
-            .map((i) => `${i.product.shortName ?? i.product.name} ${formatKoMD(i.judgment.nextJudgmentDate.value!)}`)
-            .join(', ')}
-          은 다음 달에 확인하는 조건이라 이번 달 변경 가능 구간 계산에서 뺐습니다. 옮긴 뒤 실적을 다시 채우면
-          유지됩니다.
-        </p>
-      )}
     </AppShell>
   );
 }
