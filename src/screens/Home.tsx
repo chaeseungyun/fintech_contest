@@ -2,6 +2,7 @@ import { AppShell } from '../components/AppShell';
 import { Amount } from '../components/Amount';
 import { Glyph } from '../components/Glyph';
 import { QuickMenu } from '../components/QuickMenu';
+import { Term } from '../components/Term';
 import { formatDotMD, formatDotYMD, formatKoMD, formatWonShort } from '../lib/format';
 import { totalAssets, totalDebt } from '../lib/portfolio';
 import { watchSummary } from '../lib/watch';
@@ -49,10 +50,11 @@ export function Home() {
       <button type="button" className="aibanner" onClick={openAi}>
         <div className="txt">
           <b>{brand.service}</b>
-          <span>{brand.serviceTagline}</span>
+          {/* 기능 설명이 아니라 사용자가 품을 질문으로 연다 */}
+          <span>{home.bannerQuestion ?? brand.serviceTagline}</span>
           <em className="live">
             <i className="dot" aria-hidden="true" />
-            상품 {watch.productCount}개 · 우대 조건 {watch.linkCount}건 상시 분석 중
+            상품 {watch.productCount}개 · 혜택 조건 {watch.linkCount}건 상시 분석 중
           </em>
         </div>
         <Glyph name="arrow" size={20} />
@@ -64,9 +66,14 @@ export function Home() {
           {watch.dueSoon.length > 0 && <span className="count">{watch.dueSoon.length}건 남음</span>}
         </div>
         <p className="chartnote">
-          {watch.nextDate
-            ? `${formatKoMD(watch.nextDate)}부터 은행이 우대 실적을 확인합니다. 확인이 끝나면 그 달 우대는 확정됩니다.`
-            : '이번 달 우대 확인은 모두 끝났습니다.'}
+          {watch.nextDate ? (
+            <>
+              가장 가까운 <Term term="우대 확인일" />은 {formatKoMD(watch.nextDate)}입니다. 은행이 이날{' '}
+              <Term term="실적" />을 채웠는지 보고, 확인이 끝나면 그 달 우대가 확정됩니다.
+            </>
+          ) : (
+            '이번 달 우대 확인은 모두 끝났습니다.'
+          )}
         </p>
 
         <div className="watchlist">

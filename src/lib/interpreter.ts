@@ -130,6 +130,8 @@ const METRIC_NOUN: Record<string, string> = {
   card_autopay: '카드 자동납부',
   loan_holding: '대출 보유',
   deposit_balance: '예적금 평균잔액',
+  card_payment: '카드 결제',
+  loan_autopay: '대출 자동납부 출금',
 };
 
 export function metricNoun(kind: string): string {
@@ -137,7 +139,7 @@ export function metricNoun(kind: string): string {
 }
 
 /** 건수로 세는 실적인가. 아니면 원 단위 금액이다. */
-const COUNT_METRICS = new Set(['autopay_count', 'card_holding', 'card_autopay', 'loan_holding']);
+const COUNT_METRICS = new Set(['autopay_count', 'card_holding', 'card_autopay', 'loan_holding', 'loan_autopay']);
 
 export function metricUnit(kind: string): string {
   return COUNT_METRICS.has(kind) ? '건' : '원';
@@ -191,7 +193,8 @@ export function evaluateCondition(
     cycleLabel: tag(cycleLabel(cond), cond.provenance?.cycle ?? 'doc'),
     active,
     inactiveReason: inactiveReason(cond),
-    countsForSafeAfter: recoverable && active && inThisMonth,
+    // 결제 적립(spend_rate)은 결제할 때마다 쌓인다 — 확정일을 기다린다고 지켜지는 게 없어 변경 가능 구간에서 뺀다
+    countsForSafeAfter: recoverable && active && inThisMonth && cond.binds.effect.kind !== 'spend_rate',
     metricStatus: metricStatus(cond),
   };
 }

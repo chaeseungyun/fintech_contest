@@ -762,7 +762,7 @@ ol {
   color: var(--ink-2);
 }
 
-/* 모든 행이 같은 무게 — 한 행만 강조하면 앱이 그걸 권하는 것처럼 읽힌다 */
+/* 모든 행이 같은 무게 — 한 행만 강조하면 앱이 그걸 권하는 것처럼 읽힌다. 예외는 featured(실제 규정 사례) 묶음뿐 */
 .triggerlist {
   display: flex;
   flex-direction: column;
@@ -806,6 +806,41 @@ ol {
   font-style: normal;
   font-size: var(--fs-2xs);
   color: var(--src-user);
+}
+/* 실제 규정 사례(trigger.featured) — 권하는 행이 아니라 입구라 테두리 한 줄과 칩으로만 구분한다 */
+.triggerlist.featured .triggerrow {
+  padding: 15px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xl);
+}
+.triggerlist.featured .triggerrow + .triggerrow {
+  margin-top: 8px;
+}
+.triggerrow.featured .body b {
+  font-size: var(--fs-lg);
+  line-height: 1.4;
+}
+
+/* 용어 풀이 — 점선 밑줄 버튼. 누르면 TermSheet */
+.term {
+  display: inline;
+  text-align: inherit;
+  text-decoration: underline dotted;
+  text-decoration-color: var(--mute);
+  text-underline-offset: 3px;
+}
+.layer {
+  display: contents;
+}
+.termsheet h2 {
+  font-size: var(--fs-2xl);
+  font-weight: 700;
+  letter-spacing: var(--ls-head);
+}
+.termsheet p {
+  font-size: var(--fs-sm);
+  line-height: 1.65;
+  color: var(--ink-2);
 }
 /* ── 분석 중 ─────────────────────────────────────────────── */
 
@@ -2317,3 +2352,90 @@ ol {
   line-height: 1.55;
   color: var(--mute);
 }
+
+/* ── 나눠 쓰기 ─────────────────────────────────────────────── */
+
+.splitcard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.splitcard .lbl {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink-2);
+  margin-top: 4px;
+}
+.splitcard .row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.destlist {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.destrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  text-align: left;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.destrow:last-child { border-bottom: 0; }
+.destrow .body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.destrow .body span {
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+.destrow.on {
+  box-shadow: inset 3px 0 0 var(--brand);
+}
+.destrow.on b { color: var(--brand); }
+.customform {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.customform label {
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+.customform input {
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font: inherit;
+}
+
+/* 비교 결과 결론 밑 "왜?" 두 줄 — 작게. 크게 다시 그리지 않는다 */
+.why {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 10px 0 0;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.why li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+.why .k { min-width: 0; }
+
+.splitcard .chips { flex-wrap: wrap; overflow: visible; }

@@ -4,7 +4,7 @@
 
 import { createContext, useContext } from 'react';
 import fixture from '../fixtures/scenario.json';
-import { derive, type Derived } from '../lib/derive';
+import { derive, type CustomCard, type Derived, type SplitChoice } from '../lib/derive';
 import { applyEdits, type ConditionEdit, type Edits } from '../lib/edits';
 import type { Scenario } from '../lib/types';
 
@@ -52,6 +52,12 @@ export interface AppState {
   expandedStepKey: string | null;
   /** 퀵메뉴에서 자산 탭으로 올 때 스크롤할 섹션(assetGroups 의 key) */
   section: string | null;
+  /** 나눠 쓰기 트리거별 선택. 없으면 "필요한 만큼만 남기기" · 옮겨 갈 카드 미선택 */
+  split: Record<string, SplitChoice>;
+  /** 사용자가 직접 입력한 카드(타행 등). 값은 사용자 확인 태그로 계산된다 */
+  customCard: CustomCard | null;
+  /** 풀이 시트를 연 용어(scenario.glossary 의 키). App 이 폰 프레임 위에 시트로 그린다 */
+  term: string | null;
 }
 
 export type Action =
@@ -69,6 +75,10 @@ export type Action =
   | { type: 'revert'; conditionId: string; key: keyof ConditionEdit }
   | { type: 'restoreCondition'; conditionId: string }
   | { type: 'toggleStep'; stepKey: string }
+  | { type: 'setSplit'; triggerId: string; patch: Partial<SplitChoice> }
+  | { type: 'setCustomCard'; card: CustomCard | null }
+  | { type: 'openTerm'; term: string }
+  | { type: 'closeTerm' }
   | { type: 'reset' };
 
 export function initialState(): AppState {
@@ -83,6 +93,9 @@ export function initialState(): AppState {
     chosen: {},
     expandedStepKey: null,
     section: null,
+    split: {},
+    customCard: null,
+    term: null,
   };
 }
 
@@ -136,6 +149,24 @@ export function reducer(state: AppState, action: Action): AppState {
       return { ...state, removed: state.removed.filter((id) => id !== action.conditionId) };
     case 'toggleStep':
       return { ...state, expandedStepKey: state.expandedStepKey === action.stepKey ? null : action.stepKey };
+    case 'setSplit': {
+      const prev = state.split[action.triggerId] ?? { keep: 'needed', toCardId: null };
+      return { ...state, split: { ...state.split, [action.triggerId]: { ...prev, ...action.patch } } };
+    }
+    case 'setCustomCard': {
+      // 입력한 카드를 지우면 그 카드를 고른 선택도 푼다 — 없는 카드로 계산하지 않는다
+      const split =
+        action.card === null
+          ? Object.fromEntries(
+              Object.entries(state.split).map(([k, v]) => [k, v.toCardId === 'custom_card' ? { ...v, toCardId: null } : v]),
+            )
+          : state.split;
+      return { ...state, customCard: action.card, split };
+    }
+    case 'openTerm':
+      return { ...state, term: action.term };
+    case 'closeTerm':
+      return { ...state, term: null };
     case 'reset':
       return initialState();
   }
@@ -178,6 +209,10 @@ export function select(state: AppState): { scenario: Scenario; derived: Derived 
   const triggerId = activeTriggerId(state, scenario);
   return {
     scenario,
-    derived: derive(scenario, triggerId, { chosenCandidateId: state.chosen[triggerId] ?? null }),
+    derived: derive(scenario, triggerId, {
+      chosenCandidateId: state.chosen[triggerId] ?? null,
+      split: state.split[triggerId],
+      customCard: state.customCard,
+    }),
   };
 }

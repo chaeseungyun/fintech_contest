@@ -4,19 +4,23 @@
 import { buildActionPlan, type ActionPlan, type PlanDue, type PlanLink } from './actionplan';
 import { addonProposals, type AddonProposal } from './addon';
 import { addOffset, daysBetween, maxISO } from './dates';
-import { formatKoMD, formatKoYMD, formatWonShort, withJosa } from './format';
+import { formatKoMD, formatKoYMD, formatRate, formatWonShort, withJosa } from './format';
 import { buildGraph, incomingConditions, productById, unsupportedForDocs, type Graph } from './graph';
 import { horizonProjection, type Horizon } from './horizon';
 import {
   computeSafeTiming,
   evaluateCondition,
+  isMetricMet,
   latestRecoverAt,
   requirementLabel,
   type Judgment,
   type SafeTiming,
 } from './interpreter';
 import {
+  capAdjustment,
   earlyTermination,
+  gainItem,
+  type CapAdjustment,
   lossBreakdown,
   perkLabel,
   savingItems,
@@ -27,7 +31,7 @@ import {
 } from './money';
 import { recommend, type CandidateResult, type Recommendation } from './recommend';
 import type { Condition, ISODate, MappedCondition, Product, Scenario, Source, Tagged, Trigger } from './types';
-import { candidatesFor, defaultTrigger, tag, triggerById } from './types';
+import { candidatesFor, defaultTrigger, isMapped, tag, triggerById } from './types';
 
 export interface ImpactItem {
   condition: MappedCondition;
@@ -36,6 +40,11 @@ export interface ImpactItem {
   judgment: Judgment;
   /** 실제 손실. 조건이 이미 미적용이면 0 */
   effectiveLoss: Tagged<number>;
+  /**
+   * 카드 이용금액이 옮겨 가서 다시 판정한 조건(trigger.spendShift). 변경 대상을 target 으로 갖지 않지만
+   * 같은 카드 실적에 기대는 조건이다. kept 면 옮긴 뒤에도 기준 이상이라 손실 0.
+   */
+  shift?: { before: number; after: number; kept: boolean };
 }
 
 export interface AxisPoint {
@@ -105,12 +114,17 @@ export interface Derived {
   graph: Graph;
   /** 비교에 빠진 핵심 입력. 비어 있지 않으면 verdict.kind 가 pending */
   missing: string[];
+  /** 나눠 쓰기 트리거일 때만. 화면의 배분 선택기가 이 값을 그린다 */
+  split: SplitResult | null;
   basis: ComparisonBasis;
   /** 금액 큰 순 */
   items: ImpactItem[];
   /** 손실이 실제로 발생하는 건수 */
   affectedCount: number;
+  /** 연간 손실 합계. 우대 상한 조정(capAdjustments)을 반영한 값 */
   total: Tagged<number>;
+  /** 우대 상한 때문에 명목 금액과 실제가 다른 대출. ② 묶음에 "상한 조정" 한 줄로 그린다 */
+  capAdjustments: CapAdjustment[];
   savings: SavingItem[];
   savingsTotal: Tagged<number>;
   /** 지금 실행 시 연 기준 순손익. 양수면 이득 */
@@ -146,28 +160,84 @@ export interface Derived {
 export interface DeriveOptions {
   /** 사용자가 절차의 기준으로 고른 후보 id. 없거나 null 이면 "새 상품 없이" */
   chosenCandidateId?: string | null;
+  /** 나눠 쓰기(trigger.split): 얼마를 남기고 어느 카드로 옮길지. 없으면 "필요한 만큼만 남기기" · 카드 미선택 */
+  split?: SplitChoice;
+  /** 사용자가 직접 입력한 카드(타행 등). 나눠 쓰기의 옮겨 갈 카드 후보에 들어간다 */
+  customCard?: CustomCard | null;
+}
+
+/** 남길 금액: 필요한 만큼(지금 충족 중인 카드 실적 기준 중 가장 큰 값) · 전부 옮김(0) · 직접 입력(원) */
+export type KeepChoice = 'needed' | 'all' | number;
+
+export interface SplitChoice {
+  keep: KeepChoice;
+  toCardId: string | null;
+}
+
+export interface CustomCard {
+  name: string;
+  /** 0.012 = 1.2% */
+  rewardRate: number;
+  annualFee: number;
+}
+
+export const CUSTOM_CARD_ID = 'custom_card';
+
+/** 옮겨 갈 수 있는 카드 하나. 후보 상품은 상품설명서, 직접 입력은 사용자 확인 */
+export interface SplitDestination {
+  id: string;
+  institution: string;
+  name: string;
+  rewardRate: Tagged<number>;
+  annualFee: Tagged<number>;
+}
+
+export interface SplitResult {
+  /** 지금 이 카드 월 사용액 */
+  before: Tagged<number>;
+  /** 조건을 지키려면 남겨야 하는 최소 금액. 걸린 실적 조건이 없으면 0 */
+  needed: Tagged<number>;
+  keep: KeepChoice;
+  /** 실제로 남기는 금액 */
+  kept: Tagged<number>;
+  /** 옮기는 금액 */
+  moved: Tagged<number>;
+  destinations: SplitDestination[];
+  /** 사용자가 고른 옮겨 갈 카드. 고르기 전에는 null — 앱이 대신 고르지 않는다 */
+  dest: SplitDestination | null;
 }
 
 export function derive(scenario: Scenario, triggerId?: string, options: DeriveOptions = {}): Derived {
   const today = scenario.meta.today;
   const trigger = triggerId ? triggerById(scenario, triggerId) : defaultTrigger(scenario);
-  const missing = trigger.missing ?? [];
   const centerId = trigger.productId;
   const center = productById(scenario, centerId);
   const conditions = incomingConditions(scenario, centerId);
+  const split = trigger.split ? buildSplit(scenario, center, options) : null;
+  // 옮겨 갈 카드를 고르기 전에는 얻는 쪽을 모른다 — 반대편 숫자 없이 결론을 내지 않는다
+  const missing = [...(trigger.missing ?? []), ...(split && !split.dest ? ['옮겨 갈 카드'] : [])];
 
-  const items: ImpactItem[] = conditions.map((condition) => {
-    const product = productById(scenario, condition.binds.holder);
-    const loss = lossBreakdown(condition, product);
-    const judgment = evaluateCondition(condition, today, scenario.products);
-    return {
-      condition,
-      product,
-      loss,
-      judgment,
-      effectiveLoss: tag(judgment.active ? loss.annualLoss.value : 0, 'calc'),
-    };
-  });
+  const gainIds = new Set(trigger.gains ?? []);
+  // 나눠 쓰기는 카드를 해지하지 않는다 — 카드에 걸린 조건은 사용액으로만 다시 판정한다(shiftItems)
+  const items: ImpactItem[] = (split ? [] : conditions)
+    .filter((c) => !gainIds.has(c.id))
+    .map((condition) => {
+      const product = productById(scenario, condition.binds.holder);
+      const loss = lossBreakdown(condition, product, center);
+      const judgment = evaluateCondition(condition, today, scenario.products);
+      return {
+        condition,
+        product,
+        loss,
+        judgment,
+        effectiveLoss: tag(judgment.active ? loss.annualLoss.value : 0, 'calc'),
+      };
+    });
+  if (split) items.push(...shiftItems(scenario, centerId, split.moved.value, today));
+  else if (trigger.spendShift) {
+    const amount = shiftAmount(scenario, trigger);
+    if (amount !== null) items.push(...shiftItems(scenario, trigger.spendShift.cardId, amount, today));
+  }
   items.sort((a, b) => b.effectiveLoss.value - a.effectiveLoss.value);
 
   const judgments = items.map((i) => i.judgment);
@@ -179,15 +249,27 @@ export function derive(scenario: Scenario, triggerId?: string, options: DeriveOp
   const inactive = items.filter((i) => !i.judgment.active);
   const deferredNextMonth = recoverable.filter((i) => !i.judgment.countsForSafeAfter);
 
-  const total = sumAnnual(items.map((i) => i.effectiveLoss.value));
-  const savings = savingItems(trigger.savings, center);
-  const savingsTotal = sumAnnual(savings.map((s) => s.annualAmount.value));
+  const savings = [
+    ...savingItems(trigger.savings, center),
+    ...gainItems(scenario, trigger),
+    ...(split ? splitSavings(center, split) : []),
+  ];
+  const capAdjustments = buildCapAdjustments(scenario, trigger, items);
+  // 양수 조정은 손실을 줄이고, 음수 조정은 얻는 우대가 상한에 막힌 몫이라 절감을 깎는다
+  const lossAdj = capAdjustments.reduce((a, c) => a + Math.max(0, c.amount.value), 0);
+  const gainAdj = capAdjustments.reduce((a, c) => a + Math.min(0, c.amount.value), 0);
+  const total = sumAnnual([...items.map((i) => i.effectiveLoss.value), -lossAdj]);
+  const savingsTotal = sumAnnual([...savings.map((s) => s.annualAmount.value), gainAdj]);
   const recoverBy = latestRecoverAt(unrecoverable.map((i) => i.judgment));
 
+  const sumBy = (accrual: 'annual' | 'monthly') =>
+    savings.filter((s) => s.accrual === accrual).reduce((a, s) => a + s.annualAmount.value, 0);
   const horizon = horizonProjection({
     today,
     annualLoss: total.value,
-    savings: savingsTotal.value,
+    savings: sumBy('annual'),
+    // 얻는 우대(gains)는 달마다 쌓이는 절감이라 상한에 막힌 몫도 여기서 뺀다
+    monthlySavings: sumBy('monthly') + gainAdj,
     recoverBy,
     verb: trigger.verb,
   });
@@ -197,12 +279,14 @@ export function derive(scenario: Scenario, triggerId?: string, options: DeriveOp
     conditions.map((c) => c.sourceDoc),
   );
 
-  const verdict = buildVerdict({ trigger, center, items: active, horizon, savings, missing });
+  // 문장에 이름을 올리는 건 실제로 잃는 연결뿐이다 — 옮긴 뒤에도 유지되는 카드 실적 조건은 빼고
+  const losing = active.filter((i) => i.effectiveLoss.value > 0);
+  const verdict = buildVerdict({ trigger, center, items: losing, horizon, savings, missing });
 
   const recommendation = recommend({
     trigger,
     center,
-    links: items,
+    links: cappedLinks(items, capAdjustments),
     netAnnual: horizon.netAnnual.value,
     candidates: candidatesFor(scenario, trigger.id),
   });
@@ -232,8 +316,11 @@ export function derive(scenario: Scenario, triggerId?: string, options: DeriveOp
     center,
     graph: buildGraph(scenario, centerId),
     missing,
+    split,
     basis: {
-      change: `${shortName(center)} ${trigger.verb}`,
+      change: split
+        ? `${shortName(center)} 월 ${formatWonShort(split.moved.value)} → ${split.dest?.name ?? '다른 카드'}`
+        : `${shortName(center)} ${trigger.verb}`,
       versus: '그대로 유지',
       period: '연 기준',
       asOf: today,
@@ -242,6 +329,7 @@ export function derive(scenario: Scenario, triggerId?: string, options: DeriveOp
     items,
     affectedCount: items.filter((i) => i.effectiveLoss.value > 0).length,
     total,
+    capAdjustments,
     savings,
     savingsTotal,
     netAnnual: horizon.netAnnual,
@@ -274,6 +362,184 @@ export function derive(scenario: Scenario, triggerId?: string, options: DeriveOp
 }
 
 const shortName = (p: Product) => p.shortName ?? p.name;
+
+/** 옮겨 가는 카드 이용금액(월). spendShift 가 없으면 null */
+export function shiftAmount(scenario: Scenario, trigger: Trigger): number | null {
+  if (!trigger.spendShift) return null;
+  return productById(scenario, trigger.spendShift.amountFrom).facts.monthlyAmount ?? null;
+}
+
+/** 이 카드 이용금액에 기대는 조건: 카드가 target 이거나(대출 카드 실적 우대) holder 인(카드 자체의 실적 혜택) card_spend */
+function cardSpendConditions(scenario: Scenario, cardId: string): MappedCondition[] {
+  return scenario.conditions
+    .filter(isMapped)
+    .filter((c) => (c.binds.target === cardId || c.binds.holder === cardId) && c.metric.kind === 'card_spend');
+}
+
+/**
+ * 카드 이용금액이 amount 만큼 줄 때 그 카드의 card_spend 조건을 "옮긴 뒤 금액" 으로 다시 판정한다.
+ * 지금 충족 중인데 옮긴 뒤 기준 아래로 내려가면 손실, 그대로 기준 이상이면 kept(손실 0).
+ * 지금도 미충족인 조건은 이 변경과 무관하다 — 넣지 않는다.
+ * 판정일은 원래 조건 그대로지만, 잃지 않는 조건은 이번 달 변경 가능 구간 계산에서 뺀다.
+ */
+function shiftItems(scenario: Scenario, cardId: string, amount: number, today: ISODate): ImpactItem[] {
+  return cardSpendConditions(scenario, cardId)
+    .filter((c) => c.metric.currentValue !== undefined && c.metric.threshold !== null && isMetricMet(c))
+    .map((condition) => {
+      const before = condition.metric.currentValue as number;
+      const after = Math.max(0, before - amount);
+      const kept = after >= (condition.metric.threshold as number);
+      const product = productById(scenario, condition.binds.holder);
+      const loss = lossBreakdown(condition, product);
+      const base = evaluateCondition(condition, today, scenario.products);
+      const judgment: Judgment = { ...base, countsForSafeAfter: base.countsForSafeAfter && !kept };
+      return {
+        condition,
+        product,
+        loss,
+        judgment,
+        effectiveLoss: tag(kept ? 0 : loss.annualLoss.value, 'calc'),
+        shift: { before, after, kept },
+      };
+    });
+}
+
+/**
+ * 우대 상한이 있는 대출마다 명목과 실제의 차이를 낸다.
+ * 변경 전 명목 합 = 그 대출에 걸린 조건 중 지금 충족 중인 rate_delta 전부(이 변경과 무관한 것 포함).
+ */
+function buildCapAdjustments(scenario: Scenario, trigger: Trigger, items: ImpactItem[]): CapAdjustment[] {
+  const rate = (c: MappedCondition) => (c.binds.effect.kind === 'rate_delta' ? Math.abs(c.binds.effect.value) : 0);
+  const gainConds = (trigger.gains ?? [])
+    .map((id) => scenario.conditions.find((c) => c.id === id))
+    .filter((c): c is MappedCondition => !!c && isMapped(c) && !isMetricMet(c));
+  const holderIds = new Set([
+    ...items.filter((i) => i.effectiveLoss.value > 0).map((i) => i.product.id),
+    ...gainConds.map((c) => c.binds.holder),
+  ]);
+  const out: CapAdjustment[] = [];
+  for (const id of holderIds) {
+    const holder = productById(scenario, id);
+    const activeNominal = scenario.conditions
+      .filter(isMapped)
+      .filter((c) => c.binds.holder === id && isMetricMet(c))
+      .reduce((a, c) => a + rate(c), 0);
+    const lost = items
+      .filter((i) => i.product.id === id && i.effectiveLoss.value > 0)
+      .reduce((a, i) => a + rate(i.condition), 0);
+    const gained = gainConds.filter((c) => c.binds.holder === id).reduce((a, c) => a + rate(c), 0);
+    const adj = capAdjustment(holder, activeNominal, lost, gained);
+    if (adj) out.push(adj);
+  }
+  return out;
+}
+
+/**
+ * 갈아타기 후보가 "지켜 주는 손실" 을 셀 때 쓰는 항목. 상한이 걸린 대출의 행은 실제/명목 비율로 줄인다 —
+ * 명목 8만원을 지켜 준다고 세면 후보 이득이 부풀려진다.
+ * ponytail: 비율 배분이라 후보가 그 대출의 연결 일부만 살리면 근사값. 상한은 비선형이라 정확히는 후보별로 상한을 다시 계산해야 한다.
+ */
+function cappedLinks(items: ImpactItem[], caps: CapAdjustment[]): ImpactItem[] {
+  return items.map((i) => {
+    const cap = caps.find((c) => c.productId === i.product.id && c.amount.value > 0);
+    if (!cap || i.effectiveLoss.value === 0 || cap.nominalDelta === 0) return i;
+    const ratio = cap.actualDelta / cap.nominalDelta;
+    return { ...i, effectiveLoss: tag(Math.round(i.effectiveLoss.value * ratio), 'calc') };
+  });
+}
+
+/** 나눠 쓰기의 옮겨 갈 카드 목록: 후보 중 적립률이 적힌 카드 + 직접 입력한 카드 */
+function splitDestinations(scenario: Scenario, custom: CustomCard | null | undefined): SplitDestination[] {
+  const fromCandidates: SplitDestination[] = (scenario.candidates ?? [])
+    .filter((c) => c.type === 'credit_card' && c.facts.rewardRate !== undefined)
+    .map((c) => ({
+      id: c.id,
+      institution: c.institution,
+      name: c.shortName ?? c.name,
+      rewardRate: tag(c.facts.rewardRate as number, 'doc'),
+      annualFee: tag(c.facts.annualFee ?? 0, 'doc'),
+    }));
+  if (!custom) return fromCandidates;
+  return [
+    ...fromCandidates,
+    {
+      id: CUSTOM_CARD_ID,
+      institution: '직접 입력',
+      name: custom.name,
+      rewardRate: tag(custom.rewardRate, 'user'),
+      annualFee: tag(custom.annualFee, 'user'),
+    },
+  ];
+}
+
+function buildSplit(scenario: Scenario, card: Product, options: DeriveOptions): SplitResult {
+  const before = card.facts.monthlySpendCurrent ?? 0;
+  const needed = Math.max(
+    0,
+    ...cardSpendConditions(scenario, card.id)
+      .filter((c) => isMetricMet(c) && c.metric.threshold !== null)
+      .map((c) => c.metric.threshold as number),
+  );
+  const keep = options.split?.keep ?? 'needed';
+  const raw = keep === 'needed' ? needed : keep === 'all' ? 0 : keep;
+  const kept = Math.min(before, Math.max(0, raw));
+  const destinations = splitDestinations(scenario, options.customCard);
+  const dest = destinations.find((d) => d.id === options.split?.toCardId) ?? null;
+  return {
+    before: tag(before, 'holding'),
+    needed: tag(needed, 'calc'),
+    keep,
+    kept: tag(kept, 'calc'),
+    moved: tag(before - kept, 'calc'),
+    destinations,
+    dest,
+  };
+}
+
+/**
+ * 나눠 쓰기의 얻는 쪽. 옮긴 금액 × (옮겨 갈 카드 적립률 − 지금 카드 적립률) × 12 는 달마다 쌓이고,
+ * 옮겨 갈 카드 연회비는 해마다 한 번 나간다(음수 절감). 카드를 고르기 전이면 비어 있다.
+ */
+function splitSavings(card: Product, split: SplitResult): SavingItem[] {
+  const { dest, moved } = split;
+  if (!dest || moved.value === 0) return [];
+  const own = card.facts.rewardRate ?? 0;
+  const out: SavingItem[] = [
+    {
+      key: 'split-reward',
+      kind: 'reward_diff',
+      label: `${dest.name} 적립 차이`,
+      note: `월 ${formatWonShort(moved.value)} 옮김`,
+      annualAmount: tag(Math.round(moved.value * (dest.rewardRate.value - own) * 12), 'calc'),
+      basisLabel: `적립 ${formatRate(own)} → ${formatRate(dest.rewardRate.value)}`,
+      accrual: 'monthly',
+    },
+  ];
+  if (dest.annualFee.value > 0) {
+    out.push({
+      key: 'split-fee',
+      kind: 'new_card_fee',
+      label: `${dest.name} 연회비`,
+      note: '옮겨 갈 카드를 새로 만들 때',
+      annualAmount: tag(-dest.annualFee.value, 'calc'),
+      basisLabel: `연 1회 ${dest.annualFee.value.toLocaleString('ko-KR')}원`,
+      accrual: 'annual',
+    });
+  }
+  return out;
+}
+
+/** trigger.gains: 지금 미적용이고 바꾸면 켜지는 조건의 절감. 이미 받고 있는 조건은 얻는 게 없다 */
+function gainItems(scenario: Scenario, trigger: Trigger): SavingItem[] {
+  const out: SavingItem[] = [];
+  for (const id of trigger.gains ?? []) {
+    const cond = scenario.conditions.find((c) => c.id === id);
+    if (!cond || !isMapped(cond) || isMetricMet(cond)) continue;
+    const item = gainItem(cond, productById(scenario, cond.binds.holder), requirementLabel(cond));
+    if (item) out.push(item);
+  }
+  return out;
+}
 
 /** ImpactItem → 실행 안내가 읽는 한 줄. actionplan 이 derive 를 import 하지 않게 여기서 만든다. */
 function toPlanLink(item: ImpactItem): PlanLink {
@@ -321,7 +587,7 @@ function buildVerdict(ctx: {
       lead: '확인된 조건만으로는',
       highlight: '전체 손익을 비교할 수 없습니다.',
       tail: '',
-      body: `${known}${missing.join('·')}이 없어 ${trigger.verb} 후 얻는 쪽을 계산하지 못했습니다. 그 값이 확인되면 같은 기간으로 비교합니다. 아래는 확인된 항목의 변화 소계입니다.`,
+      body: `${known}${withJosa(missing.join('·'), '이/가')} 없어 ${trigger.verb} 후 얻는 쪽을 계산하지 못했습니다. 그 값이 확인되면 같은 기간으로 비교합니다. 아래는 확인된 항목의 변화 소계입니다.`,
     };
   }
 
@@ -329,7 +595,8 @@ function buildVerdict(ctx: {
     return {
       kind: 'keep',
       lead: '확인된 조건에서는',
-      highlight: `${withJosa(name, '을/를')} 유지하는 것이`,
+      // 나눠 쓰기는 카드를 없애는 게 아니라 "지금처럼 몰아 쓰기" 가 유지다
+      highlight: trigger.split ? `${name}에 지금처럼 모아 쓰는 것이` : `${withJosa(name, '을/를')} 유지하는 것이`,
       tail: '유리합니다.',
       body:
         items.length > 0
@@ -338,7 +605,8 @@ function buildVerdict(ctx: {
     };
   }
 
-  const savingLabel = savings.length > 0 ? savings.map((s) => s.label).join('·') : '비용';
+  // "연회비 절감" · "대출 이자 절감" — 라벨이 이미 "절감" 으로 끝나면 덧붙이지 않는다
+  const savingLabel = savings.length > 0 ? savings.map((s) => s.label.replace(/ 절감$/, '')).join('·') : '비용';
   return {
     kind: 'switch',
     lead: '확인된 조건에서는',
@@ -407,7 +675,8 @@ function buildChecklist(ctx: {
  * "유지에는 절차가 없다" 는 원칙은 그대로다. 절차가 아니라 조건 목록이다.
  */
 function buildMaintain(active: ImpactItem[]): ChecklistItem[] {
-  return active.map((i) => ({
+  // 결제 적립은 지킬 실적 조건이 아니라 결제하면 쌓이는 것이라 뺀다
+  return active.filter((i) => i.condition.binds.effect.kind !== 'spend_rate').map((i) => ({
     key: `keep-${i.condition.id}`,
     text: `${shortName(i.product)} 우대 — ${requirementLabel(i.condition)} · ${i.judgment.cycleLabel.value}`,
     source: i.judgment.cycleLabel.source,

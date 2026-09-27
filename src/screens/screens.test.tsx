@@ -15,6 +15,9 @@ import { Impact } from './Impact';
 import { More } from './More';
 import { Timeline } from './Timeline';
 import { Verdict } from './Verdict';
+import { Term, TermSheet } from '../components/Term';
+import { derive } from '../lib/derive';
+import type { Scenario } from '../lib/types';
 import { BASE_SCENARIO } from '../state/store';
 import { initialState, reducer, select, StoreContext, type Action, type AppState } from '../state/store';
 
@@ -24,6 +27,16 @@ function draw(node: ReactElement, actions: Action[] = []): string {
   const { scenario, derived } = select(state);
   return renderToString(
     <StoreContext.Provider value={{ state, scenario, derived, dispatch: () => {} }}>
+      {node}
+    </StoreContext.Provider>,
+  );
+}
+
+/** 픽스처를 바꾼 시나리오로 그린다 (featured 같은 선택 필드를 시험할 때) */
+function drawWith(scenario: Scenario, node: ReactElement): string {
+  const derived = derive(scenario, scenario.defaultTriggerId);
+  return renderToString(
+    <StoreContext.Provider value={{ state: initialState(), scenario, derived, dispatch: () => {} }}>
       {node}
     </StoreContext.Provider>,
   );
@@ -59,12 +72,75 @@ describe('화면 스모크', () => {
     expect(html).toContain('상시 분석이 찾아 둔');
     expect(html).not.toContain('상시 분석 중');
     expect(html).not.toContain('계속 보고 있습니다');
-    expect(html).toContain('바꿔 볼 항목');
+    expect(html).toContain('다른 경우도 미리 보기');
     expect((html.match(/triggerrow/g) ?? []).length).toBe(BASE_SCENARIO.triggers.length);
-    expect(html).toContain('연결 혜택');
+    // 내부 용어 대신 쉬운 말 — 영향받는 상품 수는 holder 를 센 값
+    expect(html).not.toContain('연결 혜택');
+    expect(html.split('<!-- -->').join('')).toContain('영향받는 상품 4개'); // card_cancel: 주담대·신용대출·정기예금·건강보험
     // 사전 계산된 순손익(−16.4만원 등)을 허브에 적지 않는다
     expect(html).not.toContain('class="amt');
     expect(html).toContain('확인 필요');
+  });
+
+  it('허브 — 행 제목은 사용자의 질문, 기능 이름은 보조 줄', () => {
+    const html = draw(<Hub />);
+    for (const t of BASE_SCENARIO.triggers) {
+      expect(t.question).toBeTruthy();
+      expect(html).toContain(`<b>${t.question}</b>`);
+      expect(html.split('<!-- -->').join('')).toContain(`${t.label} · 영향받는 상품`);
+    }
+    // 관리비 사례가 featured 라 섹션 제목이 있다. 배지는 두지 않는다
+    expect(html).toContain('다른 경우도 미리 보기');
+    expect(html).not.toContain('class="badge"');
+  });
+
+  it('허브 — featured 트리거는 맨 위 따로, 나머지는 "다른 경우도 미리 보기" 아래', () => {
+    // 관리비 계좌 납부만 featured — 다른 트리거를 하나 더 올려도 두 행이 맨 위에 온다
+    const scenario: Scenario = {
+      ...BASE_SCENARIO,
+      triggers: BASE_SCENARIO.triggers.map((t) =>
+        t.id === 'insurance_cancel' ? { ...t, featured: true } : t,
+      ),
+    };
+    expect((drawWith(scenario, <Hub />).match(/triggerrow featured/g) ?? []).length).toBe(2);
+    const html = draw(<Hub />);
+    const featured = html.indexOf('triggerrow featured');
+    expect(featured).toBeGreaterThan(-1);
+    const section = html.indexOf('다른 경우도 미리 보기');
+    const firstQ = BASE_SCENARIO.triggers.find((t) => t.id === 'card_cancel')!.question!;
+    // 순서: featured 행 → 섹션 제목 → 나머지 행
+    expect(featured).toBeLessThan(section);
+    expect(section).toBeLessThan(html.indexOf(firstQ));
+    expect((html.match(/triggerrow featured/g) ?? []).length).toBe(1);
+    expect(html).not.toContain('바꿔 볼 항목을 고르세요');
+  });
+
+  it('홈 배너 — 질문 한 줄과 쉬운 말 상시 분석 줄', () => {
+    const html = draw(<Home />);
+    expect(html).toContain(BASE_SCENARIO.home.bannerQuestion!);
+    expect(html).not.toContain(BASE_SCENARIO.brand.serviceTagline);
+    expect(html).toMatch(/혜택 조건 <!-- -->\d+<!-- -->건 상시 분석 중/);
+    expect(html).not.toContain('우대 조건');
+  });
+
+  it('용어 풀이 — 점선 버튼을 누르면 시트가 열리고 닫힌다', () => {
+    const glossary = BASE_SCENARIO.glossary!;
+    for (const k of ['우대금리', '실적', '우대 확인일', '변경 가능 구간', '손익분기']) expect(glossary[k]).toBeTruthy();
+    // 진입 화면에 버튼으로 붙는다
+    expect(draw(<Hub />)).toContain('aria-haspopup="dialog">우대금리</button>');
+    expect(draw(<Home />)).toContain('aria-haspopup="dialog">우대 확인일</button>');
+    const tl = draw(<Timeline />, [{ type: 'push', route: { name: 'timeline', triggerId: 'card_cancel' } }]);
+    expect(tl).toContain('aria-haspopup="dialog">우대 확인일</button>');
+    expect(tl).toContain('aria-haspopup="dialog">변경 가능 구간</button>');
+    // 풀이가 없는 용어는 버튼이 아니라 글자
+    expect(draw(<Term term="없는 용어" />)).toBe('없는 용어');
+
+    expect(draw(<TermSheet />)).toBe('');
+    const open = draw(<TermSheet />, [{ type: 'openTerm', term: '우대금리' }]);
+    expect(open).toContain('role="dialog"');
+    expect(open).toContain('aria-modal="true"');
+    expect(open).toContain(glossary['우대금리']);
+    expect(draw(<TermSheet />, [{ type: 'openTerm', term: '우대금리' }, { type: 'closeTerm' }])).toBe('');
   });
 
   it('분석 중 — 샘플 조건으로 계산한다고 적는다', () => {
@@ -208,7 +284,7 @@ describe('화면 스모크', () => {
       { type: 'toggleExpanded', conditionId: 'k1' },
     ];
     const html = draw(<Impact triggerId="card_cancel" />, open);
-    expect(html).toContain('톡톡카드를 해지하면 주담대의 우대금리 0.2%p가 빠져 대출 이자가 연 120,000원 늘어납니다.');
+    expect(html).toContain('톡톡카드를 해지하면 주담대의 우대금리 0.1%p가 빠져 대출 이자가 연 38,000원 늘어납니다.');
   });
 
   it('예·적금 해지는 중도해지 이자를 영향 화면과 실행 안내에서만 보여준다', () => {

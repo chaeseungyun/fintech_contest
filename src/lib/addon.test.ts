@@ -32,9 +32,9 @@ describe('expected.addons 재현', () => {
     expect(unlocked).toEqual(E.unlocked);
   });
 
-  it('기본 시나리오에는 실적 미달 조건이 없다', () => {
-    expect(p.inactiveCount).toBe(0);
-    expect(inactiveConditions(scenario)).toEqual([]);
+  it('기본 시나리오의 실적 미달 조건은 관리비 자동납부 우대(a1) 하나 — 어떤 후보도 덮지 않는다', () => {
+    expect(p.inactiveCount).toBe(1);
+    expect(inactiveConditions(scenario).map((c) => c.id)).toEqual(['a1']);
   });
 });
 
@@ -76,15 +76,15 @@ describe('계산 규칙', () => {
   });
 
   it('실적이 미달로 떨어지면 그 조건을 되살리는 값이 순이득에 들어간다', () => {
-    // 카드 실적 기준을 올려 k1(주담대 0.2%p)을 미적용으로 만든다
+    // 카드 실적 30만 구간 기준을 올려 k1(주담대 0.1%p)을 미적용으로 만든다
     const edited = applyEdits(BASE, { k1: { threshold: 900_000 } });
     const before = evaluateAddon(candidate('card_nuri_life'), scenario);
     const after = evaluateAddon(candidate('card_nuri_life'), edited);
 
     expect(before.unlocked).toHaveLength(0);
     expect(after.unlocked.map((u) => u.condition.id)).toEqual(['k1']);
-    expect(after.unlockedGain.value).toBe(60_000_000 * 0.002);
-    expect(after.netGain.value).toBe(before.netGain.value + 120_000);
+    expect(after.unlockedGain.value).toBe(38_000_000 * 0.001);
+    expect(after.netGain.value).toBe(before.netGain.value + 38_000);
   });
 
   it('satisfies 가 UNSUPPORTED 면 아무 조건도 되살리지 못한다', () => {

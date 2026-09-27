@@ -9,11 +9,12 @@ const scenario = applyEdits(BASE, {});
 const targetOf = (id: string) => triggerById(scenario, id).productId;
 
 describe('binds 역방향 조회', () => {
-  it('카드를 target 으로 가진 조건은 3건 (UNSUPPORTED 제외)', () => {
-    expect(incomingConditions(scenario, targetOf(CARD)).map((c) => c.id)).toEqual(['k1', 'k2', 'k3']);
+  it('카드를 target 으로 가진 조건은 5건 (주담대 실적 구간 2개·신용대출 1개 포함, UNSUPPORTED 제외)', () => {
+    expect(incomingConditions(scenario, targetOf(CARD)).map((c) => c.id)).toEqual(['k1', 'k1b', 'w1', 'k2', 'k3']);
   });
-  it('급여통장을 target 으로 가진 조건은 4건', () => {
+  it('급여통장을 target 으로 가진 조건은 5건', () => {
     expect(incomingConditions(scenario, targetOf(SALARY)).map((c) => c.id)).toEqual([
+      'w2',
       'c1',
       'c2',
       'c3',
@@ -24,32 +25,35 @@ describe('binds 역방향 조회', () => {
     const target = targetOf(CARD);
     const g = buildGraph(scenario, target);
     expect(g.center.id).toBe(target);
-    expect(g.edges).toHaveLength(3);
+    expect(g.edges).toHaveLength(5);
+    // 주담대에는 실적 구간 조건이 2건 걸려 있지만 노드는 하나다
     expect(g.satellites.map((s) => s.product.id)).toEqual([
       'loan_nuri_mortgage',
+      'loan_nuri_worker',
       'dep_nuri_term',
       'ins_nuri_care',
     ]);
+    expect(g.satellites[0].edges.map((e) => e.conditionId)).toEqual(['k1', 'k1b']);
     expect(g.edges.every((e) => e.targetId === target)).toBe(true);
     expect(g.edges.every((e) => e.effect.source === 'doc')).toBe(true);
   });
   it('조건을 하나 지우면 선도 하나 줄어든다', () => {
     const fewer = applyEdits(BASE, {}, ['k3']);
     const target = targetOf(CARD);
-    expect(buildGraph(fewer, target).edges).toHaveLength(2);
+    expect(buildGraph(fewer, target).edges).toHaveLength(4);
     expect(buildGraph(fewer, target).satellites.map((s) => s.product.id)).not.toContain('ins_nuri_care');
   });
   it('조건을 하나 더하면 선도 하나 는다', () => {
     const k1 = scenario.conditions.find((c) => c.id === 'k1')!;
     const more: Scenario = { ...scenario, conditions: [...scenario.conditions, { ...k1, id: 'k9' }] };
-    expect(buildGraph(more, targetOf(CARD)).edges).toHaveLength(4);
+    expect(buildGraph(more, targetOf(CARD)).edges).toHaveLength(6);
   });
   it('연결이 없는 상품을 중심에 두면 선이 없다', () => {
     expect(buildGraph(scenario, 'inv_nuri_fund').edges).toHaveLength(0);
   });
   it('선 라벨은 metric.kind 에서 나온다', () => {
     const labels = buildGraph(scenario, targetOf(CARD)).edges.map((e) => e.metricLabel.value);
-    expect(labels).toEqual(['카드 실적 조건', '카드 보유 조건', '카드 납부 조건']);
+    expect(labels).toEqual(['카드 실적 조건', '카드 실적 조건', '카드 실적 조건', '카드 보유 조건', '카드 납부 조건']);
   });
 });
 

@@ -50,8 +50,8 @@ describe('상시 요약 — 트리거 없이 보유 상태만 본다', () => {
     for (const r of perm) expect(w.dueSoon).not.toContain(r);
   });
 
-  it('기본 시나리오에는 실적 미달 조건이 없다', () => {
-    expect(w.inactive).toHaveLength(0);
+  it('기본 시나리오의 실적 미달 조건은 관리비 자동납부 우대(a1) 하나 — 관리비를 카드로 내고 있어서다', () => {
+    expect(w.inactive.map((r) => r.condition.id)).toEqual(['a1']);
   });
 
   it('각 조건은 그것을 흔드는 분석 진입점을 안다', () => {
@@ -67,8 +67,8 @@ describe('실적을 건드리면 요약이 따라 움직인다', () => {
     const before = watchSummary(scenario);
     const after = watchSummary(applyEdits(BASE, { k1: { threshold: 900_000 } }));
 
-    expect(after.inactive.map((r) => r.condition.id)).toEqual(['k1']);
-    expect(after.activeTotal.value).toBe(before.activeTotal.value - 60_000_000 * 0.002);
+    expect(after.inactive.map((r) => r.condition.id).sort()).toEqual(['a1', 'k1']);
+    expect(after.activeTotal.value).toBe(before.activeTotal.value - 38_000_000 * 0.001);
     expect(after.linkCount).toBe(before.linkCount);
   });
 

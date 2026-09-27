@@ -93,9 +93,9 @@ export function formatMonths(months: number): string {
 const HANGUL_START = 0xac00;
 const HANGUL_END = 0xd7a3;
 
-/** 마지막 글자에 받침이 있는가. 한글이 아니면 받침 없음으로 본다. */
+/** 마지막 글자에 받침이 있는가. 한글이 아니면 받침 없음으로 본다. 끝의 괄호 설명은 읽지 않는다("수익(재예치 금리 등)" → 수익) */
 export function hasFinalConsonant(word: string): boolean {
-  const ch = word.trim().slice(-1);
+  const ch = word.replace(/\([^)]*\)\s*$/, '').trim().slice(-1);
   if (!ch) return false;
   const code = ch.charCodeAt(0);
   if (code < HANGUL_START || code > HANGUL_END) return false;

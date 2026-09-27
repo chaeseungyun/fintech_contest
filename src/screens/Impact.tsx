@@ -4,11 +4,12 @@ import { BasisStrip } from '../components/BasisStrip';
 import { Clause } from '../components/Clause';
 import { Glyph, TileIcon, TYPE_ICON } from '../components/Glyph';
 import { RecommendCard } from '../components/RecommendCard';
+import { SplitCard } from '../components/SplitCard';
 import { SourceTag } from '../components/SourceTag';
 import { formatKoMD, formatKoYMD, formatWon, formatWonShort, withJosa } from '../lib/format';
 import type { ImpactItem } from '../lib/derive';
 import { METRIC_STATUS_LABEL } from '../lib/interpreter';
-import { perkLabel } from '../lib/money';
+import { formatRateDelta, perkLabel, type CapAdjustment } from '../lib/money';
 import { useStore } from '../state/store';
 import { tag } from '../lib/types';
 
@@ -18,12 +19,50 @@ import { tag } from '../lib/types';
  */
 function plainEffect(item: ImpactItem, center: string, verb: string): string {
   const name = item.product.shortName ?? item.product.name;
-  const head = `${withJosa(center, '을/를')} ${verb}하면 ${name}의 ${perkLabel(item.condition)}`;
+  const perk = perkLabel(item.condition);
+  const head = `${withJosa(center, '을/를')} ${verb}하면 ${name}의 ${perk}`;
   const won = formatWon(item.effectiveLoss.value);
+  if (item.shift) {
+    const after = formatWonShort(item.shift.after);
+    const bar = formatWonShort(item.condition.metric.threshold ?? 0);
+    return item.shift.kept
+      ? `${withJosa(center, '을/를')} ${verb}해도 카드 이용금액이 월 ${after}으로 기준 ${bar} 이상이라 ${name}의 ${perk}는 그대로 유지됩니다.`
+      : `${withJosa(center, '을/를')} ${verb}하면 카드 이용금액이 월 ${after}으로 기준 ${bar} 아래가 되어 ${name}의 ${perk}가 빠지고 대출 이자가 연 ${won} 늘어납니다.`;
+  }
+  if (item.condition.binds.effect.kind === 'spend_rate') return `${head}이 끊겨 받는 포인트가 연 ${won} 줄어듭니다.`;
   if (item.condition.binds.effect.kind === 'monthly_benefit') return `${head}이 끊겨 연 ${won}을 더 내게 됩니다.`;
   return item.product.type === 'loan'
     ? `${head}가 빠져 대출 이자가 연 ${won} 늘어납니다.`
     : `${head}가 빠져 받는 이자가 연 ${won} 줄어듭니다.`;
+}
+
+const pp = (x: number) => formatRateDelta(x).replace(/^[−+]/, '');
+
+/**
+ * 우대 상한 조정 한 줄. 항목 행은 명목 금액이라, 상한 때문에 실제로 덜 바뀌는 몫을 여기서 되돌린다.
+ * "상한 1%p · 명목 0.4%p 중 실제 0.1%p 만 오름" — 값은 전부 capAdjustment 결과에서 온다.
+ */
+function CapRow({ cap, name }: { cap: CapAdjustment; name: string }) {
+  const softer = cap.amount.value > 0;
+  return (
+    <div className="irow saving">
+      <div className="head static">
+        <span className="ico tint-save">
+          <Glyph name="save" size={20} />
+        </span>
+        <span className="body">
+          <b>{name} 우대 상한 조정</b>
+          <span>
+            상한 {pp(cap.cap.value)} · 명목 {pp(Math.abs(cap.nominalDelta))} 중 실제 {pp(Math.abs(cap.actualDelta))}만{' '}
+            {softer ? '오름' : '내림'} <SourceTag source={cap.cap.source} />
+          </span>
+        </span>
+        <span className="tail">
+          <Amount value={cap.amount} signed short />
+        </span>
+      </div>
+    </div>
+  );
 }
 
 function ImpactRow({ item, triggerId }: { item: ImpactItem; triggerId: string }) {
@@ -42,7 +81,13 @@ function ImpactRow({ item, triggerId }: { item: ImpactItem; triggerId: string })
         <TileIcon name={TYPE_ICON[item.product.type] ?? 'deposit'} size={21} />
         <span className="body">
           <b>{item.product.name}</b>
-          <span>{j.active ? item.loss.basisLabel : j.inactiveReason}</span>
+          <span>
+            {!j.active
+              ? j.inactiveReason
+              : item.shift
+                ? `카드 이용금액 월 ${formatWonShort(item.shift.before)} → ${formatWonShort(item.shift.after)} · 기준 ${formatWonShort(item.condition.metric.threshold ?? 0)} ${item.shift.kept ? '이상 유지' : '미달'}`
+                : item.loss.basisLabel}
+          </span>
         </span>
         <span className="tail">
           <Amount value={tag(-item.effectiveLoss.value, item.effectiveLoss.source)} signed short />
@@ -116,6 +161,12 @@ function ImpactRow({ item, triggerId }: { item: ImpactItem; triggerId: string })
             <Glyph name="chevron" size={14} />
           </button>
           {!j.active && <p className="note">지금도 받지 못하는 혜택이라 손실 0원으로 두었습니다.</p>}
+          {d.capAdjustments.some((c) => c.productId === item.product.id) && (
+            <p className="note">
+              이 대출은 우대금리 합계에 상한이 있어, 위 금액은 명목 기준입니다. 실제로 바뀌는 몫은 아래 "우대 상한
+              조정" 줄에 반영했습니다.
+            </p>
+          )}
           {j.metricStatus === 'assumed' && (
             <p className="note warn">
               실적 값이 없어 충족으로 가정했습니다. 근거 화면에서 기준을 바꾸거나 해당 없음으로 뺄 수 있습니다.
@@ -196,13 +247,16 @@ export function Impact({ triggerId }: { triggerId: string }) {
 
       <BasisStrip basis={d.basis} />
 
+      {/* 나눠 쓰기: 남길 금액과 옮겨 갈 카드를 여기서 고른다 — 고른 값으로 아래 ①② 가 바뀐다 */}
+      <SplitCard triggerId={triggerId} />
+
       {/* ① 상품 자체 변화 — 바꾸면 안 내게 되는 비용. 근거가 없으면 없다고 적는다 */}
       <h3 className="sectiontitle">
         <span className="no">1</span>상품 자체 변화
       </h3>
       <div className="impactlist">
         {d.savings.map((s) => (
-          <div key={s.kind} className="irow saving">
+          <div key={s.key} className="irow saving">
             <div className="head static">
               <span className="ico tint-save">
                 <Glyph name="save" size={20} />
@@ -220,7 +274,7 @@ export function Impact({ triggerId }: { triggerId: string }) {
         {d.savings.length === 0 && (
           <p className="empty small">
             {d.missing.length > 0
-              ? `${d.missing.join('·')}이 확인되지 않아 ${d.trigger.verb} 후 얻는 쪽은 계산에서 비워 두었습니다.`
+              ? `${withJosa(d.missing.join('·'), '이/가')} 확인되지 않아 ${d.trigger.verb} 후 얻는 쪽은 계산에서 비워 두었습니다.`
               : `${d.trigger.verb}로 줄어드는 비용이 보유 상품 정보에 없습니다.`}
           </p>
         )}
@@ -242,6 +296,10 @@ export function Impact({ triggerId }: { triggerId: string }) {
         {d.items.map((item) => (
           <ImpactRow key={item.condition.id} item={item} triggerId={triggerId} />
         ))}
+        {d.capAdjustments.map((c) => {
+          const p = d.items.find((i) => i.product.id === c.productId)?.product;
+          return <CapRow key={`cap-${c.productId}`} cap={c} name={p?.shortName ?? p?.name ?? ''} />;
+        })}
         {d.items.length === 0 && <p className="empty small">이 변경에 걸린 우대 조건이 없습니다.</p>}
       </div>
 

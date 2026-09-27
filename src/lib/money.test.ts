@@ -3,7 +3,7 @@ import { derive } from './derive';
 import { applyEdits } from './edits';
 import { BASE, CARD, DEPOSIT, EXPECTED, SALARY, TRIGGER_IDS } from './fixture.test-helpers';
 import { formatWonCompact, formatWonShort } from './format';
-import { annualLossOf, earlyTermination, formatRateDelta, interestFor, lossBreakdown, savingAmountOf } from './money';
+import { annualLossOf, capAdjustment, earlyTermination, formatRateDelta, interestFor, lossBreakdown, savingAmountOf } from './money';
 import { totalAssets } from './portfolio';
 import type { MappedCondition } from './types';
 
@@ -17,9 +17,11 @@ describe('expected.annualLossByProduct 재현 — 트리거 전부', () => {
     const d = derive(scenario, triggerId);
 
     it(`${triggerId}: 상품별 손실`, () => {
-      const byProduct = Object.fromEntries(
-        d.items.filter((i) => i.effectiveLoss.value > 0).map((i) => [i.product.id, i.effectiveLoss.value]),
-      );
+      // 같은 상품에 조건이 여럿 걸릴 수 있다(카드 실적 구간 k1·k1b) — 상품별로 더한다
+      const byProduct: Record<string, number> = {};
+      for (const i of d.items.filter((x) => x.effectiveLoss.value > 0)) {
+        byProduct[i.product.id] = (byProduct[i.product.id] ?? 0) + i.effectiveLoss.value;
+      }
       expect(byProduct).toEqual(e.annualLossByProduct);
       expect(d.items.every((i) => i.loss.annualLoss.source === 'calc')).toBe(true);
     });
@@ -29,7 +31,7 @@ describe('expected.annualLossByProduct 재현 — 트리거 전부', () => {
       expect(d.total.source).toBe('calc');
       expect(d.savingsTotal.value).toBe(e.savingsTotal);
       expect(d.netAnnual.value).toBe(e.netAnnual);
-      expect(d.affectedCount).toBe(Object.keys(e.annualLossByProduct).length);
+      expect(d.affectedCount).toBeGreaterThanOrEqual(Object.keys(e.annualLossByProduct).length);
     });
 
     it(`${triggerId}: 금액 큰 순으로 정렬된다`, () => {
@@ -41,7 +43,7 @@ describe('expected.annualLossByProduct 재현 — 트리거 전부', () => {
 
 describe('계산 규칙', () => {
   it('rate_delta = 원금 × |금리차|, 부호 무관', () => {
-    expect(annualLossOf(cond('c1'), product('loan_nuri_mortgage'))).toBe(60_000_000 * 0.003);
+    expect(annualLossOf(cond('c1'), product('loan_nuri_mortgage'))).toBe(38_000_000 * 0.003);
     expect(annualLossOf(cond('k2'), product('dep_nuri_term'))).toBe(20_000_000 * 0.0025);
   });
   it('monthly_benefit = 월 금액 × 12', () => {
@@ -87,45 +89,45 @@ describe('보유 현황', () => {
 });
 
 describe('수정 → 재계산', () => {
-  it('카드 실적 우대를 0.5%p 로 올리면 주담대 손실이 300,000 이 되고 태그가 user 로 바뀐다', () => {
+  it('카드 실적 우대(30만 구간)를 0.5%p 로 올리면 그 행 손실이 190,000 이 되고 태그가 user 로 바뀐다', () => {
     const d = derive(applyEdits(BASE, { k1: { effectValue: -0.005 } }), CARD);
-    const loan = d.items.find((i) => i.product.id === 'loan_nuri_mortgage')!;
-    expect(loan.loss.annualLoss.value).toBe(300_000);
-    expect(loan.loss.effect.source).toBe('user');
-    expect(d.total.value).toBe(EXPECTED.triggers[CARD].annualLossTotal - 120_000 + 300_000);
+    const row = d.items.find((i) => i.condition.id === 'k1')!;
+    expect(row.loss.annualLoss.value).toBe(190_000);
+    expect(row.loss.effect.source).toBe('user');
+    expect(d.total.value).toBe(EXPECTED.triggers[CARD].annualLossTotal - 38_000 + 190_000);
   });
 
-  it('시연 장면: 카드 실적 기준 30만 → 90만이면 주담대 손실이 빠지고 안전 시점이 9/30 으로 남는다', () => {
+  it('시연 장면: 60만 구간 기준을 90만으로 올리면 그 0.1%p 가 이미 미적용이 되고 안전 시점은 9/30 으로 남는다', () => {
     const before = derive(scenario, CARD);
-    const after = derive(applyEdits(BASE, { k1: { threshold: 900_000 } }), CARD);
-    expect(before.total.value).toBe(194_000);
-    expect(after.total.value).toBe(194_000 - 120_000);
-    expect(after.affectedCount).toBe(2);
-    expect(after.inactive.map((i) => i.condition.id)).toEqual(['k1']);
-    const loan = after.items.find((i) => i.product.id === 'loan_nuri_mortgage')!;
-    expect(loan.effectiveLoss.value).toBe(0);
-    expect(loan.loss.annualLoss.value).toBe(120_000);
-    // k1(9/15) 이 빠져도 k3(9/30) 이 남아 안전 시점은 그대로
+    const after = derive(applyEdits(BASE, { k1b: { threshold: 900_000 } }), CARD);
+    expect(before.total.value).toBe(170_000);
+    expect(after.total.value).toBe(170_000 - 38_000);
+    expect(after.affectedCount).toBe(4);
+    expect(after.inactive.map((i) => i.condition.id)).toEqual(['k1b']);
+    const tier = after.items.find((i) => i.condition.id === 'k1b')!;
+    expect(tier.effectiveLoss.value).toBe(0);
+    expect(tier.loss.annualLoss.value).toBe(38_000);
+    // k1b(9/15) 가 빠져도 k3(9/30) 이 남아 안전 시점은 그대로
     expect(before.timing.safeAfter.value).toBe('2026-09-30');
     expect(after.timing.safeAfter.value).toBe('2026-09-30');
   });
 
-  it('급여통장 시연 장면: 카드 실적 기준 30만 → 70만이면 합계 510,000 → 270,000, 안전 시점 9/30 → 9/15', () => {
+  it('급여통장 시연 장면: 카드 실적 기준 30만 → 90만이면 합계 504,000 → 264,000, 안전 시점 9/30 → 9/15', () => {
     const before = derive(scenario, SALARY);
-    const after = derive(applyEdits(BASE, { c2: { threshold: 700_000 } }), SALARY);
-    expect(before.total.value).toBe(510_000);
-    expect(after.total.value).toBe(270_000);
-    expect(after.affectedCount).toBe(3);
+    const after = derive(applyEdits(BASE, { c2: { threshold: 900_000 } }), SALARY);
+    expect(before.total.value).toBe(504_000);
+    expect(after.total.value).toBe(264_000);
+    expect(after.affectedCount).toBe(4);
     expect(before.timing.safeAfter.value).toBe('2026-09-30');
     expect(after.timing.safeAfter.value).toBe('2026-09-15');
     expect(after.inactive.map((i) => i.condition.id)).toEqual(['c2']);
   });
 
   it('되돌리면 원래 값 (같은 조작 두 번 = 같은 숫자)', () => {
-    const a = derive(applyEdits(BASE, { c2: { threshold: 700_000 } }), SALARY);
-    const b = derive(applyEdits(BASE, { c2: { threshold: 700_000 } }), SALARY);
+    const a = derive(applyEdits(BASE, { c2: { threshold: 900_000 } }), SALARY);
+    const b = derive(applyEdits(BASE, { c2: { threshold: 900_000 } }), SALARY);
     expect(a.total.value).toBe(b.total.value);
-    expect(derive(applyEdits(BASE, {}), SALARY).total.value).toBe(510_000);
+    expect(derive(applyEdits(BASE, {}), SALARY).total.value).toBe(504_000);
   });
 });
 
@@ -199,5 +201,36 @@ describe('중도해지 이자 — expected.earlyTermination 재현', () => {
 
   it('카드 해지 시나리오에는 중도해지 손실이 없다', () => {
     expect(derive(scenario, CARD).earlyTermination).toBeNull();
+  });
+});
+
+describe('우대 상한 — 명목 우대폭과 실제 바뀌는 금리', () => {
+  const loan = product('loan_nuri_worker'); // 잔액 2,000만 · 상한 1.0%p · 고정 우대 0.3%p
+  const noCap = { ...loan, facts: { ...loan.facts, preferentialCap: undefined } };
+
+  it('상한 위(명목 1.3%p)에서 0.4%p 가 빠지면 실제로는 0.1%p 만 오른다 → 조정 +60,000', () => {
+    const adj = capAdjustment(loan, 0.01, 0.004, 0)!;
+    expect(adj.actualDelta).toBeCloseTo(0.001, 10);
+    expect(adj.amount.value).toBe(60_000);
+    expect(adj.cap.source).toBe('holding');
+  });
+  it('상한 아래로 충분히 내려가면 명목 그대로 — 급여 0.6%p 는 실제 0.3%p', () => {
+    expect(capAdjustment(loan, 0.01, 0.006, 0)!.amount.value).toBe(60_000);
+    expect(capAdjustment(loan, 0.0, 0.0, 0)).toBeNull();
+  });
+  it('상한에 딱 맞는 대출에 우대가 더해져도 금리는 그대로 — 얻는 쪽을 깎는다(음수 조정)', () => {
+    // 명목 0.7 + 고정 0.3 = 1.0%p(상한) 에서 0.1%p 를 더 얻는다
+    const adj = capAdjustment(loan, 0.007, 0, 0.001)!;
+    expect(adj.actualDelta).toBeCloseTo(0, 10);
+    expect(adj.amount.value).toBe(-20_000);
+  });
+  it('상한이 없으면 조정 없음', () => {
+    expect(capAdjustment(noCap, 0.01, 0.004, 0)).toBeNull();
+  });
+  it('카드 해지: 신용대출 행은 명목 80,000 으로 두고 합계는 상한 조정 60,000 을 뺀 값', () => {
+    const d = derive(scenario, CARD);
+    expect(d.items.find((i) => i.condition.id === 'w1')!.effectiveLoss.value).toBe(80_000);
+    expect(d.capAdjustments.map((c) => [c.productId, c.amount.value])).toEqual([['loan_nuri_worker', 60_000]]);
+    expect(d.total.value).toBe(d.items.reduce((a, i) => a + i.effectiveLoss.value, 0) - 60_000);
   });
 });

@@ -46,6 +46,16 @@ export interface ProductFacts {
   last4?: string;
   /** 보험 보장 요약 */
   coverage?: string;
+  /** 카드 기본 적립·할인율 (0.007 = 0.7%) */
+  rewardRate?: number;
+  /** 매달 나가는 금액 (관리비 등 납부 항목) */
+  monthlyAmount?: number;
+  /** 우대금리 합계 상한 (0.01 = 1.0%p). 있으면 이 대출에 걸린 우대는 묶어서 상한까지만 계산한다 */
+  preferentialCap?: number;
+  /** 다른 보유 상품과 연결되지 않은 우대(신용등급 등). 상한 계산에만 들어간다 */
+  fixedPreferential?: number;
+  /** 지금 이 항목을 결제하는 카드. 결제 수단을 바꾸면 이 카드의 이용금액이 그만큼 준다 */
+  paidBy?: string;
 }
 
 /**
@@ -78,8 +88,13 @@ export interface Span {
   end: number;
 }
 
+/**
+ * rate_delta      원금 × |금리차|
+ * monthly_benefit 월 금액 × 12
+ * spend_rate      결제액 × 적립률 × 12. 결제액은 target 상품의 facts.monthlyAmount (관리비 카드 적립 등)
+ */
 export interface Effect {
-  kind: 'rate_delta' | 'monthly_benefit';
+  kind: 'rate_delta' | 'monthly_benefit' | 'spend_rate';
   value: number;
 }
 
@@ -157,7 +172,7 @@ export const isMapped = (c: Condition): c is MappedCondition =>
  * 변경을 실행했을 때 없어지는 비용 = 절감.
  * 금액은 대상 상품의 facts 에서 읽는다 — 화면이나 JSON 에 숫자를 따로 적지 않는다.
  */
-export type SavingKind = 'annual_fee' | 'monthly_premium';
+export type SavingKind = 'annual_fee' | 'monthly_premium' | 'rate_gain' | 'reward_diff' | 'new_card_fee';
 
 export interface Saving {
   kind: SavingKind;
@@ -183,8 +198,12 @@ export interface Trigger {
   id: string;
   productId: string;
   action: string;
-  /** 리스트 제목: "카드 해지/변경" */
+  /** 리스트 제목: "카드 해지/변경". question 이 있으면 허브에서는 보조 줄로 내려간다 */
   label: string;
+  /** 허브 행 제목 — 사용자가 스스로 할 질문: "톡톡카드를 해지하면 대출 이자가 늘까요?" */
+  question?: string;
+  /** 허브 맨 위에 따로 크게 두는 사례(관리비 계좌 납부). 배지 없이 자리만 먼저다 */
+  featured?: boolean;
   icon: IconKey;
   /** 문장에 쓰는 동사: "해지", "변경" */
   verb: string;
@@ -196,6 +215,21 @@ export interface Trigger {
    */
   missing?: string[];
   savings: Saving[];
+  /**
+   * 변경 후 새로 충족되는 조건 id. 지금은 미적용이고, 바꾸면 켜진다(관리비 계좌 납부 → 대출 자동납부 우대).
+   * 원금 × |금리차| 가 절감(①)에 "월마다 쌓이는" 항목으로 들어간다.
+   */
+  gains?: string[];
+  /**
+   * 이 변경으로 카드 이용금액이 옮겨 간다. 그 카드의 card_spend 조건을 옮긴 뒤 금액으로 다시 판정한다.
+   * amountFrom 상품의 facts.monthlyAmount 만큼 cardId 카드에서 빠진다.
+   */
+  spendShift?: { cardId: string; amountFrom: string };
+  /**
+   * 대상 카드를 해지하지 않고 사용액 일부를 다른 카드로 옮긴다(나눠 쓰기). 걸린 조건은 사용액으로만 다시 판정하고,
+   * 얼마를 남길지·어느 카드로 옮길지는 사용자가 고른다(store.split). 옮겨 갈 카드를 고르기 전에는 보류다.
+   */
+  split?: boolean;
 }
 
 /**
@@ -264,6 +298,8 @@ export interface HomeData {
   quickMenu: { key: IconKey; label?: string; tab?: string }[];
   bannerTitle: string;
   bannerBody: string;
+  /** 홈 배너 둘째 줄 — 기능 설명이 아니라 사용자의 질문. 없으면 brand.serviceTagline */
+  bannerQuestion?: string;
 }
 
 export interface Brand {
@@ -284,6 +320,8 @@ export interface Scenario {
   conditions: Condition[];
   /** 갈아탈 후보. 없으면 추천 카드가 뜨지 않는다 */
   candidates?: Candidate[];
+  /** 용어 풀이. 키는 화면에 나오는 용어 그대로, 값은 쉬운 말 한두 문장 (Term 컴포넌트) */
+  glossary?: Record<string, string>;
   /** 테스트 검증용. 화면에서 읽지 않는다. */
   expected?: unknown;
 }

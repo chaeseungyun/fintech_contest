@@ -10,6 +10,8 @@ export interface TriggerExpectation {
   annualLossTotal: number;
   savingsTotal: number;
   netAnnual: number;
+  /** 3개월 유지 비교값(지금 바꾸는 것 대비). 제안서 사례처럼 3개월로 적은 트리거만 */
+  threeMonths?: number;
   nextJudgmentDates: Record<string, ISODate | null>;
   safeAfter: ISODate;
   unrecoverable: { conditionId: string; until: ISODate }[];

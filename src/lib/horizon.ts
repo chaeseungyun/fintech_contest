@@ -5,8 +5,9 @@
 //   지금 실행(0)   : 연 기준 순손익 = 절감 − 연간 손실
 //                    (바로 실행하면 절감은 생기고 혜택은 없어진다)
 //   m개월 유지(m>0): 지켜낸 혜택 − 그동안 계속 낸 비용
-//                    = 연간 손실 × m/12 − 절감 × ceil(m/12)
-//                    절감은 연 단위로 나가는 비용이라 해가 바뀔 때마다 한 번씩 더해진다.
+//                    = 연간 손실 × m/12 − 절감 × ceil(m/12) − 월 절감 × m/12
+//                    절감(연회비 등)은 연 단위로 나가는 비용이라 해가 바뀔 때마다 한 번씩 더해진다.
+//                    월 절감(이자 절감 등)은 달마다 쌓이므로 개월 수에 비례한다.
 //
 // 추천 구간
 //   1) 지금 실행이 이미 이득이면(순손익 ≥ 0) 0개월
@@ -56,8 +57,10 @@ export interface HorizonInput {
   today: ISODate;
   /** 연간 손실 합계 (양수) */
   annualLoss: number;
-  /** 연간 절감 합계 (양수) */
+  /** 연간 절감 합계 중 해마다 한 번 나가는 것 (양수) */
   savings: number;
+  /** 연간 절감 합계 중 달마다 쌓이는 것 (양수). 없으면 0 */
+  monthlySavings?: number;
   /** 회복 불가 조건의 회복 시점 중 가장 늦은 날. 없으면 null */
   recoverBy: ISODate | null;
   /** "해지" / "변경" */
@@ -69,22 +72,23 @@ export function netAnnualOf(annualLoss: number, savings: number): number {
   return savings - annualLoss;
 }
 
-export function holdValue(annualLoss: number, savings: number, months: number): number {
+export function holdValue(annualLoss: number, savings: number, months: number, monthlySavings = 0): number {
   const kept = (annualLoss * months) / 12;
-  const paid = savings * Math.ceil(months / 12);
+  const paid = savings * Math.ceil(months / 12) + (monthlySavings * months) / 12;
   return Math.round(kept - paid);
 }
 
 export function horizonProjection(input: HorizonInput): Horizon {
   const { today, annualLoss, savings, recoverBy, verb } = input;
+  const monthly = input.monthlySavings ?? 0;
   const months = [...(input.months ?? DEFAULT_HORIZON_MONTHS)].sort((a, b) => a - b);
-  const net = netAnnualOf(annualLoss, savings);
+  const net = netAnnualOf(annualLoss, savings + monthly);
 
   const raw = months.map((m) => ({
     months: m,
     kind: (m === 0 ? 'now' : 'hold') as HorizonPoint['kind'],
     label: m === 0 ? `지금 ${verb}` : `${formatMonths(m)} 유지`,
-    amount: m === 0 ? net : holdValue(annualLoss, savings, m),
+    amount: m === 0 ? net : holdValue(annualLoss, savings, m, monthly),
   }));
 
   const { months: recommendedMonths, reason } = pickRecommended(raw, { today, net, recoverBy });

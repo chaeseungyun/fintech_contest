@@ -59,7 +59,7 @@ export function watchSummary(scenario: Scenario): WatchSummary {
       condition,
       holder,
       target,
-      annualBenefit: { value: annualLossOf(condition, holder), source: 'calc' as const },
+      annualBenefit: { value: annualLossOf(condition, holder, target), source: 'calc' as const },
       judgment,
       requirement: requirementLabel(condition),
       dueThisMonth: date !== null && compareISO(date, nextMonth) < 0,

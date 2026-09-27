@@ -1,6 +1,7 @@
 import { AppShell } from '../components/AppShell';
 import { Glyph, TileIcon, TYPE_ICON } from '../components/Glyph';
 import { SourceTag } from '../components/SourceTag';
+import { Term } from '../components/Term';
 import type { Axis, AxisPoint, Derived } from '../lib/derive';
 import { formatDotMD, formatDotYMD, formatKoMD, formatKoYMD, withJosa } from '../lib/format';
 import { perkLabel } from '../lib/money';
@@ -123,8 +124,9 @@ export function Timeline() {
           )}
         </h1>
         <p>
-          우대 확인일은 은행이 실적을 채웠는지 보고 그 달 우대를 줄지 정하는 날입니다. 이 날이 지나면 그 달
-          우대는 확정되어, 그 뒤에 바꿔도 그 달 혜택은 잃지 않습니다.
+          <Term term="우대 확인일" />은 은행이 <Term term="실적" />을 채웠는지 보고 그 달 우대를 줄지 정하는
+          날입니다. 이 날이 지나면 그 달 우대는 확정되어, 그 뒤에 바꿔도 그 달 혜택은 잃지 않습니다. 이번 달
+          확인이 모두 끝난 뒤가 <Term term="변경 가능 구간" />입니다.
         </p>
       </div>
 

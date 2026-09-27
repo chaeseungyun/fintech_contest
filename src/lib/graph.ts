@@ -14,9 +14,10 @@ export interface Edge {
   metricLabel: Tagged<string>;
 }
 
+/** 영향받는 상품 하나. 한 상품에 조건이 여럿 걸릴 수 있다(카드 실적 구간 등) — 노드는 하나, 조건은 전부 든다 */
 export interface Satellite {
   product: Product;
-  edge: Edge;
+  edges: Edge[];
 }
 
 export interface Graph {
@@ -45,6 +46,8 @@ const EDGE_LABEL: Record<string, string> = {
   card_autopay: '카드 납부 조건',
   loan_holding: '대출 보유 조건',
   deposit_balance: '예적금 잔액 조건',
+  card_payment: '카드 적립',
+  loan_autopay: '자동납부 조건',
 };
 
 export function metricLabel(cond: MappedCondition): string {
@@ -65,7 +68,12 @@ export function toEdge(cond: MappedCondition): Edge {
 export function buildGraph(scenario: Scenario, centerId: string): Graph {
   const center = productById(scenario, centerId);
   const edges = incomingConditions(scenario, centerId).map(toEdge);
-  const satellites = edges.map((edge) => ({ product: productById(scenario, edge.holderId), edge }));
+  const satellites: Satellite[] = [];
+  for (const edge of edges) {
+    const same = satellites.find((s) => s.product.id === edge.holderId);
+    if (same) same.edges.push(edge);
+    else satellites.push({ product: productById(scenario, edge.holderId), edges: [edge] });
+  }
   return { center, edges, satellites };
 }
 

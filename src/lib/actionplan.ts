@@ -140,7 +140,7 @@ function summaryOf(input: ActionPlanInput): string {
     case 'keep':
       return `확인된 조건에서는 유지하는 쪽이 유리합니다. 그래도 ${verb}해야 한다면 손해를 가장 줄이는 순서입니다.`;
     case 'pending':
-      return `${input.missing.join('·')}이 확인되지 않아 전체 비교는 보류 중입니다. 그래도 ${verb}한다면 확인된 항목 기준으로 손해를 줄이는 순서입니다.`;
+      return `${withJosa(input.missing.join('·'), '이/가')} 확인되지 않아 전체 비교는 보류 중입니다. 그래도 ${verb}한다면 확인된 항목 기준으로 손해를 줄이는 순서입니다.`;
     case 'switch': {
       const preserved = input.chosen?.preserved.length ?? 0;
       if (preserved > 0) {

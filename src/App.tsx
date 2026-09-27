@@ -9,6 +9,7 @@ import { Home } from './screens/Home';
 import { Impact } from './screens/Impact';
 import { More } from './screens/More';
 import { Hub } from './screens/Hub';
+import { TermSheet } from './components/Term';
 import { Timeline } from './screens/Timeline';
 import { Verdict } from './screens/Verdict';
 import {
@@ -73,10 +74,14 @@ export default function App() {
     <StoreContext.Provider value={store}>
       <div className="stage">
         <div className="phone">
-          <div className="screen" key={baseRoute ? baseRoute.name : base.tab} {...(sheet ? INERT : {})}>
-            {screenFor(base)}
+          {/* 용어 풀이 시트가 떠 있으면 그 아래(화면·허브) 전부 포커스를 막는다 */}
+          <div className="layer" {...(state.term ? INERT : {})}>
+            <div className="screen" key={baseRoute ? baseRoute.name : base.tab} {...(sheet ? INERT : {})}>
+              {screenFor(base)}
+            </div>
+            {sheet && <Hub />}
           </div>
-          {sheet && <Hub />}
+          <TermSheet />
         </div>
       </div>
     </StoreContext.Provider>

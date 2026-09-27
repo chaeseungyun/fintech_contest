@@ -7,6 +7,7 @@ import type { Derived } from '../lib/derive';
 import type { ImpactItem } from '../lib/derive';
 import { formatDotYMD, formatKoMD, formatKoYMD, formatMonths, withJosa } from '../lib/format';
 import { perkLabel } from '../lib/money';
+import { tag } from '../lib/types';
 import { useStore } from '../state/store';
 
 /**
@@ -26,6 +27,15 @@ function unrecoverableNote(d: Derived): string {
   const perks = d.unrecoverable.map(perkOf).join('·');
   const until = formatKoYMD(d.recoverBy!);
   return `${perks}는 ${withJosa(center, '을/를')} 보유한 조건으로 가입 때 확정된 것이라, 지금 ${verb}하면 만기(${until})까지 이 우대 없이 이어지고 ${withJosa(center, '을/를')} 다시 만들어도 되돌아오지 않습니다.`;
+}
+
+/** "톡톡카드 적립·주담대 우대" — 실제로 잃는 연결의 상품과 혜택 이름. 상품이 여럿이면 상품 이름만 */
+function whyLossLabel(d: Derived): string {
+  const losing = d.items.filter((i) => i.effectiveLoss.value > 0);
+  const names = [...new Set(losing.map((i) => i.product.shortName ?? i.product.name))];
+  if (names.length !== 1) return `${names.join('·')} 혜택`;
+  const perks = [...new Set(losing.map((i) => perkLabel(i.condition).split(' ')[0]))];
+  return `${names[0]} ${perks.join('·')}`;
 }
 
 function horizonNote(d: Derived): string {
@@ -48,9 +58,9 @@ function horizonNote(d: Derived): string {
 }
 
 /**
- * 분석이 끝나고 처음 보는 화면. 결론 → 순손익 → 비교 기준 → 손익 막대 → 기간별 차트 → 시점 스트립.
+ * 분석이 끝나고 처음 보는 화면. 결론 → 순손익 → 비교 기준 → "왜?" 두 줄 → 기간별 차트 → 시점 스트립.
  * 항목별 이유·유지 조건·갈아타기 후보·체크리스트는 "분석 과정 보기"(impact) 로 한 단계 들어간다.
- * 절감·손실 금액은 결과 상세의 몫이라 여기서는 비율 막대로만 그린다 — 같은 값을 두 화면에 다시 쓰지 않는다.
+ * "왜?" 두 줄(얻는 것·잃는 것 합계)은 작게만 쓴다 — 항목별 금액과 근거는 결과 상세의 몫이다.
  */
 export function Verdict({ triggerId }: { triggerId: string }) {
   const { derived: d, dispatch } = useStore();
@@ -100,23 +110,25 @@ export function Verdict({ triggerId }: { triggerId: string }) {
           <Amount value={d.netAnnual} signed short size="hero" />
         </div>
         <BasisStrip basis={d.basis} />
-        {loss > 0 && saving > 0 && (
-          <div className="ratio" aria-label="잃는 혜택과 줄어드는 비용의 비율">
-            <div className="bars">
-              <span className="down" style={{ flexGrow: loss }} />
-              <span className="up" style={{ flexGrow: saving }} />
-            </div>
-            <div className="legend">
-              <span>
-                <i className="down" />
-                잃는 혜택
-              </span>
-              <span>
-                <i className="up" />
-                줄어드는 비용
-              </span>
-            </div>
-          </div>
+        {/* 결론 밑 "왜?" 두 줄 — 처음 보는 사람이 순손익이 어디서 왔는지 바로 읽게 한다(팀 확정 2026-09-27).
+            작게 쓴다: 항목별 내역과 근거는 결과 상세의 몫이다 */}
+        {(saving !== 0 || loss > 0) && (
+          <ul className="why" aria-label="순손익이 나온 이유">
+            {saving !== 0 && (
+              <li>
+                <span className="k">
+                  얻는 것 · {d.savings.map((s) => s.label).join('·')}
+                </span>
+                <Amount value={d.savingsTotal} signed short />
+              </li>
+            )}
+            {loss > 0 && (
+              <li>
+                <span className="k">잃는 것 · {whyLossLabel(d)}</span>
+                <Amount value={tag(-loss, d.total.source)} signed short />
+              </li>
+            )}
+          </ul>
         )}
       </section>
 
@@ -134,6 +146,19 @@ export function Verdict({ triggerId }: { triggerId: string }) {
         <HorizonChart horizon={d.horizon} quiet={d.horizon.reason === 'positive' && d.savings.length === 0} />
         <p className="chartnote">{horizonNote(d)}</p>
       </section>
+
+      {d.split && d.split.dest === null && (
+        <button type="button" className="card linkrow" onClick={toImpact}>
+          <span className="ico warn">
+            <Glyph name="card" size={19} />
+          </span>
+          <span className="body">
+            <b>옮겨 갈 카드를 고르면 비교가 끝납니다</b>
+            <span>남길 금액과 카드 고르기</span>
+          </span>
+          <Glyph name="chevron" size={16} />
+        </button>
+      )}
 
       {d.items.length > 0 && (
         <button type="button" className="card linkrow" onClick={toTimeline}>

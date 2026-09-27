@@ -56,11 +56,11 @@ describe('계산 규칙', () => {
       );
     }
     const smart = d.recommendation.results.find((r) => r.candidate.id === 'card_nuri_smart')!;
-    // k1 120,000 + k3 24,000 유지, 자체 혜택 5,000×12, 연회비 15,000
-    expect(smart.preservedLoss.value).toBe(144_000);
+    // k1 38,000 + k1b 38,000 + k3 24,000 + w1 20,000(상한 적용 실제분) 유지, 자체 혜택 5,000×12, 연회비 15,000
+    expect(smart.preservedLoss.value).toBe(120_000);
     expect(smart.ownBenefit.value).toBe(60_000);
     expect(smart.ownCost.value).toBe(15_000);
-    expect(smart.netAfter.value).toBe(-164_000 + 144_000 + 60_000 - 15_000);
+    expect(smart.netAfter.value).toBe(-140_000 + 120_000 + 60_000 - 15_000);
   });
 
   it('PERMANENT 조건은 후보가 실적을 유지시켜도 살리지 못한다', () => {
@@ -123,7 +123,7 @@ describe('파이프라인이 못 채운 경우', () => {
     expect(r.preserved).toHaveLength(0);
     expect(r.preservedLoss.value).toBe(0);
     // 보수적으로 계산하니 문턱을 못 넘는다
-    expect(r.netAfter.value).toBe(-164_000 + 60_000 - 15_000);
+    expect(r.netAfter.value).toBe(-140_000 + 60_000 - 15_000);
     expect(r.recommended).toBe(false);
     expect(r.basisLabel).toContain('연결 유지 확인 필요');
   });
@@ -169,9 +169,9 @@ describe('문장', () => {
   it('추천이 있고 문턱이 있으면 "그래도 갈아탄다면"', () => {
     const r = derive(scenario, CARD).recommendation;
     expect(r.headline.title).toBe('그래도 갈아탄다면');
-    expect(r.headline.body).toContain('16.4만원');
+    expect(r.headline.body).toContain('14만원');
     expect(r.headline.body).toContain('스마트카드로');
-    expect(r.headline.body).toContain('연결 2/3');
+    expect(r.headline.body).toContain('연결 4/5');
     expect(r.headline.body).toContain('2.5만원');
   });
 
@@ -191,8 +191,8 @@ describe('문장', () => {
     const r = derive(scenario, CARD).recommendation;
     const smart = r.results.find((x) => x.candidate.id === 'card_nuri_smart')!;
     const hanbit = r.results.find((x) => x.candidate.id === 'card_hanbit_premium')!;
-    expect(smart.basisLabel).toBe('연결 2/3 유지 · 연회비 1.5만원 · 자체 혜택 연 6만원');
-    expect(hanbit.basisLabel).toBe('연결 0/3 유지 · 연회비 없음 · 자체 혜택 연 12만원');
+    expect(smart.basisLabel).toBe('연결 4/5 유지 · 연회비 1.5만원 · 자체 혜택 연 6만원');
+    expect(hanbit.basisLabel).toBe('연결 0/5 유지 · 연회비 없음 · 자체 혜택 연 12만원');
   });
 });
 
@@ -201,7 +201,7 @@ describe('체크리스트 연동', () => {
     const d = derive(scenario, CARD);
     const item = d.checklist.find((c) => c.key === 'switch-order')!;
     expect(item).toBeDefined();
-    expect(item.text).toBe('예를 들어 스마트카드를 먼저 만든 뒤 9월 30일 이후에 톡톡카드를 해지하면 연결 2건이 유지됩니다.');
+    expect(item.text).toBe('예를 들어 스마트카드를 먼저 만든 뒤 9월 30일 이후에 톡톡카드를 해지하면 연결 4건이 유지됩니다.');
     expect(item.source).toBe('calc');
   });
 
@@ -228,17 +228,17 @@ describe('수정 → 재계산', () => {
   it('카드 실적 기준을 올려 k1 이 미적용이 되면 유지 목록에서도 빠진다', () => {
     const d = derive(applyEdits(BASE, { k1: { threshold: 900_000 } }), CARD);
     const smart = d.recommendation.results.find((r) => r.candidate.id === 'card_nuri_smart')!;
-    expect(smart.preserved.map((l) => l.condition.id)).toEqual(['k3']);
-    expect(d.recommendation.linkCount).toBe(2);
+    expect(smart.preserved.map((l) => l.condition.id).sort()).toEqual(['k1b', 'k3', 'w1']);
+    expect(d.recommendation.linkCount).toBe(4);
     // k1 은 손실에서도 빠지고 유지분에서도 빠져 순손익은 같다
     expect(smart.netAfter.value).toBe(25_000);
   });
 
   it('조건을 지우면 연결 수가 줄어든다', () => {
     const d = derive(applyEdits(BASE, {}, ['k3']), CARD);
-    expect(d.recommendation.linkCount).toBe(2);
+    expect(d.recommendation.linkCount).toBe(4);
     const smart = d.recommendation.results.find((r) => r.candidate.id === 'card_nuri_smart')!;
-    expect(smart.basisLabel).toContain('연결 1/2 유지');
+    expect(smart.basisLabel).toContain('연결 3/4 유지');
   });
 
   it('순수 함수: 같은 입력이면 같은 결과', () => {

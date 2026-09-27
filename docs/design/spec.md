@@ -143,7 +143,8 @@ CLAUDE.md가 "상시 분석 중은 홈이 말한다"고 지정한 자리다. 값
 - 제목은 `home.bannerTitle`, 본문은 `home.bannerBody` 그대로.
 - 행에는 **금액이 없다**(CLAUDE.md). 연결 건수 · 영향 상품 · `trigger.missing`만.
   `missing`은 `--warn` 색 한 줄로 따로 뺀다.
-- 첫 행(카드 해지)만 테두리 강조. 나머지는 hairline 구분 목록.
+- 행 제목은 `trigger.question`(사용자의 질문), `label`은 보조 줄.
+- `trigger.featured`가 켜진 행만 테두리로 맨 위에 따로 두고(배지 없음), 나머지는 "다른 경우도 미리 보기" 아래 hairline 구분 목록.
 
 시트로 바꾸면 `AppShell`이 필요 없다 — 탭바도 나오지 않는다.
 구현은 `stack`에 `hub`를 그대로 쌓되 `AppShell` 대신 시트 컨테이너를 쓰는 쪽이 간단하다.
