@@ -195,7 +195,7 @@
         "dept": "누리은행 여신관리부 주택담보대출 담당",
         "channels": ["영업점 여신 창구 (사전 예약 권장)", "누리은행 앱 > 대출 > 금리 확인"],
         "hours": "평일 09:00–16:00",
-        "ask": ["우대금리 재산정일이 매월 며칠인지", "중도상환수수료가 남아 있는지"]
+        "ask": ["우대금리 재산정일이 매월 며칠인지", "관리비 계좌 자동이체가 대출 자동납부 출금 2건에 들어가는지", "중도상환수수료가 남아 있는지"]
       }
     },
     {
@@ -205,7 +205,7 @@
       "shortName": "신용대출",
       "type": "loan",
       "facts": {
-        "balance": 20000000,
+        "balance": 38000000,
         "baseRate": 0.058,
         "appliedRate": 0.048,
         "preferentialCap": 0.01,
@@ -1020,7 +1020,8 @@
         "loan_change": ["card_nuri_life", "acct_nuri_plus"],
         "deposit_cancel": ["card_nuri_life", "acct_nuri_plus"],
         "insurance_cancel": ["card_nuri_life", "acct_nuri_plus"],
-        "salary_switch": ["card_nuri_life"]
+        "salary_switch": ["card_nuri_life"],
+        "card_split": ["acct_nuri_plus"]
       }
     },
     "triggers": {
@@ -1041,13 +1042,13 @@
       "card_cancel": {
         "annualLossByProduct": {
           "loan_nuri_mortgage": 76000,
-          "loan_nuri_worker": 80000,
+          "loan_nuri_worker": 152000,
           "dep_nuri_term": 50000,
           "ins_nuri_care": 24000
         },
-        "annualLossTotal": 170000,
+        "annualLossTotal": 188000,
         "savingsTotal": 30000,
-        "netAnnual": -140000,
+        "netAnnual": -158000,
         "nextJudgmentDates": {
           "k1": "2026-09-15",
           "k1b": "2026-09-15",
@@ -1057,13 +1058,13 @@
         },
         "safeAfter": "2026-09-30",
         "unrecoverable": [{ "conditionId": "k2", "until": "2027-03-20" }],
-        "horizon": [-140000, 12500, 55000, 97500, 140000],
+        "horizon": [-158000, 17000, 64000, 111000, 158000],
         "recommendedMonths": 9,
         "verdict": "keep",
         "recommendation": {
-          "hurdle": 140000,
+          "hurdle": 158000,
           "ranked": ["card_nuri_smart", "card_hanbit_premium"],
-          "netAfter": { "card_nuri_smart": 25000, "card_hanbit_premium": -20000 },
+          "netAfter": { "card_nuri_smart": 25000, "card_hanbit_premium": -38000 },
           "preserved": { "card_nuri_smart": ["w1", "k1", "k1b", "k3"], "card_hanbit_premium": [] },
           "best": "card_nuri_smart"
         }
@@ -1084,14 +1085,14 @@
       "salary_switch": {
         "annualLossByProduct": {
           "loan_nuri_mortgage": 114000,
-          "loan_nuri_worker": 120000,
+          "loan_nuri_worker": 228000,
           "card_nuri_tok": 240000,
           "autopay_nuri_utility": 60000,
           "dep_nuri_term": 30000
         },
-        "annualLossTotal": 504000,
+        "annualLossTotal": 558000,
         "savingsTotal": 0,
-        "netAnnual": -504000,
+        "netAnnual": -558000,
         "nextJudgmentDates": {
           "w2": "2026-09-15",
           "c1": "2026-09-15",
@@ -1101,10 +1102,10 @@
         },
         "safeAfter": "2026-09-30",
         "unrecoverable": [{ "conditionId": "c4", "until": "2027-03-20" }],
-        "horizon": [-504000, 126000, 252000, 378000, 504000],
+        "horizon": [-558000, 139500, 279000, 418500, 558000],
         "recommendedMonths": 9,
         "verdict": "pending",
-        "recommendation": { "hurdle": 504000, "ranked": [], "netAfter": {}, "preserved": {}, "best": null }
+        "recommendation": { "hurdle": 558000, "ranked": [], "netAfter": {}, "preserved": {}, "best": null }
       },
       "loan_change": {
         "annualLossByProduct": {

@@ -56,11 +56,11 @@ describe('계산 규칙', () => {
       );
     }
     const smart = d.recommendation.results.find((r) => r.candidate.id === 'card_nuri_smart')!;
-    // k1 38,000 + k1b 38,000 + k3 24,000 + w1 20,000(상한 적용 실제분) 유지, 자체 혜택 5,000×12, 연회비 15,000
-    expect(smart.preservedLoss.value).toBe(120_000);
+    // k1 38,000 + k1b 38,000 + k3 24,000 + w1 38,000(상한 적용 실제분) 유지, 자체 혜택 5,000×12, 연회비 15,000
+    expect(smart.preservedLoss.value).toBe(138_000);
     expect(smart.ownBenefit.value).toBe(60_000);
     expect(smart.ownCost.value).toBe(15_000);
-    expect(smart.netAfter.value).toBe(-140_000 + 120_000 + 60_000 - 15_000);
+    expect(smart.netAfter.value).toBe(-158_000 + 138_000 + 60_000 - 15_000);
   });
 
   it('PERMANENT 조건은 후보가 실적을 유지시켜도 살리지 못한다', () => {
@@ -123,7 +123,7 @@ describe('파이프라인이 못 채운 경우', () => {
     expect(r.preserved).toHaveLength(0);
     expect(r.preservedLoss.value).toBe(0);
     // 보수적으로 계산하니 문턱을 못 넘는다
-    expect(r.netAfter.value).toBe(-140_000 + 60_000 - 15_000);
+    expect(r.netAfter.value).toBe(-158_000 + 60_000 - 15_000);
     expect(r.recommended).toBe(false);
     expect(r.basisLabel).toContain('연결 유지 확인 필요');
   });

@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 import { AppShell } from '../components/AppShell';
 import { Amount } from '../components/Amount';
 import { BasisStrip } from '../components/BasisStrip';
@@ -8,7 +9,7 @@ import { SplitCard } from '../components/SplitCard';
 import { SourceTag } from '../components/SourceTag';
 import { formatKoMD, formatKoYMD, formatWon, formatWonShort, withJosa } from '../lib/format';
 import type { ImpactItem } from '../lib/derive';
-import { METRIC_STATUS_LABEL } from '../lib/interpreter';
+import { METRIC_STATUS_LABEL, requirementLabel } from '../lib/interpreter';
 import { formatRateDelta, perkLabel, type CapAdjustment } from '../lib/money';
 import { useStore } from '../state/store';
 import { tag } from '../lib/types';
@@ -22,6 +23,9 @@ function plainEffect(item: ImpactItem, center: string, verb: string): string {
   const perk = perkLabel(item.condition);
   const head = `${withJosa(center, '을/를')} ${verb}하면 ${name}의 ${perk}`;
   const won = formatWon(item.effectiveLoss.value);
+  if (item.shift?.recognized) {
+    return `옮겨 간 카드 이용금액도 ${name}의 카드 실적으로 인정된다고 입력해, ${name}의 ${perk}는 그대로 유지된다고 계산했어요. 은행 확인이 필요해요.`;
+  }
   if (item.shift) {
     const after = formatWonShort(item.shift.after);
     const bar = formatWonShort(item.condition.metric.threshold ?? 0);
@@ -44,6 +48,14 @@ const pp = (x: number) => formatRateDelta(x).replace(/^[−+]/, '');
  */
 function CapRow({ cap, name }: { cap: CapAdjustment; name: string }) {
   const softer = cap.amount.value > 0;
+  const nominal = pp(Math.abs(cap.nominalDelta));
+  const actual = Math.abs(cap.actualDelta);
+  // 손실 사이에 끼는 + 금액이 "얻는 것" 으로 읽히지 않게, 왜 덜 바뀌는지를 문장으로 쓴다
+  const why = softer
+    ? `${nominal} 우대가 빠져도 실제 금리는 ${pp(actual)}만 올라요`
+    : actual === 0
+      ? `${nominal} 우대를 더 받아도 실제 금리는 그대로예요`
+      : `${nominal} 우대를 더 받아도 실제 금리는 ${pp(actual)}만 내려요`;
   return (
     <div className="irow saving">
       <div className="head static">
@@ -53,8 +65,7 @@ function CapRow({ cap, name }: { cap: CapAdjustment; name: string }) {
         <span className="body">
           <b>{name} 우대 상한 조정</b>
           <span>
-            상한 {pp(cap.cap.value)} · 명목 {pp(Math.abs(cap.nominalDelta))} 중 실제 {pp(Math.abs(cap.actualDelta))}만{' '}
-            {softer ? '오름' : '내림'} <SourceTag source={cap.cap.source} />
+            우대 합계 상한 {pp(cap.cap.value)} · {why} <SourceTag source={cap.cap.source} />
           </span>
         </span>
         <span className="tail">
@@ -65,10 +76,20 @@ function CapRow({ cap, name }: { cap: CapAdjustment; name: string }) {
   );
 }
 
+/** 같은 상품에 같은 우대폭 조건이 여러 개(카드 실적 30만·60만 구간)면 행이 똑같아 보인다 — 구간을 붙인다 */
+function tierLabel(item: ImpactItem): string {
+  const m = item.condition.metric;
+  if (m.kind === 'card_spend' && m.threshold !== null) return `카드 ${formatWonShort(m.threshold)} 이상 구간`;
+  return requirementLabel(item.condition);
+}
+
 function ImpactRow({ item, triggerId }: { item: ImpactItem; triggerId: string }) {
   const { state, derived: d, dispatch } = useStore();
   const open = state.expandedConditionId === item.condition.id;
   const j = item.judgment;
+  const twin = d.items.some(
+    (o) => o !== item && o.product.id === item.product.id && o.loss.basisLabel === item.loss.basisLabel,
+  );
 
   return (
     <div className={`irow${open ? ' open' : ''}${j.active ? '' : ' off'}`}>
@@ -85,8 +106,12 @@ function ImpactRow({ item, triggerId }: { item: ImpactItem; triggerId: string })
             {!j.active
               ? j.inactiveReason
               : item.shift
-                ? `카드 이용금액 월 ${formatWonShort(item.shift.before)} → ${formatWonShort(item.shift.after)} · 기준 ${formatWonShort(item.condition.metric.threshold ?? 0)} ${item.shift.kept ? '이상 유지' : '미달'}`
-                : item.loss.basisLabel}
+                ? item.shift.recognized
+                  ? `옮긴 카드도 실적 인정(직접 입력) · 기준 ${formatWonShort(item.condition.metric.threshold ?? 0)} 이상 유지`
+                  : `카드 이용금액 월 ${formatWonShort(item.shift.before)} → ${formatWonShort(item.shift.after)} · 기준 ${formatWonShort(item.condition.metric.threshold ?? 0)} ${item.shift.kept ? '이상 유지' : '미달'}`
+                : twin
+                  ? `${item.loss.basisLabel} · ${tierLabel(item)}`
+                  : item.loss.basisLabel}
           </span>
         </span>
         <span className="tail">
@@ -178,11 +203,15 @@ function ImpactRow({ item, triggerId }: { item: ImpactItem; triggerId: string })
  * 절차의 기준 안(store.chosen)은 여기 후보 카드에서 고른다.
  */
 export function Impact({ triggerId }: { triggerId: string }) {
-  const { derived: d, dispatch } = useStore();
+  const { scenario, derived: d, dispatch } = useStore();
   const center = d.center;
   const v = d.verdict;
   const pending = v.kind === 'pending';
 
+  const capName = (id: string) => {
+    const p = scenario.products.find((x) => x.id === id);
+    return p ? (p.shortName ?? p.name) : '';
+  };
   const toPlan = () => dispatch({ type: 'push', route: { name: 'actionplan', triggerId } });
   const toHub = () => dispatch({ type: 'popTo', name: 'hub' });
 
@@ -277,13 +306,23 @@ export function Impact({ triggerId }: { triggerId: string }) {
         </button>
       </h3>
       <div className="impactlist">
-        {d.items.map((item) => (
-          <ImpactRow key={item.condition.id} item={item} triggerId={triggerId} />
-        ))}
-        {d.capAdjustments.map((c) => {
-          const p = d.items.find((i) => i.product.id === c.productId)?.product;
-          return <CapRow key={`cap-${c.productId}`} cap={c} name={p?.shortName ?? p?.name ?? ''} />;
+        {d.items.map((item, i) => {
+          // 상한 조정은 그 대출의 마지막 행 바로 아래에 둔다 — 어느 행을 깎는 줄인지 붙어 있어야 읽힌다
+          const last = !d.items.slice(i + 1).some((o) => o.product.id === item.product.id);
+          const cap = last ? d.capAdjustments.find((c) => c.productId === item.product.id) : undefined;
+          return (
+            <Fragment key={item.condition.id}>
+              <ImpactRow item={item} triggerId={triggerId} />
+              {cap && <CapRow cap={cap} name={item.product.shortName ?? item.product.name} />}
+            </Fragment>
+          );
         })}
+        {/* 손실 행이 없는 대출의 조정(얻는 우대가 상한에 막힌 경우)은 목록 끝에 */}
+        {d.capAdjustments
+          .filter((c) => !d.items.some((i) => i.product.id === c.productId))
+          .map((c) => (
+            <CapRow key={`cap-${c.productId}`} cap={c} name={capName(c.productId)} />
+          ))}
         {d.items.length === 0 && <p className="empty small">이 변경에 걸린 우대 조건이 없습니다.</p>}
       </div>
 

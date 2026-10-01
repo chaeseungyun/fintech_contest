@@ -95,16 +95,17 @@ export function basisLabel(cond: MappedCondition, holder: Product, target?: Prod
 }
 
 /** 혜택 관점 문구. 같은 조건을 "지금 받고 있는 것"으로 읽을 때 쓴다. */
-export function benefitLabel(cond: MappedCondition, holder: Product): string {
+/** active=false 면 실적 미달로 지금 못 받는 우대 — "적용 중" 이라고 쓰지 않는다 */
+export function benefitLabel(cond: MappedCondition, holder: Product, active = true): string {
   const { effect } = cond.binds;
   if (effect.kind === 'rate_delta') {
     const principal = principalOf(holder);
-    const head = `${perkLabel(cond)} 적용 중`;
+    const head = `${perkLabel(cond)} ${active ? '적용 중' : '미적용'}`;
     if (!principal) return head;
     const noun = holder.type === 'loan' ? '잔액' : '원금';
     return `${head} · ${noun} ${formatWonCompact(principal.value)}`;
   }
-  return `${perkLabel(cond)} 중`;
+  return active ? `${perkLabel(cond)} 중` : `${perkLabel(cond)} 미적용`;
 }
 
 export function lossBreakdown(cond: MappedCondition, holder: Product, target?: Product): LossBreakdown {

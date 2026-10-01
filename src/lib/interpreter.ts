@@ -152,6 +152,12 @@ export function requirementLabel(cond: MappedCondition): string {
   return `${metricNoun(kind)} ${fmt(threshold)}${metricUnit(kind)} 이상`;
 }
 
+/** 지금 실적 값. "1건" · "800,000원". 값이 없으면 null */
+export function currentLabel(cond: MappedCondition): string | null {
+  const { currentValue, kind } = cond.metric;
+  return currentValue === undefined ? null : `${fmt(currentValue)}${metricUnit(kind)}`;
+}
+
 function inactiveReason(cond: MappedCondition): string | null {
   if (isMetricMet(cond)) return null;
   const { threshold, currentValue, kind } = cond.metric;

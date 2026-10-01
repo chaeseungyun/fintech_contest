@@ -123,6 +123,16 @@ describe('관리비 계좌 납부 — 제안서 4쪽 실제 사례', () => {
     expect(lost.verdict.kind).toBe('keep');
   });
 
+  it('실행 안내: 신청 전에 자동납부 2건 인정과 가장 빠듯한 카드 실적 기준(60만)을 확인한다', () => {
+    const keys = d.actionPlan.steps.map((s) => s.key);
+    expect(keys).toEqual(['confirm', 'execute']);
+    const confirm = d.actionPlan.steps[0];
+    expect(confirm.bullets).toHaveLength(2);
+    expect(confirm.bullets[0]).toContain('지금 1건');
+    expect(confirm.bullets[1]).toContain(`여유 ${formatWonShort(800_000 - 162_103 - 600_000)}`);
+    expect(confirm.contact?.ask.join(' ')).toContain('2건');
+  });
+
   it('카드 적립은 결제할 때마다 쌓여 기다릴 이유가 없다 — 변경 가능 구간을 만들지 않는다', () => {
     expect(d.timing.alreadySafe).toBe(true);
     expect(d.actionPlan.steps.some((s) => s.key === 'wait')).toBe(false);
@@ -158,8 +168,8 @@ describe('다른 카드와 나눠 쓰기 — 필요한 실적만 남기기 (v35 
       'k1b',
       'w1',
     ]);
-    expect(d.capAdjustments.map((c) => c.amount.value)).toEqual([60_000]);
-    expect(d.netAnnual.value).toBe(800_000 * 0.005 * 12 - (240_000 + 80_000 + 38_000 + 38_000 - 60_000));
+    expect(d.capAdjustments.map((c) => c.amount.value)).toEqual([114_000]);
+    expect(d.netAnnual.value).toBe(800_000 * 0.005 * 12 - (240_000 + 152_000 + 38_000 + 38_000 - 114_000));
     expect(d.verdict.kind).toBe('keep');
     expect(d.verdict.highlight).toContain('지금처럼 모아 쓰는 것이');
   });
@@ -180,6 +190,35 @@ describe('다른 카드와 나눠 쓰기 — 필요한 실적만 남기기 (v35 
     expect(d.netAnnual.value).toBe(12_000);
     // 입력한 카드가 없으면 그 id 를 골라도 보류
     expect(derive(scenario, SPLIT, { split: { keep: 'needed', toCardId: CUSTOM_CARD_ID } }).verdict.kind).toBe('pending');
+  });
+
+  it('직접 입력 카드의 실적 기준에 못 미치면 적립이 없고, 월 한도가 있으면 거기까지만 센다', () => {
+    const base = { name: '로카카드', rewardRate: 0.012, annualFee: 0 };
+    const pick = { split: { keep: 'needed' as const, toCardId: CUSTOM_CARD_ID } };
+    // 옮기는 금액 20만 < 실적 기준 30만 → 적립 0, 톡톡카드 적립 0.7% 만 잃는다
+    const under = derive(scenario, SPLIT, { ...pick, customCard: { ...base, minSpend: 300_000 } });
+    expect(under.savings[0].annualAmount.value).toBe(-Math.round(200_000 * 0.007 * 12));
+    expect(under.savings[0].basisLabel).toContain('적립 없음');
+    // 월 한도 1,000원 < 20만 × 1.2% = 2,400원
+    const capped = derive(scenario, SPLIT, { ...pick, customCard: { ...base, monthlyCap: 1_000 } });
+    expect(capped.savings[0].annualAmount.value).toBe(Math.round((1_000 - 200_000 * 0.007) * 12));
+  });
+
+  it('대출 실적 인정을 "인정" 으로 넣으면 전부 옮겨도 대출 카드 우대는 유지 — 카드 자체 혜택은 여전히 잃는다', () => {
+    const customCard = { name: '로카카드', rewardRate: 0.012, annualFee: 0, loanRecognized: 'yes' as const };
+    const d = derive(scenario, SPLIT, { split: { keep: 'all', toCardId: CUSTOM_CARD_ID }, customCard });
+    const lost = d.items.filter((i) => i.effectiveLoss.value > 0).map((i) => i.condition.id);
+    expect(lost).toEqual(['c2']);
+    const k1 = d.items.find((i) => i.condition.id === 'k1')!;
+    expect(k1.shift!.recognized).toBe(true);
+    expect(k1.effectiveLoss.source).toBe('user');
+    expect(d.actionPlan.steps.find((s) => s.key === 'confirm')!.bullets[0]).toContain('직접 입력한 값');
+    // 모르면 인정하지 않는 쪽으로 계산한다
+    const unknown = derive(scenario, SPLIT, {
+      split: { keep: 'all', toCardId: CUSTOM_CARD_ID },
+      customCard: { ...customCard, loanRecognized: 'unknown' },
+    });
+    expect(unknown.items.filter((i) => i.effectiveLoss.value > 0).length).toBe(4);
   });
 
   it('직접 입력 금액은 0 ~ 지금 사용액 사이로 자른다', () => {

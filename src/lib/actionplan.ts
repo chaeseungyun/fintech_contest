@@ -71,6 +71,14 @@ export interface PlanDue {
   date: ISODate;
 }
 
+/**
+ * 바꾼 뒤에도 채워져야 계산이 맞는 조건. 얻는 우대(gains)는 켜진다고 보고, 사용액이 옮겨 가도
+ * 기준 이상인 카드 실적(shift.kept)은 유지된다고 보고 계산했다 — 그 가정을 은행 인정 결과로 확인하는 단계다.
+ */
+export interface PlanConfirm {
+  text: string;
+}
+
 export interface ActionPlanInput {
   kind: PlanKind;
   trigger: Trigger;
@@ -85,6 +93,10 @@ export interface ActionPlanInput {
   /** 비교에 빠진 핵심 입력. 있으면 kind 가 pending */
   missing: string[];
   earlyTermination: EarlyTermination | null;
+  /** 바꾼 뒤 확인할 조건. 비어 있으면 단계를 만들지 않는다 */
+  confirm?: PlanConfirm[];
+  /** 그 확인을 물어볼 창구 (얻는 우대가 걸린 상품) */
+  confirmContact?: ActionContact | null;
 }
 
 export function toContact(institution: string, contact: Contact | undefined): ActionContact | null {
@@ -150,7 +162,7 @@ function summaryOf(input: ActionPlanInput): string {
 }
 
 // ── 절차 ──────────────────────────────────────────────────────────────
-// 순서의 핵심: 새 상품의 발급·인정 조건을 먼저 확인하고 → 이번 달 판정이 끝난 뒤 →
+// 순서의 핵심: 새 상품의 발급·인정 조건을 먼저 확인하고 → 바꾼 뒤 채워질 조건을 확인하고 → 이번 달 판정이 끝난 뒤 →
 // 미확인·비가역 손실을 짚고 → 기존 상품을 정리한다. 경고는 해지 단계보다 앞에 온다.
 
 function switchSteps(input: ActionPlanInput): ActionStep[] {
@@ -205,6 +217,20 @@ function switchSteps(input: ActionPlanInput): ActionStep[] {
         source: 'doc',
       });
     }
+  }
+
+  const confirm = input.confirm ?? [];
+  if (confirm.length > 0) {
+    steps.push({
+      key: 'confirm',
+      title: `${trigger.verb} 뒤에도 우대 조건이 채워지는지 확인합니다`,
+      detail: '아래 조건이 채워진다고 보고 계산했어요. 은행 인정 결과가 다르면 손익이 달라집니다.',
+      bullets: confirm.map((c) => c.text),
+      whenLabel: '지금',
+      when: null,
+      contact: input.confirmContact ?? null,
+      source: 'doc',
+    });
   }
 
   if (!timing.alreadySafe) {

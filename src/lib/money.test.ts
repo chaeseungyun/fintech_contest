@@ -100,8 +100,8 @@ describe('수정 → 재계산', () => {
   it('시연 장면: 60만 구간 기준을 90만으로 올리면 그 0.1%p 가 이미 미적용이 되고 안전 시점은 9/30 으로 남는다', () => {
     const before = derive(scenario, CARD);
     const after = derive(applyEdits(BASE, { k1b: { threshold: 900_000 } }), CARD);
-    expect(before.total.value).toBe(170_000);
-    expect(after.total.value).toBe(170_000 - 38_000);
+    expect(before.total.value).toBe(188_000);
+    expect(after.total.value).toBe(188_000 - 38_000);
     expect(after.affectedCount).toBe(4);
     expect(after.inactive.map((i) => i.condition.id)).toEqual(['k1b']);
     const tier = after.items.find((i) => i.condition.id === 'k1b')!;
@@ -112,11 +112,11 @@ describe('수정 → 재계산', () => {
     expect(after.timing.safeAfter.value).toBe('2026-09-30');
   });
 
-  it('급여통장 시연 장면: 카드 실적 기준 30만 → 90만이면 합계 504,000 → 264,000, 안전 시점 9/30 → 9/15', () => {
+  it('급여통장 시연 장면: 카드 실적 기준 30만 → 90만이면 합계 558,000 → 318,000, 안전 시점 9/30 → 9/15', () => {
     const before = derive(scenario, SALARY);
     const after = derive(applyEdits(BASE, { c2: { threshold: 900_000 } }), SALARY);
-    expect(before.total.value).toBe(504_000);
-    expect(after.total.value).toBe(264_000);
+    expect(before.total.value).toBe(558_000);
+    expect(after.total.value).toBe(318_000);
     expect(after.affectedCount).toBe(4);
     expect(before.timing.safeAfter.value).toBe('2026-09-30');
     expect(after.timing.safeAfter.value).toBe('2026-09-15');
@@ -127,7 +127,7 @@ describe('수정 → 재계산', () => {
     const a = derive(applyEdits(BASE, { c2: { threshold: 900_000 } }), SALARY);
     const b = derive(applyEdits(BASE, { c2: { threshold: 900_000 } }), SALARY);
     expect(a.total.value).toBe(b.total.value);
-    expect(derive(applyEdits(BASE, {}), SALARY).total.value).toBe(504_000);
+    expect(derive(applyEdits(BASE, {}), SALARY).total.value).toBe(558_000);
   });
 });
 
@@ -205,32 +205,32 @@ describe('중도해지 이자 — expected.earlyTermination 재현', () => {
 });
 
 describe('우대 상한 — 명목 우대폭과 실제 바뀌는 금리', () => {
-  const loan = product('loan_nuri_worker'); // 잔액 2,000만 · 상한 1.0%p · 고정 우대 0.3%p
+  const loan = product('loan_nuri_worker'); // 잔액 3,800만 · 상한 1.0%p · 고정 우대 0.3%p
   const noCap = { ...loan, facts: { ...loan.facts, preferentialCap: undefined } };
 
   it('상한 위(명목 1.3%p)에서 0.4%p 가 빠지면 실제로는 0.1%p 만 오른다 → 조정 +60,000', () => {
     const adj = capAdjustment(loan, 0.01, 0.004, 0)!;
     expect(adj.actualDelta).toBeCloseTo(0.001, 10);
-    expect(adj.amount.value).toBe(60_000);
+    expect(adj.amount.value).toBe(114_000);
     expect(adj.cap.source).toBe('holding');
   });
   it('상한 아래로 충분히 내려가면 명목 그대로 — 급여 0.6%p 는 실제 0.3%p', () => {
-    expect(capAdjustment(loan, 0.01, 0.006, 0)!.amount.value).toBe(60_000);
+    expect(capAdjustment(loan, 0.01, 0.006, 0)!.amount.value).toBe(114_000);
     expect(capAdjustment(loan, 0.0, 0.0, 0)).toBeNull();
   });
   it('상한에 딱 맞는 대출에 우대가 더해져도 금리는 그대로 — 얻는 쪽을 깎는다(음수 조정)', () => {
     // 명목 0.7 + 고정 0.3 = 1.0%p(상한) 에서 0.1%p 를 더 얻는다
     const adj = capAdjustment(loan, 0.007, 0, 0.001)!;
     expect(adj.actualDelta).toBeCloseTo(0, 10);
-    expect(adj.amount.value).toBe(-20_000);
+    expect(adj.amount.value).toBe(-38_000);
   });
   it('상한이 없으면 조정 없음', () => {
     expect(capAdjustment(noCap, 0.01, 0.004, 0)).toBeNull();
   });
   it('카드 해지: 신용대출 행은 명목 80,000 으로 두고 합계는 상한 조정 60,000 을 뺀 값', () => {
     const d = derive(scenario, CARD);
-    expect(d.items.find((i) => i.condition.id === 'w1')!.effectiveLoss.value).toBe(80_000);
-    expect(d.capAdjustments.map((c) => [c.productId, c.amount.value])).toEqual([['loan_nuri_worker', 60_000]]);
-    expect(d.total.value).toBe(d.items.reduce((a, i) => a + i.effectiveLoss.value, 0) - 60_000);
+    expect(d.items.find((i) => i.condition.id === 'w1')!.effectiveLoss.value).toBe(152_000);
+    expect(d.capAdjustments.map((c) => [c.productId, c.amount.value])).toEqual([['loan_nuri_worker', 114_000]]);
+    expect(d.total.value).toBe(d.items.reduce((a, i) => a + i.effectiveLoss.value, 0) - 114_000);
   });
 });

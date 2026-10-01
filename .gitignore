@@ -5,3 +5,6 @@ dist
 # 개인 스킬 설치본 — 저장소에 올리지 않는다
 .claude/skills/
 skills/
+
+# 시연 녹화 결과물 (scripts/record-demo.py)
+demo-video/
