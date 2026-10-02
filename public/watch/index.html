@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FinStay AI 시연 영상</title>
+  <meta property="og:title" content="FinStay AI 시연 영상" />
+  <meta property="og:description" content="보유 금융상품 사이의 연결과 손익 변화를 미리 보는 체험본 시연 (2분)" />
+  <meta property="og:image" content="/demo-poster.jpg" />
+  <style>
+    /* 영상 칸의 크기를 처음부터 16:9 로 잡아 둔다 — 브라우저 기본 플레이어처럼 작게 떴다가 커지지 않게 */
+    :root { color-scheme: light; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      padding: 24px 16px;
+      background: #f2f4f8;
+      font-family: system-ui, -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+      color: #15171b;
+    }
+    .frame {
+      width: min(100%, calc((100vh - 140px) * 16 / 9), 1600px);
+      aspect-ratio: 16 / 9;
+      background: #fefefe url('/demo-poster.jpg') center / cover no-repeat;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 24px rgba(20, 22, 26, 0.12);
+    }
+    video { display: block; width: 100%; height: 100%; background: transparent; }
+    .links { display: flex; flex-wrap: wrap; gap: 8px 20px; justify-content: center; font-size: 15px; }
+    a { color: #1e40af; text-decoration: none; font-weight: 600; }
+    a:hover { text-decoration: underline; }
+    .muted { color: #6e737b; font-weight: 400; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <video src="/demo.mp4" poster="/demo-poster.jpg" controls playsinline preload="metadata"></video>
+  </div>
+  <div class="links">
+    <a href="/?demo">직접 체험해 보기 <span class="muted">· PC에서 단계 설명과 함께</span></a>
+    <a href="/demo.mp4" download="FinStayAI_demo.mp4">영상 내려받기</a>
+  </div>
+</body>
+</html>
