@@ -103,13 +103,23 @@ export function Timeline() {
   const { derived: d, dispatch } = useStore();
   const center = d.center.shortName ?? d.center.name;
   const { timing } = d;
+  // 이번 달 확인일이 남았는데 기다려도 지켜지는 게 없다 — "끝났다" 고 하지 않는다
+  const noWait = timing.alreadySafe && d.waitExempt.length > 0;
+  const hasKept = d.waitExempt.some((i) => i.shift?.kept);
+  const hasSpendRate = d.waitExempt.some((i) => i.condition.binds.effect.kind === 'spend_rate');
 
   return (
     <AppShell title="우대 확인일과 변경 가능 구간" onBack={() => dispatch({ type: 'back' })} hideTabBar>
       {/* 제목이 결론을 말한다. "안전" 이라는 말을 기한에 쓰지 않는다 */}
       <div className="pagehead">
         <h1>
-          {timing.alreadySafe ? (
+          {noWait ? (
+            <>
+              남은 우대 확인을
+              <br />
+              기다리지 않아도 돼요
+            </>
+          ) : timing.alreadySafe ? (
             <>
               이번 달 우대 확인은
               <br />
@@ -123,10 +133,16 @@ export function Timeline() {
             </>
           )}
         </h1>
-        <p>
-          마지막 <Term term="우대 확인일" />이 지나면 <Term term="변경 가능 구간" />이에요. 그 뒤에 바꿔도 이번 달
-          혜택은 잃지 않아요.
-        </p>
+        {noWait ? (
+          <p>
+            남은 <Term term="우대 확인일" />에도 잃는 우대가 없어 오늘부터 <Term term="변경 가능 구간" />이에요.
+          </p>
+        ) : (
+          <p>
+            마지막 <Term term="우대 확인일" />이 지나면 <Term term="변경 가능 구간" />이에요. 그 뒤에 바꿔도 이번 달
+            혜택은 잃지 않아요.
+          </p>
+        )}
       </div>
 
       <section className="card axiscard">
@@ -135,7 +151,13 @@ export function Timeline() {
         </span>
         <AxisChart axis={d.axis} d={d} />
         <p className="axisnote">
-          {timing.alreadySafe ? (
+          {noWait ? (
+            <>
+              {hasKept && '바꾼 뒤에도 실적 기준을 채워 남은 확인에서 잃는 우대가 없어요. '}
+              {hasSpendRate && '포인트 적립은 결제할 때마다 쌓여 확인일을 기다려도 지켜지지 않아요. '}
+              지금 바꿔도 돼요.
+            </>
+          ) : timing.alreadySafe ? (
             <>이번 달 우대가 이미 확정됐습니다. 지금 바꿔도 이번 달 혜택은 잃지 않습니다.</>
           ) : (
             <>
@@ -168,7 +190,15 @@ export function Timeline() {
                 ) : (
                   <>
                     <em className="d">{formatDotMD(date)}</em>
-                    {j.recoverable && !j.countsForSafeAfter && <span className="muted">다음 달 · 계산 제외</span>}
+                    {j.recoverable && !j.countsForSafeAfter && (
+                      <span className="muted">
+                        {item.condition.binds.effect.kind === 'spend_rate'
+                          ? '결제마다 적립'
+                          : item.shift?.kept
+                            ? '바꿔도 유지'
+                            : '다음 달 · 계산 제외'}
+                      </span>
+                    )}
                   </>
                 )}
               </span>

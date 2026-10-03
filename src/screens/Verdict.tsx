@@ -167,8 +167,10 @@ export function Verdict({ triggerId }: { triggerId: string }) {
           </span>
           <span className="body">
             <b>
-              {d.timing.alreadySafe
-                ? '이번 달 우대 확인은 모두 끝났습니다'
+              {d.timing.alreadySafe && d.waitExempt.length > 0
+                ? '남은 우대 확인을 기다리지 않아도 돼요'
+                : d.timing.alreadySafe
+                  ? '이번 달 우대 확인은 모두 끝났습니다'
                 : `${formatKoMD(d.timing.safeAfter.value)}이 지나면 이번 달 우대가 확정`}
             </b>
             <span>우대 확인일과 변경 가능 구간 보기</span>

@@ -2,7 +2,7 @@
 // 화면은 이 배열을 순회해 그리기만 한다.
 
 import type { ImpactItem } from './derive';
-import { formatKoYMD, formatWon } from './format';
+import { formatKoYMD, formatRate, formatWon } from './format';
 import { metricNoun } from './interpreter';
 import { formatRateDelta, principalLabel } from './money';
 import type { Product, Tagged } from './types';
@@ -43,6 +43,14 @@ export function evidenceFields(item: ImpactItem, target: Product): EvidenceField
       label: '감면 폭',
       display: tag(formatRateDelta(effect.value.value), effect.source),
       edit: { kind: 'effect', raw: Math.abs(effect.value.value) * 100, unit: '%p', min: 0, max: 20, step: 0.05 },
+    });
+  } else if (effect.value.kind === 'spend_rate') {
+    // 결제 적립은 결제액에 곱하는 비율이다 — 원이 아니라 % 로 보이고 % 로 고친다
+    fields.push({
+      key: 'effect',
+      label: '적립률',
+      display: tag(formatRate(effect.value.value), effect.source),
+      edit: { kind: 'effect', raw: Math.round(effect.value.value * 100 * 1000) / 1000, unit: '%', min: 0, max: 10, step: 0.1 },
     });
   } else {
     fields.push({
@@ -139,5 +147,6 @@ export function toEditValue(item: ImpactItem, kind: EditKind, raw: number): numb
     const sign = Math.sign(item.loss.effect.value.value) || -1;
     return (sign * raw) / 100;
   }
+  if (kind === 'effect' && item.loss.effect.value.kind === 'spend_rate') return raw / 100;
   return raw;
 }

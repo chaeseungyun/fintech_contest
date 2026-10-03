@@ -4,6 +4,7 @@ import { Glyph, TYPE_ICON } from '../components/Glyph';
 import { Clause } from '../components/Clause';
 import { SourceTag } from '../components/SourceTag';
 import { formatRateDelta } from '../lib/money';
+import { formatRate } from '../lib/format';
 import type { Satellite } from '../lib/graph';
 import type { Effect } from '../lib/types';
 import { useStore } from '../state/store';
@@ -20,6 +21,7 @@ const LABEL_T = 0.64;
 
 function effectLabel(e: Effect): string {
   if (e.kind === 'rate_delta') return formatRateDelta(e.value);
+  if (e.kind === 'spend_rate') return `적립 ${formatRate(e.value)}`;
   return e.value >= 10000 ? `월 ${e.value / 10000}만원` : `월 ${e.value / 1000}천원`;
 }
 

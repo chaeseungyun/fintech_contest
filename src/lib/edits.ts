@@ -5,7 +5,7 @@ import type { Condition, MappedCondition, Provenance, Scenario, Source } from '.
 import { isMapped } from './types';
 
 export interface ConditionEdit {
-  /** binds.effect.value 를 덮어쓴다 (금리차는 부호 포함 소수, 월 혜택은 원) */
+  /** binds.effect.value 를 덮어쓴다 (금리차는 부호 포함 소수, 월 혜택은 원, 적립률은 소수) */
   effectValue?: number;
   /** RECUR.from / COUNT.checkOn / ROLLING.settleOn 의 dayOfMonth */
   dayOfMonth?: number;

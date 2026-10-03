@@ -3,7 +3,7 @@
 
 import { buildActionPlan, toContact, type ActionPlan, type PlanConfirm, type PlanDue, type PlanLink } from './actionplan';
 import { addonProposals, type AddonProposal } from './addon';
-import { addOffset, daysBetween, maxISO } from './dates';
+import { addOffset, compareISO, daysBetween, maxISO, startOfNextMonth } from './dates';
 import { formatKoMD, formatKoYMD, formatRate, formatWonShort, withJosa } from './format';
 import { buildGraph, incomingConditions, productById, unsupportedForDocs, type Graph } from './graph';
 import { horizonProjection, type Horizon } from './horizon';
@@ -154,6 +154,12 @@ export interface Derived {
   inactive: ImpactItem[];
   /** 살아있고 회복 가능하지만 판정일이 다음 달이라 안전 시점 계산에서 빠진 것 */
   deferredNextMonth: ImpactItem[];
+  /**
+   * 이번 달 확인일이 남았지만 기다려도 지켜지는 게 없어 계산에서 빠진 것 —
+   * 바꾼 뒤에도 실적 기준을 채우거나(shift.kept), 결제할 때마다 쌓이는 적립(spend_rate).
+   * 이것만 남았으면 "확인이 끝났다" 가 아니라 "기다리지 않아도 된다" 다.
+   */
+  waitExempt: ImpactItem[];
   axis: Axis;
   unsupported: Condition[];
 }
@@ -270,7 +276,12 @@ export function derive(scenario: Scenario, triggerId?: string, options: DeriveOp
   const recoverable = active.filter((i) => i.judgment.recoverable);
   const unrecoverable = active.filter((i) => !i.judgment.recoverable);
   const inactive = items.filter((i) => !i.judgment.active);
-  const deferredNextMonth = recoverable.filter((i) => !i.judgment.countsForSafeAfter);
+  const thisMonth = (i: ImpactItem) => {
+    const date = i.judgment.nextJudgmentDate.value;
+    return date !== null && compareISO(date, startOfNextMonth(today)) < 0;
+  };
+  const deferredNextMonth = recoverable.filter((i) => !i.judgment.countsForSafeAfter && !thisMonth(i));
+  const waitExempt = recoverable.filter((i) => !i.judgment.countsForSafeAfter && thisMonth(i));
 
   const savings = [
     ...savingItems(trigger.savings, center),
@@ -381,6 +392,7 @@ export function derive(scenario: Scenario, triggerId?: string, options: DeriveOp
     unrecoverable,
     inactive,
     deferredNextMonth,
+    waitExempt,
     axis: buildAxis(today, items, timing),
     unsupported,
   };

@@ -137,6 +137,14 @@ describe('관리비 계좌 납부 — 제안서 4쪽 실제 사례', () => {
     expect(d.timing.alreadySafe).toBe(true);
     expect(d.actionPlan.steps.some((s) => s.key === 'wait')).toBe(false);
   });
+
+  it('이번 달 확인일이 남은 조건은 "끝났다" 가 아니라 기다릴 필요가 없는 것으로 나눈다', () => {
+    expect(d.waitExempt.length).toBeGreaterThan(0);
+    expect(d.deferredNextMonth).toHaveLength(0);
+    for (const i of d.waitExempt) {
+      expect(i.shift?.kept || i.condition.binds.effect.kind === 'spend_rate').toBe(true);
+    }
+  });
 });
 
 describe('다른 카드와 나눠 쓰기 — 필요한 실적만 남기기 (v35 9쪽 · 제안서 6쪽)', () => {
